@@ -6,10 +6,13 @@ import CaseStudy from './pages/CaseStudy'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminPasswordRecovery from './pages/admin/AdminPasswordRecovery'
 import AdminDashboard from './pages/admin/AdminDashboard'
+import ProfileMetadata from './components/ProfileMetadata'
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <ProfileMetadata />
+      <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/projects/:slug/case-study" element={<CaseStudy />} />
       <Route path="/login" element={<Login />} />
@@ -17,6 +20,7 @@ export default function App() {
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin/recover" element={<AdminPasswordRecovery />} />
       <Route path="*" element={<NotFound />} />
-    </Routes>
+      </Routes>
+    </>
   )
 }
