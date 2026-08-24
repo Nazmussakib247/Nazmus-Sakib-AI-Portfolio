@@ -19,6 +19,25 @@ export function getDb() {
       connectionString: env.databaseUrl,
       ssl: { rejectUnauthorized },
     });
+    pool.on("error", (error) => {
+      const details = error as Error & { code?: string };
+      console.error("[db] PostgreSQL pool error", {
+        name: details.name,
+        code: details.code,
+        message: details.message,
+      });
+    });
+    void pool
+      .query("select 1 as ok")
+      .then(() => console.info("[db] PostgreSQL connectivity check passed"))
+      .catch((error) => {
+        const details = error as Error & { code?: string };
+        console.error("[db] PostgreSQL connectivity check failed", {
+          name: details.name,
+          code: details.code,
+          message: details.message,
+        });
+      });
     // Drizzle's node-postgres generics are narrower than the installed
     // @types/pg QueryResult union; the runtime Pool is compatible, so keep
     // the application schema inference at the Drizzle boundary.
