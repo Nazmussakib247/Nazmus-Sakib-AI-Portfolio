@@ -15,6 +15,11 @@ function toAbsoluteUrl(value: string) {
   }
 }
 
+function updateSocialPreviewImage(imageUrl: string) {
+  document.querySelector<HTMLMetaElement>('meta[property="og:image"]')?.setAttribute('content', imageUrl);
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:image"]')?.setAttribute('content', imageUrl);
+}
+
 function updateStructuredProfileImage(imageUrl: string) {
   const structuredData = document.getElementById('portfolio-structured-data');
   if (!structuredData?.textContent) return;
@@ -45,6 +50,7 @@ export default function ProfileMetadata() {
     favicon.dataset.profileFavicon = 'true';
     if (!favicon.parentNode) document.head.appendChild(favicon);
 
+    updateSocialPreviewImage(imageUrl);
     updateStructuredProfileImage(imageUrl);
   }, [profile]);
 
