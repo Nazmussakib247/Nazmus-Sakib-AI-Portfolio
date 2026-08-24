@@ -114,11 +114,13 @@ export default function FloatingSkillLogos() {
       </div>
 
       {/* Mobile: keep every hardcoded logo visible in a compact, non-blocking logo dock. */}
-      <div className="absolute inset-x-2 bottom-1 grid grid-cols-7 gap-1.5 pr-24 sm:inset-x-8 sm:bottom-2 sm:grid-cols-8 sm:pr-24 lg:hidden">
+            <div className="absolute bottom-[8.5rem] left-1/2 grid w-[calc(100%-2rem)] max-w-[360px] -translate-x-1/2 grid-cols-7 gap-1.5 sm:bottom-[7.5rem] sm:w-[calc(100%-4rem)] sm:max-w-[560px] sm:grid-cols-8 lg:hidden">
+
         {floatingCards.map((card, index) => (
           <div
             key={`mobile-${card.label}-${index}`}
-            className="flex h-7 min-w-0 items-center justify-center rounded-lg border border-white/10 bg-[#0b0e1a]/70 px-1 shadow-[0_0_16px_rgba(124,92,255,0.08)] backdrop-blur-sm sm:h-8"
+                        className="flex h-7 min-w-0 items-center justify-center rounded-lg border border-white/10 bg-[#0b0e1a]/70 px-1 shadow-[0_0_16px_rgba(124,92,255,0.08)] backdrop-blur-sm transition-colors duration-200 sm:h-8"
+
             title={card.label}
           >
             <SkillIcon card={card} mobile />

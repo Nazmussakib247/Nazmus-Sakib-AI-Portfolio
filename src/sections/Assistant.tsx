@@ -257,14 +257,15 @@ export default function Assistant() {
 
   return (
     <div
-      className="xervis-widget group fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] right-3 z-[80] sm:bottom-7 sm:right-7"
+            className="xervis-widget group fixed bottom-[calc(7rem+env(safe-area-inset-bottom))] right-3 z-[80] sm:bottom-7 sm:right-7"
+
     >
       {open && (
         <div
           role="dialog"
           aria-modal="false"
           aria-label="Xervis AI Assistant"
-          className="xervis-chat-panel fixed bottom-[calc(3.5rem+78px+0.75rem+env(safe-area-inset-bottom))] right-3 flex h-[min(520px,calc(100dvh-13rem))] w-[calc(100vw-1.5rem)] max-w-[390px] flex-col overflow-hidden rounded-[26px] border border-[#e8b923]/25 bg-[#080b17]/95 shadow-[0_24px_80px_rgba(0,0,0,0.65),0_0_45px_rgba(232,185,35,0.12)] backdrop-blur-2xl sm:bottom-[calc(1.75rem+90px+0.75rem)] sm:right-7"
+          className="xervis-chat-panel fixed bottom-[calc(7rem+78px+0.75rem+env(safe-area-inset-bottom))] right-3 flex h-[min(520px,calc(100dvh-13rem))] w-[calc(100vw-1.5rem)] max-w-[390px] flex-col overflow-hidden rounded-[26px] border border-[#e8b923]/25 bg-[#080b17]/95 shadow-[0_24px_80px_rgba(0,0,0,0.65),0_0_45px_rgba(232,185,35,0.12)] backdrop-blur-2xl sm:bottom-[calc(1.75rem+90px+0.75rem)] sm:right-7"
         >
           <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#14182a] to-[#0a0d19] px-4 py-3.5">
             <div className="flex min-w-0 items-center gap-3">

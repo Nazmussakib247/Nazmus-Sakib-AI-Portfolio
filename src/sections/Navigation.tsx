@@ -206,7 +206,11 @@ export default function Navigation() {
       {/* Mobile hamburger */}
       <button
         type="button"
-        onClick={() => setMobileOpen(!mobileOpen)}
+        onClick={() => {
+          setMobileOpen((current) => !current);
+          setSearchOpen(false);
+          setQuery('');
+        }}
         className={`glass-strong fixed right-4 top-4 z-50 rounded-full p-3 transition-opacity duration-500 md:hidden ${
           visible || mobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
@@ -241,6 +245,7 @@ export default function Navigation() {
             type="button"
             onClick={() => {
               setMobileOpen(false);
+              setQuery('');
               setSearchOpen(true);
             }}
             className={`inline-flex items-center gap-2 text-xl text-gray-400 transition-all duration-500 hover:text-white ${
@@ -252,6 +257,84 @@ export default function Navigation() {
           </button>
         </div>
       </div>
+
+      {searchOpen && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/35 p-3 backdrop-blur-sm md:hidden"
+          onClick={() => {
+            setSearchOpen(false);
+            setQuery('');
+          }}
+        >
+          <div
+            data-lenis-prevent="true"
+            data-lenis-prevent-wheel="true"
+            onClick={(event) => event.stopPropagation()}
+            onWheel={(event) => event.stopPropagation()}
+            className="mx-auto mt-16 flex max-h-[calc(100dvh-5rem)] w-full max-w-md flex-col overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-[#080b17]/[.98] p-3 text-white shadow-[0_18px_60px_rgba(0,0,0,0.62)] ring-1 ring-black/40 backdrop-blur-2xl"
+            style={{ WebkitOverflowScrolling: 'touch', scrollbarGutter: 'stable' }}
+          >
+            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5">
+              <Search className="h-4 w-4 shrink-0 text-[#e8b923]" />
+              <input
+                ref={searchInputRef}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') {
+                    setSearchOpen(false);
+                    setQuery('');
+                  }
+                  if (event.key === 'Enter' && filteredSearches[0]) go(filteredSearches[0].id);
+                }}
+                placeholder="Search projects, skills, experience…"
+                className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-gray-600"
+                aria-label="Search portfolio sections"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchOpen(false);
+                  setQuery('');
+                }}
+                className="rounded-full p-1.5 text-gray-500 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923]"
+                aria-label="Close search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="mb-2 mt-3 flex items-center justify-between px-1">
+              <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-gray-600">Frequently explored</p>
+              <span className="font-mono text-[9px] text-gray-700">{filteredSearches.length} results</span>
+            </div>
+            <div className="space-y-1 pr-1">
+              {filteredSearches.map((item) => {
+                const Icon = searchIconMap[item.icon as keyof typeof searchIconMap] || FolderKanban;
+                return (
+                  <button
+                    type="button"
+                    key={`mobile-${item.id}-${item.label}`}
+                    onClick={() => go(item.id)}
+                    className="group flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors hover:bg-white/[0.06] focus-visible:bg-white/[0.06] focus-visible:outline-none"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-gray-500 group-hover:border-[#e8b923]/35 group-hover:text-[#e8b923]">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm text-gray-200 group-hover:text-white">{item.label}</span>
+                      <span className="block truncate text-[11px] text-gray-600">{item.hint}</span>
+                    </span>
+                    <ArrowUpRight className="h-4 w-4 shrink-0 text-gray-700 group-hover:text-[#e8b923]" />
+                  </button>
+                );
+              })}
+              {filteredSearches.length === 0 && (
+                <p className="px-2.5 py-5 text-center text-xs text-gray-600">No matching portfolio area found.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
