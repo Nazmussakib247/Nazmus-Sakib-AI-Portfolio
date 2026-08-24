@@ -15,8 +15,14 @@ export function getDb() {
     // deployment to opt out of CA verification explicitly for this staging
     // connection via PGSSL_REJECT_UNAUTHORIZED=false.
     const rejectUnauthorized = process.env.PGSSL_REJECT_UNAUTHORIZED !== "false";
+    // pg-connection-string lets sslmode=require override Pool.ssl. Remove
+    // those URL flags so the explicit policy below is authoritative even if
+    // Render still has an older Supabase URL saved in its environment.
+    const databaseUrl = new URL(env.databaseUrl);
+    databaseUrl.searchParams.delete("sslmode");
+    databaseUrl.searchParams.delete("uselibpqcompat");
     const pool = new Pool({
-      connectionString: env.databaseUrl,
+      connectionString: databaseUrl.toString(),
       ssl: { rejectUnauthorized },
     });
     pool.on("error", (error) => {
