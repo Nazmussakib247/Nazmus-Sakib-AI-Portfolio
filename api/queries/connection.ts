@@ -1,4 +1,5 @@
 import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { env } from "../lib/env";
 import * as schema from "@db/schema";
 import * as relations from "@db/relations";
@@ -9,7 +10,19 @@ let instance: ReturnType<typeof drizzle<typeof fullSchema>>;
 
 export function getDb() {
   if (!instance) {
-    instance = drizzle(env.databaseUrl, {
+    // Supabase’s pooler certificate chain is not trusted by every Render
+    // runtime image. Keep transport encryption enabled, while allowing the
+    // deployment to opt out of CA verification explicitly for this staging
+    // connection via PGSSL_REJECT_UNAUTHORIZED=false.
+    const rejectUnauthorized = process.env.PGSSL_REJECT_UNAUTHORIZED !== "false";
+    const pool = new Pool({
+      connectionString: env.databaseUrl,
+      ssl: { rejectUnauthorized },
+    });
+    // Drizzle's node-postgres generics are narrower than the installed
+    // @types/pg QueryResult union; the runtime Pool is compatible, so keep
+    // the application schema inference at the Drizzle boundary.
+    instance = drizzle(pool as any, {
       schema: fullSchema,
     });
   }

@@ -44,8 +44,8 @@ export const profileAdminRouter = createAdminRouter({
           .where(eq(profiles.id, existing[0].id));
         return { success: true, id: existing[0].id };
       } else {
-        const result = await db.insert(profiles).values(input);
-        return { success: true, id: Number(result[0].insertId) };
+        const [result] = await db.insert(profiles).values(input).returning({ id: profiles.id });
+        return { success: true, id: Number(result.id) };
       }
     }),
 });

@@ -41,8 +41,8 @@ export const certificateAdminRouter = createAdminRouter({
         updatedAt: new Date(),
       };
       if (input.issueDate) data.issueDate = new Date(input.issueDate);
-      const result = await db.insert(certificates).values(data as typeof certificates.$inferInsert);
-      return { success: true, id: Number(result[0].insertId) };
+      const [result] = await db.insert(certificates).values(data as typeof certificates.$inferInsert).returning({ id: certificates.id });
+      return { success: true, id: Number(result.id) };
     }),
 
   update: adminProcedure

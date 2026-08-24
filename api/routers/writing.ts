@@ -228,8 +228,8 @@ export const writingAdminRouter = createAdminRouter({
     )
     .mutation(async ({ input }) => {
       const db = getDb();
-      const result = await db.insert(writings).values(input);
-      return { success: true, id: Number(result[0].insertId) };
+      const [result] = await db.insert(writings).values(input).returning({ id: writings.id });
+      return { success: true, id: Number(result.id) };
     }),
 
   update: adminProcedure

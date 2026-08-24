@@ -35,13 +35,13 @@ export const uploadAdminRouter = createAdminRouter({
       }
       const size = Math.floor(input.dataBase64.length * 0.75);
       const db = getDb();
-      const result = await db.insert(uploads).values({
+      const [result] = await db.insert(uploads).values({
         filename: input.filename,
         mimeType: input.mimeType,
         size,
         data: input.dataBase64,
-      });
-      const id = Number(result[0].insertId);
+      }).returning({ id: uploads.id });
+      const id = Number(result.id);
       return { success: true, id, url: `/api/files/${id}` };
     }),
 

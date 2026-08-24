@@ -28,8 +28,8 @@ export const experienceAdminRouter = createAdminRouter({
     )
     .mutation(async ({ input }) => {
       const db = getDb();
-      const result = await db.insert(experiences).values(input);
-      return { success: true, id: Number(result[0].insertId) };
+      const [result] = await db.insert(experiences).values(input).returning({ id: experiences.id });
+      return { success: true, id: Number(result.id) };
     }),
 
   update: adminProcedure

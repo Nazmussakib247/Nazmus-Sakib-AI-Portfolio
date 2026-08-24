@@ -29,8 +29,8 @@ export const awardAdminRouter = createAdminRouter({
     )
     .mutation(async ({ input }) => {
       const db = getDb();
-      const result = await db.insert(awards).values(input);
-      return { success: true, id: Number(result[0].insertId) };
+      const [result] = await db.insert(awards).values(input).returning({ id: awards.id });
+      return { success: true, id: Number(result.id) };
     }),
 
   update: adminProcedure

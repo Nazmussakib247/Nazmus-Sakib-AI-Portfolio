@@ -63,8 +63,8 @@ export const projectRouter = createRouter({
 export const projectAdminRouter = createAdminRouter({
   create: adminProcedure.input(z.object({ title: z.string().min(1), description: z.string().min(1), techStack: z.array(z.string()).optional(), thumbnailUrl: z.string().optional(), githubUrl: z.string().nullable().optional(), liveUrl: z.string().nullable().optional(), videoUrl: z.string().nullable().optional(), screenshots: z.array(z.string()).optional(), orderIndex: z.number().default(0), isFeatured: z.boolean().default(true), ...caseStudyFields })).mutation(async ({ input }) => {
     const db = getDb();
-    const result = await db.insert(projects).values({ ...input, techStack: input.techStack || [], screenshots: input.screenshots || [], caseStudyArchitecture: input.caseStudyArchitecture || [], caseStudyDecisions: input.caseStudyDecisions || [], caseStudyMetrics: input.caseStudyMetrics || [], caseStudyMedia: input.caseStudyMedia || [], caseStudyLinks: input.caseStudyLinks || [], caseStudyStack: input.caseStudyStack || [] });
-    return { success: true, id: Number(result[0].insertId) };
+    const [result] = await db.insert(projects).values({ ...input, techStack: input.techStack || [], screenshots: input.screenshots || [], caseStudyArchitecture: input.caseStudyArchitecture || [], caseStudyDecisions: input.caseStudyDecisions || [], caseStudyMetrics: input.caseStudyMetrics || [], caseStudyMedia: input.caseStudyMedia || [], caseStudyLinks: input.caseStudyLinks || [], caseStudyStack: input.caseStudyStack || [] }).returning({ id: projects.id });
+    return { success: true, id: Number(result.id) };
   }),
   update: adminProcedure.input(z.object({ id: z.number(), ...baseProjectFields, ...caseStudyFields })).mutation(async ({ input }) => {
     const { id, ...data } = input;
