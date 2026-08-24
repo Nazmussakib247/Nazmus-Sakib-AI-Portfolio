@@ -164,7 +164,12 @@ function MobileNav({
     <>
       <div className="fixed top-0 right-0 left-0 z-40 flex items-center justify-between border-b border-white/5 bg-[#0b0e1a] px-4 py-3 lg:hidden">
         <span className="text-sm font-medium text-white">Admin Panel</span>
-        <button onClick={() => setOpen(!open)} className="relative text-gray-400" aria-label="Menu">
+        <button
+          onClick={() => setOpen(!open)}
+          className="relative text-gray-400"
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-expanded={open}
+        >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           {!open && unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-[#e8b923]" />
@@ -172,12 +177,17 @@ function MobileNav({
         </button>
       </div>
       {open && (
-        <div className="fixed inset-0 z-30 bg-[#05060f]/97 pt-14 lg:hidden">
-          <nav className="space-y-1 p-4">
+        <div
+          className="fixed inset-x-0 top-14 bottom-0 z-[60] overflow-y-auto border-t border-white/5 bg-[#05060f] lg:hidden"
+          role="dialog"
+          aria-label="Admin navigation"
+          aria-modal="true"
+        >
+          <nav className="grid grid-cols-2 gap-2 p-4 pb-8">
             {children(() => setOpen(false))}
             <button
               onClick={logout}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm text-red-400"
+              className="col-span-2 flex h-11 items-center gap-3 rounded-lg border-t border-white/5 px-3 pt-3 text-sm text-red-400"
             >
               <LogOut className="h-4 w-4" />
               Logout
