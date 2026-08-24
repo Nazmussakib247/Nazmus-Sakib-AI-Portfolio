@@ -42,7 +42,8 @@ export default function Home() {
       <Preloader name="NAZMUS SAKIB" skip={isCaseStudyReturn} />
       <CustomCursor />
       <ScrollProgress />
-      <main className="relative pb-12 sm:pb-14">
+              <main className="relative pb-[calc(3rem+env(safe-area-inset-bottom))] sm:pb-14">
+
         <Hero />
         <Navigation />
         {isVisible('about') && <About />}

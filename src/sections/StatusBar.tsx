@@ -58,7 +58,7 @@ export default function StatusBar() {
 
   return (
     <aside
-      className="fixed inset-x-0 bottom-0 z-[70] border-t border-white/10 bg-[#060812]/90 shadow-[0_-10px_35px_rgba(0,0,0,0.28)] backdrop-blur-xl"
+      className="fixed inset-x-0 bottom-0 z-[70] border-t border-white/10 bg-[#060812]/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_35px_rgba(0,0,0,0.28)] backdrop-blur-xl"
       aria-label="Portfolio status ticker"
     >
       <div className="mx-auto flex h-12 max-w-[1600px] items-center gap-3 px-4 pr-24 sm:h-14 sm:gap-5 sm:px-6 sm:pr-28 lg:px-8 lg:pr-28">

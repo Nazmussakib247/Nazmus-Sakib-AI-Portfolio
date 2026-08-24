@@ -25,10 +25,12 @@ export default function Assistant() {
   const [agentStatus, setAgentStatus] = useState<'online' | 'offline'>('online');
   const [introText, setIntroText] = useState('');
   const [showGreeting, setShowGreeting] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [speakingMessageIndex, setSpeakingMessageIndex] = useState<number | null>(null);
   const [isGreetingPlaying, setIsGreetingPlaying] = useState(false);
   const voiceHoverActiveRef = useRef(false);
+  const hasScrolledRef = useRef(false);
   const openRef = useRef(false);
   const voiceEnabledRef = useRef(true);
   const greetingAudioRef = useRef<HTMLVideoElement | null>(null);
@@ -152,7 +154,7 @@ export default function Assistant() {
         index += 1;
         const nextText = introCopy.slice(0, index);
         setIntroText(nextText);
-        if (nextText.length > 0) setShowGreeting(true);
+        if (nextText.length > 0 && !hasScrolledRef.current) setShowGreeting(true);
         if (index >= introCopy.length && typingTimer !== undefined) window.clearInterval(typingTimer);
       }, 26);
     }, 5200);
@@ -163,6 +165,21 @@ export default function Assistant() {
       if (typingTimer !== undefined) window.clearInterval(typingTimer);
       window.clearTimeout(dismissTimer);
     };
+  }, []);
+
+  useEffect(() => {
+    const dismissGreetingOnScroll = () => {
+      if (window.scrollY <= 64) return;
+      hasScrolledRef.current = true;
+      setHasScrolled(true);
+      setShowGreeting(false);
+      const audio = greetingAudioRef.current;
+      if (audio && !audio.paused) audio.pause();
+      setIsGreetingPlaying(false);
+    };
+
+    window.addEventListener('scroll', dismissGreetingOnScroll, { passive: true });
+    return () => window.removeEventListener('scroll', dismissGreetingOnScroll);
   }, []);
 
   useEffect(() => {
@@ -240,14 +257,14 @@ export default function Assistant() {
 
   return (
     <div
-      className="xervis-widget group fixed bottom-4 right-4 z-[80] sm:bottom-7 sm:right-7"
+      className="xervis-widget group fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] right-3 z-[80] sm:bottom-7 sm:right-7"
     >
       {open && (
         <div
           role="dialog"
           aria-modal="false"
           aria-label="Xervis AI Assistant"
-          className="xervis-chat-panel fixed bottom-[calc(1rem+78px+0.75rem+3.5rem)] right-3 flex h-[min(520px,calc(100dvh-13rem))] w-[calc(100vw-1.5rem)] max-w-[390px] flex-col overflow-hidden rounded-[26px] border border-[#e8b923]/25 bg-[#080b17]/95 shadow-[0_24px_80px_rgba(0,0,0,0.65),0_0_45px_rgba(232,185,35,0.12)] backdrop-blur-2xl sm:bottom-[calc(1.75rem+90px+0.75rem)] sm:right-7"
+          className="xervis-chat-panel fixed bottom-[calc(3.5rem+78px+0.75rem+env(safe-area-inset-bottom))] right-3 flex h-[min(520px,calc(100dvh-13rem))] w-[calc(100vw-1.5rem)] max-w-[390px] flex-col overflow-hidden rounded-[26px] border border-[#e8b923]/25 bg-[#080b17]/95 shadow-[0_24px_80px_rgba(0,0,0,0.65),0_0_45px_rgba(232,185,35,0.12)] backdrop-blur-2xl sm:bottom-[calc(1.75rem+90px+0.75rem)] sm:right-7"
         >
           <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#14182a] to-[#0a0d19] px-4 py-3.5">
             <div className="flex min-w-0 items-center gap-3">
@@ -396,8 +413,13 @@ export default function Assistant() {
         className="sr-only"
       />
 
+<<<<<<< HEAD
       {!open && showGreeting && introText && (
         <div className="xervis-greeting absolute bottom-[calc(100%+0.9rem+3.5rem)] right-0 w-[min(300px,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] rounded-2xl rounded-br-md border border-[#e8b923]/25 bg-[#080b17]/95 px-4 py-3 text-xs leading-relaxed text-gray-300 shadow-[0_14px_35px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:bottom-[calc(100%+0.9rem)]">
+=======
+      {!open && !hasScrolled && showGreeting && introText && (
+        <div className="xervis-greeting absolute bottom-[calc(100%+0.9rem)] right-0 w-[min(300px,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] rounded-2xl rounded-br-md border border-[#e8b923]/25 bg-[#080b17]/95 px-4 py-3 text-xs leading-relaxed text-gray-300 shadow-[0_14px_35px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+>>>>>>> 27bd6a5 (Polish mobile layout and fixed widgets)
           <span className="mb-1 flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[#e8b923]">
             <Bot className="h-3 w-3" /> Xervis
           </span>

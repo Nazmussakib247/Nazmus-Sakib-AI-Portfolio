@@ -227,7 +227,7 @@ export default function Hero() {
       <div className="bg-grid absolute inset-0 z-0 opacity-60 [mask-image:radial-gradient(ellipse_60%_55%_at_50%_45%,#000_35%,transparent_80%)]" />
       <FloatingSkillLogos />
 
-      <div ref={contentRef} className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4">
+      <div ref={contentRef} className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 pb-16 sm:pb-0">
         <div className="text-center">
           <div data-hero className="relative top-4 mb-6">
             <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.3em] text-[#e8b923]">
@@ -237,12 +237,12 @@ export default function Hero() {
 
           <h1
             data-hero
-            className="text-gradient-chrome mb-5 text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl"
+            className="text-gradient-chrome mb-4 max-w-full text-4xl font-bold tracking-tight sm:mb-5 sm:text-6xl md:text-7xl lg:text-8xl"
           >
             {headline}
           </h1>
 
-          <div data-hero className="mb-6 flex min-h-[28px] items-center justify-center gap-3">
+          <div data-hero className="mb-5 flex min-h-[28px] items-center justify-center gap-2 sm:mb-6 sm:gap-3">
             <span className="h-px w-10 bg-gradient-to-r from-transparent to-[#e8b923]/70" />
             <p className="font-mono text-sm tracking-wide text-gray-300 sm:text-base">
               <Typewriter words={taglines} />
@@ -250,11 +250,11 @@ export default function Hero() {
             <span className="h-px w-10 bg-gradient-to-l from-transparent to-[#e8b923]/70" />
           </div>
 
-          <p data-hero className="mx-auto mb-10 max-w-xl text-sm leading-relaxed text-gray-400 sm:text-base">
+          <p data-hero className="mx-auto mb-8 max-w-xl text-sm leading-relaxed text-gray-400 sm:mb-10 sm:text-base">
             {get('heroSubtext')}
           </p>
 
-          <div data-hero className="flex flex-wrap items-center justify-center gap-4">
+          <div data-hero className="flex max-w-[340px] flex-wrap items-center justify-center gap-3 sm:max-w-none sm:gap-4">
             <Magnetic>
               <button
                 onClick={() => scrollToId(primaryTarget)}
@@ -288,7 +288,7 @@ export default function Hero() {
             </Magnetic>
           </div>
 
-          <div data-hero className="mt-7 flex items-center justify-center gap-3">
+          <div data-hero className="mt-6 flex items-center justify-center gap-3 sm:mt-7">
             {socialLinks.map(({ label, href, icon: Icon }) => href ? (
               <a
                 key={label}
