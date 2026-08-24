@@ -1,24 +1,27 @@
 import {
-  mysqlTable,
-  mysqlEnum,
+  pgTable,
+  pgEnum,
   varchar,
   text,
   timestamp,
-  int,
-  json,
+  integer,
+  jsonb,
   boolean,
   date,
-  longtext,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
+
+const roleEnum = pgEnum("user_role", ["user", "admin"]);
+const experienceTypeEnum = pgEnum("experience_type", ["education", "work", "internship"]);
+const platformEnum = pgEnum("writing_platform", ["medium", "pdf", "blogspot"]);
 
 // Auth users table (existing)
-export const users = mysqlTable("users", {
-  id: int("id").autoincrement().primaryKey(),
+export const users = pgTable("users", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   unionId: varchar("unionId", { length: 255 }).notNull().unique(),
   name: varchar("name", { length: 255 }),
   email: varchar("email", { length: 320 }),
   avatar: text("avatar"),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  role: roleEnum("role").default("user").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt")
     .defaultNow()
@@ -31,8 +34,8 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 // Profile table (single row)
-export const profiles = mysqlTable("profiles", {
-  id: int("id").autoincrement().primaryKey(),
+export const profiles = pgTable("profiles", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   title: varchar("title", { length: 500 }).notNull(),
   bio: text("bio").notNull(),
@@ -43,7 +46,7 @@ export const profiles = mysqlTable("profiles", {
   linkedinUrl: text("linkedin_url"),
   mediumUrl: text("medium_url"),
   location: varchar("location", { length: 255 }),
-  age: int("age"),
+  age: integer("age"),
   university: varchar("university", { length: 255 }),
   department: varchar("department", { length: 255 }),
   semester: varchar("semester", { length: 100 }),
@@ -57,16 +60,16 @@ export const profiles = mysqlTable("profiles", {
 export type Profile = typeof profiles.$inferSelect;
 
 // Projects table
-export const projects = mysqlTable("projects", {
-  id: int("id").autoincrement().primaryKey(),
+export const projects = pgTable("projects", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description").notNull(),
-  techStack: json("tech_stack").$type<string[]>(),
+  techStack: jsonb("tech_stack").$type<string[]>(),
   thumbnailUrl: text("thumbnail_url"),
   githubUrl: text("github_url"),
   liveUrl: text("live_url"),
   videoUrl: text("video_url"),
-  screenshots: json("screenshots").$type<string[]>(),
+  screenshots: jsonb("screenshots").$type<string[]>(),
   // Optional flagship case-study content. JSON collections use stable ordered shapes validated at the API boundary.
   slug: varchar("slug", { length: 255 }).unique(),
   caseStudyEnabled: boolean("case_study_enabled").default(false),
@@ -76,14 +79,14 @@ export const projects = mysqlTable("projects", {
   architectureSummary: text("architecture_summary"),
   outcomeSummary: text("outcome_summary"),
   lessonsLearned: text("lessons_learned"),
-  caseStudyOrder: int("case_study_order").default(0),
-  caseStudyArchitecture: json("case_study_architecture").$type<CaseStudyArchitectureNode[]>(),
-  caseStudyDecisions: json("case_study_decisions").$type<CaseStudyDecision[]>(),
-  caseStudyMetrics: json("case_study_metrics").$type<CaseStudyMetric[]>(),
-  caseStudyMedia: json("case_study_media").$type<CaseStudyMedia[]>(),
-  caseStudyLinks: json("case_study_links").$type<CaseStudyLink[]>(),
-  caseStudyStack: json("case_study_stack").$type<string[]>(),
-  orderIndex: int("order_index").default(0),
+  caseStudyOrder: integer("case_study_order").default(0),
+  caseStudyArchitecture: jsonb("case_study_architecture").$type<CaseStudyArchitectureNode[]>(),
+  caseStudyDecisions: jsonb("case_study_decisions").$type<CaseStudyDecision[]>(),
+  caseStudyMetrics: jsonb("case_study_metrics").$type<CaseStudyMetric[]>(),
+  caseStudyMedia: jsonb("case_study_media").$type<CaseStudyMedia[]>(),
+  caseStudyLinks: jsonb("case_study_links").$type<CaseStudyLink[]>(),
+  caseStudyStack: jsonb("case_study_stack").$type<string[]>(),
+  orderIndex: integer("order_index").default(0),
   isFeatured: boolean("is_featured").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
@@ -100,17 +103,17 @@ export type CaseStudyLink = { label: string; url: string; kind?: string; orderIn
 export type Project = typeof projects.$inferSelect;
 
 // Certificates table
-export const certificates = mysqlTable("certificates", {
-  id: int("id").autoincrement().primaryKey(),
+export const certificates = pgTable("certificates", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   issuer: varchar("issuer", { length: 255 }).notNull(),
   thumbnailUrl: text("thumbnail_url"),
   credentialUrl: text("credential_url"),
-  skillsGained: json("skills_gained").$type<string[]>(),
+  skillsGained: jsonb("skills_gained").$type<string[]>(),
   description: text("description"),
   category: varchar("category", { length: 100 }).default("General"),
   issueDate: date("issue_date"),
-  orderIndex: int("order_index").default(0),
+  orderIndex: integer("order_index").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -121,16 +124,16 @@ export const certificates = mysqlTable("certificates", {
 export type Certificate = typeof certificates.$inferSelect;
 
 // Experiences table
-export const experiences = mysqlTable("experiences", {
-  id: int("id").autoincrement().primaryKey(),
-  type: mysqlEnum("type", ["education", "work", "internship"]).notNull(),
+export const experiences = pgTable("experiences", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+  type: experienceTypeEnum("type").notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   organization: varchar("organization", { length: 255 }).notNull(),
   location: varchar("location", { length: 255 }),
   startDate: varchar("start_date", { length: 50 }),
   endDate: varchar("end_date", { length: 50 }),
   description: text("description"),
-  orderIndex: int("order_index").default(0),
+  orderIndex: integer("order_index").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -141,8 +144,8 @@ export const experiences = mysqlTable("experiences", {
 export type Experience = typeof experiences.$inferSelect;
 
 // Awards table
-export const awards = mysqlTable("awards", {
-  id: int("id").autoincrement().primaryKey(),
+export const awards = pgTable("awards", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   eyebrow: varchar("eyebrow", { length: 255 }),
@@ -151,7 +154,7 @@ export const awards = mysqlTable("awards", {
   sourceUrl: text("source_url"),
   sourceLabel: varchar("source_label", { length: 255 }),
   iconName: varchar("icon_name", { length: 100 }).default("award"),
-  orderIndex: int("order_index").default(0),
+  orderIndex: integer("order_index").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -162,17 +165,17 @@ export const awards = mysqlTable("awards", {
 export type Award = typeof awards.$inferSelect;
 
 // Writings/Blog articles table
-export const writings = mysqlTable("writings", {
-  id: int("id").autoincrement().primaryKey(),
+export const writings = pgTable("writings", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
   excerpt: text("excerpt"),
   category: varchar("category", { length: 100 }),
   coverImageUrl: text("cover_image_url"),
   externalUrl: text("external_url"),
-  platform: mysqlEnum("platform", ["medium", "pdf", "blogspot"]).default("medium"),
+  platform: platformEnum("platform").default("medium"),
   isPublished: boolean("is_published").default(true),
   isFeatured: boolean("is_featured").default(false),
-  orderIndex: int("order_index").default(0),
+  orderIndex: integer("order_index").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -184,8 +187,8 @@ export type Writing = typeof writings.$inferSelect;
 
 // Admin authentication tables
 // The token column stores a SHA-256 digest; the raw bearer token is only sent in the HttpOnly cookie.
-export const adminSessions = mysqlTable("admin_sessions", {
-  id: int("id").autoincrement().primaryKey(),
+export const adminSessions = pgTable("admin_sessions", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   token: varchar("token", { length: 255 }).notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -193,8 +196,8 @@ export const adminSessions = mysqlTable("admin_sessions", {
 
 export type AdminSession = typeof adminSessions.$inferSelect;
 
-export const adminCredentials = mysqlTable("admin_credentials", {
-  id: int("id").autoincrement().primaryKey(),
+export const adminCredentials = pgTable("admin_credentials", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   passwordHash: text("password_hash").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
@@ -205,10 +208,10 @@ export const adminCredentials = mysqlTable("admin_credentials", {
 
 export type AdminCredential = typeof adminCredentials.$inferSelect;
 
-export const adminLoginAttempts = mysqlTable("admin_login_attempts", {
-  id: int("id").autoincrement().primaryKey(),
+export const adminLoginAttempts = pgTable("admin_login_attempts", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   identifier: varchar("identifier", { length: 255 }).notNull().unique(),
-  failedCount: int("failed_count").default(0).notNull(),
+  failedCount: integer("failed_count").default(0).notNull(),
   firstFailedAt: timestamp("first_failed_at").defaultNow().notNull(),
   lastAttemptAt: timestamp("last_attempt_at").defaultNow().notNull(),
   blockedUntil: timestamp("blocked_until"),
@@ -216,12 +219,12 @@ export const adminLoginAttempts = mysqlTable("admin_login_attempts", {
 
 export type AdminLoginAttempt = typeof adminLoginAttempts.$inferSelect;
 
-export const adminPasswordResets = mysqlTable("admin_password_resets", {
-  id: int("id").autoincrement().primaryKey(),
+export const adminPasswordResets = pgTable("admin_password_resets", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   email: varchar("email", { length: 320 }).notNull(),
   codeHash: varchar("code_hash", { length: 64 }).notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
-  attempts: int("attempts").default(0).notNull(),
+  attempts: integer("attempts").default(0).notNull(),
   usedAt: timestamp("used_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -229,14 +232,14 @@ export const adminPasswordResets = mysqlTable("admin_password_resets", {
 export type AdminPasswordReset = typeof adminPasswordResets.$inferSelect;
 
 // Skills table
-export const skills = mysqlTable("skills", {
-  id: int("id").autoincrement().primaryKey(),
+export const skills = pgTable("skills", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   category: varchar("category", { length: 100 }).notNull(),
   iconName: varchar("icon_name", { length: 100 }).default("code"),
   iconUrl: text("icon_url"),
   name: varchar("name", { length: 100 }).notNull(),
-  level: int("level").default(80), // 0-100 proficiency
-  orderIndex: int("order_index").default(0),
+  level: integer("level").default(80), // 0-100 proficiency
+  orderIndex: integer("order_index").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -247,8 +250,8 @@ export const skills = mysqlTable("skills", {
 export type Skill = typeof skills.$inferSelect;
 
 // Contact messages table
-export const contactMessages = mysqlTable("contact_messages", {
-  id: int("id").autoincrement().primaryKey(),
+export const contactMessages = pgTable("contact_messages", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 320 }).notNull(),
   subject: varchar("subject", { length: 500 }),
@@ -260,8 +263,8 @@ export const contactMessages = mysqlTable("contact_messages", {
 export type ContactMessage = typeof contactMessages.$inferSelect;
 
 // Site settings key-value store
-export const siteSettings = mysqlTable("site_settings", {
-  id: int("id").autoincrement().primaryKey(),
+export const siteSettings = pgTable("site_settings", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   key: varchar("key", { length: 100 }).notNull().unique(),
   value: text("value"),
   updatedAt: timestamp("updated_at")
@@ -273,12 +276,12 @@ export const siteSettings = mysqlTable("site_settings", {
 export type SiteSetting = typeof siteSettings.$inferSelect;
 
 // Uploaded files (images/PDFs) stored in DB as base64
-export const uploads = mysqlTable("uploads", {
-  id: int("id").autoincrement().primaryKey(),
+export const uploads = pgTable("uploads", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
   filename: varchar("filename", { length: 500 }).notNull(),
   mimeType: varchar("mime_type", { length: 100 }).notNull(),
-  size: int("size").notNull(),
-  data: longtext("data").notNull(),
+  size: integer("size").notNull(),
+  data: text("data").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
