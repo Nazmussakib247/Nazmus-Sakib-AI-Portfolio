@@ -34,6 +34,20 @@ const floatingCards: FloatingCard[] = [
   { label: 'CSS', iconUrl: '/images/skills/css3-original.svg', left: '74%', top: '87%', driftX: '12px', driftY: '-14px', duration: 13, delay: -5, size: 'sm' },
 ];
 
+function SkillIcon({ card, mobile = false }: { card: FloatingCard; mobile?: boolean }) {
+  const iconSize = mobile ? 'h-4 w-4' : card.size === 'md' ? 'h-6 w-6' : 'h-5 w-5';
+
+  return card.icon ? (
+    <card.icon className={`${iconSize} text-[#e8b923]/80`} strokeWidth={1.5} />
+  ) : (
+    <img
+      src={card.iconUrl}
+      alt=""
+      className={`${iconSize} object-contain opacity-80 saturate-[0.8] ${card.iconClassName || ''}`}
+    />
+  );
+}
+
 export default function FloatingSkillLogos() {
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
 
@@ -68,8 +82,9 @@ export default function FloatingSkillLogos() {
   }, []);
 
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] hidden lg:block">
-      <div className="absolute inset-0 opacity-70">
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1]">
+      {/* Desktop: preserve the original asymmetric floating arrangement. */}
+      <div className="absolute inset-0 hidden opacity-70 lg:block">
         {floatingCards.map((card, index) => {
           const cssVariables = {
             '--skill-drift-x': card.driftX,
@@ -80,7 +95,7 @@ export default function FloatingSkillLogos() {
 
           return (
             <div
-              key={`${card.label}-${index}`}
+              key={`desktop-${card.label}-${index}`}
               className="skill-float absolute"
               style={{ ...cssVariables, left: card.left, top: card.top }}
             >
@@ -90,20 +105,25 @@ export default function FloatingSkillLogos() {
                   card.size === 'md' ? 'min-w-[78px]' : 'min-w-[62px]'
                 }`}
               >
-                {card.icon ? (
-                  <card.icon className={`${card.size === 'md' ? 'h-6 w-6' : 'h-5 w-5'} text-[#e8b923]/80`} strokeWidth={1.5} />
-                ) : (
-                  <img
-                    src={card.iconUrl}
-                    alt=""
-                    className={`${card.size === 'md' ? 'h-6 w-6' : 'h-5 w-5'} object-contain opacity-80 saturate-[0.8] ${card.iconClassName || ''}`}
-                  />
-                )}
+                <SkillIcon card={card} />
                 <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-gray-400">{card.label}</span>
               </div>
             </div>
           );
         })}
+      </div>
+
+      {/* Mobile: keep every hardcoded logo visible in a compact, non-blocking logo dock. */}
+      <div className="absolute inset-x-2 bottom-1 grid grid-cols-4 gap-1.5 pr-24 sm:inset-x-8 sm:bottom-2 sm:grid-cols-8 sm:pr-24 lg:hidden">
+        {floatingCards.map((card, index) => (
+          <div
+            key={`mobile-${card.label}-${index}`}
+            className="flex h-7 min-w-0 items-center justify-center rounded-lg border border-white/10 bg-[#0b0e1a]/70 px-1 shadow-[0_0_16px_rgba(124,92,255,0.08)] backdrop-blur-sm sm:h-8"
+            title={card.label}
+          >
+            <SkillIcon card={card} mobile />
+          </div>
+        ))}
       </div>
     </div>
   );
