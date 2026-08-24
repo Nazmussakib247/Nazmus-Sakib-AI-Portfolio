@@ -16,19 +16,26 @@ const t = initTRPC.context<TrpcContext>().create({
 
 export const createAdminRouter = t.router;
 
+function getPublicRequestOrigin(req: Request): string | null {
+  try {
+    const requestUrl = new URL(req.url);
+    const forwardedHost = req.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+    const forwardedProto = req.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+    const host = forwardedHost || req.headers.get("host") || requestUrl.host;
+    const protocol = forwardedProto || requestUrl.protocol.replace(":", "");
+    return `${protocol}://${host}`;
+  } catch {
+    return null;
+  }
+}
+
 function assertSameOrigin(req: Request): void {
   if (!["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) return;
   const origin = req.headers.get("origin");
   if (!origin) return;
 
-  let requestOrigin: string;
-  try {
-    requestOrigin = new URL(req.url).origin;
-  } catch {
-    return;
-  }
-
-  if (origin !== requestOrigin) {
+  const requestOrigin = getPublicRequestOrigin(req);
+  if (!requestOrigin || origin !== requestOrigin) {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Cross-site admin requests are not allowed",
