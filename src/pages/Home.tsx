@@ -12,6 +12,7 @@ import Contact from '@/sections/Contact';
 import Assistant from '@/sections/Assistant';
 import SocialActivity from '@/sections/SocialActivity';
 import StatusBar from '@/sections/StatusBar';
+import ProfileMetadata from '@/components/ProfileMetadata';
 import Navigation from '@/sections/Navigation';
 import SmoothScroll from '@/components/fx/SmoothScroll';
 import CustomCursor from '@/components/fx/CustomCursor';
@@ -38,7 +39,9 @@ export default function Home() {
   }, [get]);
 
   return (
-    <SmoothScroll>
+    <>
+      <ProfileMetadata />
+      <SmoothScroll>
       <Preloader name="NAZMUS SAKIB" skip={isCaseStudyReturn} />
       <CustomCursor />
       <ScrollProgress />
@@ -58,6 +61,7 @@ export default function Home() {
         {isVisible('contact') && <Contact />}
         <StatusBar />
       </main>
-    </SmoothScroll>
+      </SmoothScroll>
+    </>
   );
 }
