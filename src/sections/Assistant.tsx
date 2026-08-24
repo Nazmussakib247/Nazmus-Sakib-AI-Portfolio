@@ -247,7 +247,7 @@ export default function Assistant() {
           role="dialog"
           aria-modal="false"
           aria-label="Xervis AI Assistant"
-          className="xervis-chat-panel fixed bottom-[calc(1rem+78px+0.75rem)] right-3 flex h-[min(520px,calc(100dvh-13rem))] w-[calc(100vw-1.5rem)] max-w-[390px] flex-col overflow-hidden rounded-[26px] border border-[#e8b923]/25 bg-[#080b17]/95 shadow-[0_24px_80px_rgba(0,0,0,0.65),0_0_45px_rgba(232,185,35,0.12)] backdrop-blur-2xl sm:bottom-[calc(1.75rem+90px+0.75rem)] sm:right-7"
+          className="xervis-chat-panel fixed bottom-[calc(1rem+78px+0.75rem+3.5rem)] right-3 flex h-[min(520px,calc(100dvh-13rem))] w-[calc(100vw-1.5rem)] max-w-[390px] flex-col overflow-hidden rounded-[26px] border border-[#e8b923]/25 bg-[#080b17]/95 shadow-[0_24px_80px_rgba(0,0,0,0.65),0_0_45px_rgba(232,185,35,0.12)] backdrop-blur-2xl sm:bottom-[calc(1.75rem+90px+0.75rem)] sm:right-7"
         >
           <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#14182a] to-[#0a0d19] px-4 py-3.5">
             <div className="flex min-w-0 items-center gap-3">
@@ -397,7 +397,7 @@ export default function Assistant() {
       />
 
       {!open && showGreeting && introText && (
-        <div className="xervis-greeting absolute bottom-[calc(100%+0.9rem)] right-0 w-[min(300px,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] rounded-2xl rounded-br-md border border-[#e8b923]/25 bg-[#080b17]/95 px-4 py-3 text-xs leading-relaxed text-gray-300 shadow-[0_14px_35px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+        <div className="xervis-greeting absolute bottom-[calc(100%+0.9rem+3.5rem)] right-0 w-[min(300px,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] rounded-2xl rounded-br-md border border-[#e8b923]/25 bg-[#080b17]/95 px-4 py-3 text-xs leading-relaxed text-gray-300 shadow-[0_14px_35px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:bottom-[calc(100%+0.9rem)]">
           <span className="mb-1 flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[#e8b923]">
             <Bot className="h-3 w-3" /> Xervis
           </span>

@@ -114,7 +114,7 @@ export default function FloatingSkillLogos() {
       </div>
 
       {/* Mobile: keep every hardcoded logo visible in a compact, non-blocking logo dock. */}
-      <div className="absolute inset-x-2 bottom-1 grid grid-cols-4 gap-1.5 pr-24 sm:inset-x-8 sm:bottom-2 sm:grid-cols-8 sm:pr-24 lg:hidden">
+      <div className="absolute inset-x-2 bottom-1 grid grid-cols-7 gap-1.5 pr-24 sm:inset-x-8 sm:bottom-2 sm:grid-cols-8 sm:pr-24 lg:hidden">
         {floatingCards.map((card, index) => (
           <div
             key={`mobile-${card.label}-${index}`}
