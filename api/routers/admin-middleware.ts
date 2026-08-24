@@ -29,13 +29,39 @@ function getPublicRequestOrigin(req: Request): string | null {
   }
 }
 
+const trustedAdminOrigins = new Set([
+  "https://nazmus-sakib-ai-portfolio.onrender.com",
+  "https://nazmussakib.tech",
+  "https://www.nazmussakib.tech",
+  ...(process.env.PUBLIC_APP_ORIGINS || "")
+    .split(",")
+    .map((value) => value.trim().replace(/\/$/, ""))
+    .filter(Boolean),
+]);
+
+function normalizeOrigin(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+}
+
 function assertSameOrigin(req: Request): void {
   if (!["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) return;
-  const origin = req.headers.get("origin");
+  const origin = normalizeOrigin(req.headers.get("origin"));
   if (!origin) return;
 
   const requestOrigin = getPublicRequestOrigin(req);
-  if (!requestOrigin || origin !== requestOrigin) {
+  const allowedOrigins = new Set([requestOrigin, ...trustedAdminOrigins]);
+  if (!allowedOrigins.has(origin)) {
+    console.warn("[admin-csrf] rejected origin", {
+      origin,
+      requestOrigin,
+      hasForwardedHost: Boolean(req.headers.get("x-forwarded-host")),
+      hasForwardedProto: Boolean(req.headers.get("x-forwarded-proto")),
+    });
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Cross-site admin requests are not allowed",
