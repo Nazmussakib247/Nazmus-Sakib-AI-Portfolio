@@ -1,0 +1,173 @@
+import { useEffect, useRef, useState } from 'react';
+import { BookOpen, Download, Eye, FileText, Github, Linkedin, X } from 'lucide-react';
+import { trpc } from '@/providers/trpc';
+import { useReveal } from '@/components/fx/useReveal';
+import SectionHeading from '@/components/fx/SectionHeading';
+import { useSettings } from '@/hooks/useSettings';
+
+export const CV_PREVIEW_EVENT = 'portfolio:open-cv-preview';
+
+export default function CV() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const { getJson } = useSettings();
+  const copy = getJson<{ cv?: Record<string, string> }>('sectionCopy', {});
+  const cvCopy = copy.cv ?? {};
+  const { data: profile } = trpc.profile.get.useQuery();
+  const { data: projects } = trpc.project.list.useQuery();
+  useReveal(sectionRef, [profile, projects]);
+
+  const cvUrl = profile?.cvUrl || '';
+  const selectedWork = (projects ?? []).slice(0, 6).map((project) => project.title).filter(Boolean).join(', ');
+
+  useEffect(() => {
+    const openPreview = () => setIsPreviewOpen(true);
+    window.addEventListener(CV_PREVIEW_EVENT, openPreview);
+    return () => window.removeEventListener(CV_PREVIEW_EVENT, openPreview);
+  }, []);
+
+  useEffect(() => {
+    if (!isPreviewOpen) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsPreviewOpen(false);
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', closeOnEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isPreviewOpen]);
+
+  return (
+    <>
+      <section
+        id="cv"
+        ref={sectionRef}
+        className="relative w-full overflow-hidden px-4 py-24 sm:px-6 lg:px-8 lg:py-32"
+        style={{ background: 'var(--bg-deep)' }}
+      >
+        <div className="mx-auto max-w-6xl">
+          <SectionHeading
+            kicker={cvCopy.kicker || ''}
+            title={cvCopy.title || ''}
+            blurb={cvCopy.blurb || ''}
+          />
+
+          <div className="grid items-stretch gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+            <div data-reveal="left" className="will-reveal glass-strong relative overflow-hidden rounded-3xl border border-[#e8b923]/20 p-7 sm:p-10">
+              <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#7c5cff]/10 blur-3xl" />
+              <div className="relative z-10 flex h-full flex-col justify-between gap-10">
+                <div>
+                  <div className="mb-6 flex items-center gap-4">
+                    <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#e8b923]/30 bg-[#e8b923]/10">
+                      <FileText className="h-7 w-7 text-[#e8b923]" />
+                    </span>
+                    <div>
+                      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#e8b923]">{cvCopy.profileLabel || ''}</p>
+                      <h3 className="mt-1 text-2xl font-medium text-white">{profile?.name || cvCopy.profileFallback || ''}</h3>
+                    </div>
+                  </div>
+                  <p className="max-w-xl text-sm leading-relaxed text-gray-400 sm:text-base">{cvCopy.profileBlurb || ''}</p>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  {cvUrl ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsPreviewOpen(true)}
+                      className="glow-gold group inline-flex items-center gap-2 rounded-full bg-[#e8b923] px-6 py-3 text-sm font-semibold text-[#05060f] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#f5cd45]"
+                    >
+                      <Eye className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+                      {cvCopy.viewLabel || ''}
+                      <span className="ml-1 h-1.5 w-1.5 rounded-full bg-[#05060f]/60" />
+                    </button>
+                  ) : (
+                    <span className="inline-flex items-center rounded-full border border-white/10 px-5 py-3 text-xs text-gray-500">
+                      {cvCopy.noLink || ''}
+                    </span>
+                  )}
+                  <span className="inline-flex items-center rounded-full border border-white/10 px-5 py-3 text-xs text-gray-500">
+                    {cvCopy.previewBadge || ''}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div data-reveal="right" className="will-reveal grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+              <div className="glass card-hover rounded-2xl p-5">
+                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#e8b923]">{cvCopy.focusLabel || ''}</p>
+                <p className="text-sm leading-relaxed text-gray-300">{cvCopy.focusText || ''}</p>
+              </div>
+              <div className="glass card-hover rounded-2xl p-5">
+                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[#e8b923]">{cvCopy.selectedLabel || ''}</p>
+                <p className="text-sm leading-relaxed text-gray-300">{selectedWork || cvCopy.selectedFallback || ''}</p>
+              </div>
+              <div className="glass card-hover rounded-2xl p-5">
+                <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.25em] text-[#e8b923]">{cvCopy.connectLabel || ''}</p>
+                <div className="flex items-center gap-3 text-gray-400">
+                  {profile?.githubUrl && <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" aria-label={cvCopy.githubLabel || ''} className="transition-colors hover:text-[#e8b923]"><Github className="h-4 w-4" /></a>}
+                  {profile?.linkedinUrl && <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" aria-label={cvCopy.linkedinLabel || ''} className="transition-colors hover:text-[#e8b923]"><Linkedin className="h-4 w-4" /></a>}
+                  {profile?.mediumUrl && <a href={profile.mediumUrl} target="_blank" rel="noopener noreferrer" aria-label={cvCopy.mediumLabel || ''} className="transition-colors hover:text-[#e8b923]"><BookOpen className="h-4 w-4" /></a>}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {isPreviewOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-[#05060f]/90 p-3 backdrop-blur-md sm:p-6"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setIsPreviewOpen(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cv-preview-title"
+            className="flex h-[min(92vh,900px)] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-[#e8b923]/30 bg-[#11131f] shadow-[0_24px_100px_rgba(0,0,0,0.55)]"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 sm:px-6">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#e8b923]">{cvCopy.previewKicker || ''}</p>
+                <h2 id="cv-preview-title" className="mt-1 text-lg font-medium text-white">{`${profile?.name || cvCopy.profileFallback || ''} · ${cvCopy.title || ''}`}</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPreviewOpen(false)}
+                aria-label={cvCopy.closeLabel || ''}
+                className="rounded-full border border-white/10 p-2 text-gray-400 transition-colors hover:border-[#e8b923]/50 hover:text-[#e8b923]"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="min-h-0 flex-1 bg-white">
+              {cvUrl ? <iframe src={cvUrl} title={`${profile?.name || cvCopy.profileFallback || ''} ${cvCopy.previewTitleSuffix || ''}`} className="h-full w-full" /> : <div className="flex h-full items-center justify-center px-6 text-center text-sm text-gray-500">{cvCopy.noPreview || ''}</div>}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-3 sm:px-6">
+              <p className="text-xs text-gray-500">{cvCopy.reviewNote || ''}</p>
+              {cvUrl && (
+                <a
+                  href={cvUrl}
+                  download={cvCopy.downloadFileName || ''}
+                  className="inline-flex items-center gap-2 rounded-full border border-[#e8b923]/40 bg-[#e8b923]/10 px-4 py-2 text-xs font-semibold text-[#e8b923] transition-colors hover:bg-[#e8b923] hover:text-[#05060f]"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  {cvCopy.downloadLabel || ''}
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

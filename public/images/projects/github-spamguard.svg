@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f1117"/>
+      <stop offset="100%" style="stop-color:#1a1f2e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Decorative circles -->
+  <circle cx="200" cy="150" r="300" fill="#6366f1" opacity="0.07"/>
+  <circle cx="1000" cy="480" r="280" fill="#8b5cf6" opacity="0.07"/>
+  <!-- Logo icon -->
+  <rect x="80" y="220" width="72" height="72" rx="16" fill="url(#accent)"/>
+  <text x="116" y="271" font-family="sans-serif" font-size="38" font-weight="bold" fill="white" text-anchor="middle">⚡</text>
+  <!-- Title -->
+  <text x="175" y="260" font-family="system-ui, sans-serif" font-size="56" font-weight="800" fill="white">SpamGuard AI</text>
+  <!-- Subtitle -->
+  <text x="80" y="320" font-family="system-ui, sans-serif" font-size="28" fill="#94a3b8">ML-Powered Email Spam Detection</text>
+  <!-- Divider -->
+  <rect x="80" y="360" width="120" height="4" rx="2" fill="url(#accent)"/>
+  <!-- Feature pills -->
+  <rect x="80" y="390" width="220" height="44" rx="22" fill="#6366f1" opacity="0.2"/>
+  <text x="190" y="418" font-family="system-ui, sans-serif" font-size="20" fill="#a5b4fc" text-anchor="middle">Naive Bayes · SVM</text>
+  <rect x="320" y="390" width="200" height="44" rx="22" fill="#6366f1" opacity="0.2"/>
+  <text x="420" y="418" font-family="system-ui, sans-serif" font-size="20" fill="#a5b4fc" text-anchor="middle">Real ML Training</text>
+  <rect x="540" y="390" width="220" height="44" rx="22" fill="#6366f1" opacity="0.2"/>
+  <text x="650" y="418" font-family="system-ui, sans-serif" font-size="20" fill="#a5b4fc" text-anchor="middle">Bangla + English</text>
+  <!-- URL -->
+  <text x="80" y="560" font-family="system-ui, sans-serif" font-size="22" fill="#475569">github.com/Nazmussakib247</text>
+</svg>
