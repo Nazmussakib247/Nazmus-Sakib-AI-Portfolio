@@ -415,7 +415,7 @@ export default function Assistant() {
       />
 
       {!open && !hasScrolled && showGreeting && introText && (
-        <div className="xervis-greeting absolute bottom-[calc(100%+0.9rem+3.5rem)] right-0 hidden w-[min(300px,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] rounded-2xl rounded-br-md border border-[#e8b923]/25 bg-[#080b17]/95 px-4 py-3 text-xs leading-relaxed text-gray-300 shadow-[0_14px_35px_rgba(0,0,0,0.45)] backdrop-blur-xl lg:block lg:bottom-[calc(100%+0.9rem)]">
+        <div className="xervis-greeting absolute bottom-[calc(100%+0.9rem+3.5rem)] right-0 w-[min(300px,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] rounded-2xl rounded-br-md border border-[#e8b923]/25 bg-[#080b17]/95 px-4 py-3 text-xs leading-relaxed text-gray-300 shadow-[0_14px_35px_rgba(0,0,0,0.45)] backdrop-blur-xl lg:block lg:bottom-[calc(100%+0.9rem)]">
           <span className="mb-1 flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[#e8b923]">
             <Bot className="h-3 w-3" /> Xervis
           </span>
