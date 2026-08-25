@@ -106,16 +106,18 @@ export function MessagesTab() {
                   <div className="mt-4 border-t border-white/5 pt-4">
                     {m.subject && <p className="mb-2 text-sm font-medium text-white">{m.subject}</p>}
                     <p className="mb-4 text-sm leading-relaxed whitespace-pre-wrap text-gray-300">{m.message}</p>
-                    <div className="mb-4 rounded-xl border border-white/10 bg-black/20 p-3">
-                      <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#e8b923]"><ShieldAlert className="h-3.5 w-3.5" /> Abuse-monitoring details</div>
-                      <div className="grid gap-2 text-xs text-gray-400 sm:grid-cols-2">
-                        <div className="flex min-w-0 items-center gap-2"><span className="text-gray-600">IP</span><code className="truncate text-gray-300">{m.ipAddress || 'Unavailable'}</code></div>
-                        <div className="flex items-center gap-2"><Smartphone className="h-3.5 w-3.5 text-gray-600" /><span>{[m.deviceType, m.browser, m.operatingSystem].filter(Boolean).join(' · ') || 'Unknown device'}</span></div>
-                        <div className="text-gray-500">IP messages: <strong className="text-gray-300">{ipCounts.get(ip) || 0}</strong></div>
-                        <div className="text-gray-500">Email messages: <strong className="text-gray-300">{emailCounts.get(m.email.toLowerCase()) || 0}</strong></div>
+                    {(m.ipAddress || m.deviceType || m.browser || m.operatingSystem || m.userAgent) && (
+                      <div className="mb-4 rounded-xl border border-white/10 bg-black/20 p-3">
+                        <div className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#e8b923]"><ShieldAlert className="h-3.5 w-3.5" /> Abuse-monitoring details</div>
+                        <div className="grid gap-2 text-xs text-gray-400 sm:grid-cols-2">
+                          {m.ipAddress && <div className="flex min-w-0 items-center gap-2"><span className="text-gray-600">IP</span><code className="truncate text-gray-300">{m.ipAddress}</code></div>}
+                          {(m.deviceType || m.browser || m.operatingSystem) && <div className="flex items-center gap-2"><Smartphone className="h-3.5 w-3.5 text-gray-600" /><span>{[m.deviceType, m.browser, m.operatingSystem].filter(Boolean).join(' · ')}</span></div>}
+                          {m.ipAddress && <div className="text-gray-500">IP messages: <strong className="text-gray-300">{ipCounts.get(ip) || 0}</strong></div>}
+                          <div className="text-gray-500">Email messages: <strong className="text-gray-300">{emailCounts.get(m.email.toLowerCase()) || 0}</strong></div>
+                        </div>
+                        {m.userAgent && <p className="mt-2 break-words font-mono text-[10px] leading-relaxed text-gray-600" title={m.userAgent}>{m.userAgent}</p>}
                       </div>
-                      {m.userAgent && <p className="mt-2 break-words font-mono text-[10px] leading-relaxed text-gray-600" title={m.userAgent}>{m.userAgent}</p>}
-                    </div>
+                    )}
                     <div className="flex flex-wrap items-center gap-2">
                       <a href={`mailto:${m.email}?subject=${encodeURIComponent(`Re: ${m.subject || 'Your message'}`)}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[#e8b923]/10 px-3 py-1.5 text-xs text-[#e8b923] transition-colors hover:bg-[#e8b923]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923]"><Reply className="h-3.5 w-3.5" /> Reply via email</a>
                       <button type="button" onClick={() => markRead.mutate({ id: m.id, isRead: !m.isRead })} className="min-h-11 rounded-lg bg-white/5 px-3 py-1.5 text-xs text-gray-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923]">Mark as {m.isRead ? 'unread' : 'read'}</button>

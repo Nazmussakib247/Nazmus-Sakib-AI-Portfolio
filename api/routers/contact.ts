@@ -92,33 +92,47 @@ export const contactRouter = createRouter({
         // Silently accept honeypot submissions
         return { success: true };
       }
-      const ip = getClientIp(ctx.req);
+      const rawIp = getClientIp(ctx.req);
+      const ipAddress = rawIp === 'unknown' ? null : rawIp;
+      const rawUserAgent = ctx.req.headers.get('user-agent')?.trim() || null;
+      const userAgent = rawUserAgent?.slice(0, 500) || null;
+      const parsedAgent = userAgent ? parseUserAgent(userAgent) : { deviceType: null, browser: null, operatingSystem: null };
       const db = getDb();
-      const blocked = await db.select({ id: blockedContactIps.id }).from(blockedContactIps).where(eq(blockedContactIps.ipAddress, ip)).limit(1);
-      if (blocked.length) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Messages from this address are not accepted." });
+
+      // Abuse-control tables are deployed separately from the contact table. If
+      // their migration is pending, never block a legitimate message or expose
+      // the database error to the visitor; metadata simply remains unavailable.
+      if (ipAddress) {
+        try {
+          const blocked = await db.select({ id: blockedContactIps.id }).from(blockedContactIps).where(eq(blockedContactIps.ipAddress, ipAddress)).limit(1);
+          if (blocked.length) {
+            throw new TRPCError({ code: "FORBIDDEN", message: "Messages from this address are not accepted." });
+          }
+          if (!(await checkRate(db, ipAddress))) {
+            throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many messages. Please try again later." });
+          }
+        } catch (error) {
+          if (error instanceof TRPCError) throw error;
+          console.error('[contact] abuse-control metadata unavailable:', error);
+        }
       }
-      if (!(await checkRate(db, ip))) {
-        throw new TRPCError({
-          code: "TOO_MANY_REQUESTS",
-          message: "Too many messages. Please try again later.",
+
+      try {
+        await db.insert(contactMessages).values({
+          name: input.name,
+          email: input.email,
+          subject: input.subject || null,
+          message: input.message,
+          ipAddress,
+          userAgent,
+          deviceType: parsedAgent.deviceType,
+          browser: parsedAgent.browser,
+          operatingSystem: parsedAgent.operatingSystem,
         });
+      } catch (error) {
+        console.error('[contact] message persistence failed:', error);
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Unable to send your message right now. Please try again later." });
       }
-      const userAgent = (ctx.req.headers.get('user-agent') || 'unknown').slice(0, 500);
-      const { deviceType, browser, operatingSystem } = parseUserAgent(userAgent);
-      const isSpam = deviceType === 'Bot';
-      await db.insert(contactMessages).values({
-        name: input.name,
-        email: input.email,
-        subject: input.subject || null,
-        message: input.message,
-        ipAddress: ip,
-        userAgent,
-        deviceType,
-        browser,
-        operatingSystem,
-        isSpam,
-      });
 
       let emailSent = false;
       const resendKey = process.env.RESEND_API_KEY?.trim();
@@ -134,7 +148,7 @@ export const contactRouter = createRouter({
               to: [contactTo],
               reply_to: input.email,
               subject: input.subject || `Portfolio message from ${input.name}`,
-              html: `<h2>New portfolio contact</h2><p><strong>Name:</strong> ${escapeHtml(input.name)}</p><p><strong>Email:</strong> ${escapeHtml(input.email)}</p><p><strong>Device:</strong> ${escapeHtml(deviceType)} · ${escapeHtml(browser)} · ${escapeHtml(operatingSystem)}</p><p><strong>IP:</strong> ${escapeHtml(ip)}</p><p><strong>Message:</strong></p><p>${escapeHtml(input.message).replace(/\n/g, '<br />')}</p>`,
+              html: `<h2>New portfolio contact</h2><p><strong>Name:</strong> ${escapeHtml(input.name)}</p><p><strong>Email:</strong> ${escapeHtml(input.email)}</p>${userAgent ? `<p><strong>Device:</strong> ${escapeHtml(parsedAgent.deviceType || 'Unknown')} · ${escapeHtml(parsedAgent.browser || 'Unknown')} · ${escapeHtml(parsedAgent.operatingSystem || 'Unknown')}</p>` : ''}${ipAddress ? `<p><strong>IP:</strong> ${escapeHtml(ipAddress)}</p>` : ''}<p><strong>Message:</strong></p><p>${escapeHtml(input.message).replace(/\n/g, '<br />')}</p>`,
             }),
             signal: AbortSignal.timeout(10000),
           });
