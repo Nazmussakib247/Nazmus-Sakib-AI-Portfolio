@@ -66,9 +66,11 @@ function updateStructuredData(profile: { name?: string | null; title?: string | 
 
 export default function ProfileMetadata() {
   const { data: profile } = trpc.profile.get.useQuery();
-  const { get } = useSettings();
+  const { get, settingsFetched } = useSettings();
 
   useEffect(() => {
+    if (!settingsFetched) return;
+
     const title = get('seoTitle').trim() || 'Nazmus Sakib — ML Engineer · AI Engineer · AI Product Engineer';
     const description = get('seoDescription').trim() || 'Portfolio of Nazmus Sakib, an ML Engineer and AI product builder working across NLP, LLMs, retrieval, full-stack systems, and intelligent automation.';
     const siteUrl = toAbsoluteUrl(get('canonicalSiteUrl') || '/', window.location.origin).replace(/\/$/, '') + '/';
@@ -93,7 +95,7 @@ export default function ProfileMetadata() {
     ensureLink('icon').dataset.adminManaged = 'true';
 
     if (profile) updateStructuredData(profile, siteUrl, profileImageUrl, title, description);
-  }, [get, profile]);
+  }, [get, profile, settingsFetched]);
 
   return null;
 }

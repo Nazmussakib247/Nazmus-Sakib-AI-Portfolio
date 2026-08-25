@@ -58,6 +58,13 @@ function getAbsoluteUrl(c: Context, value: string | null | undefined, fallback: 
   }
 }
 
+function addAssetVersion(url: string, updatedAt: Date | string | null | undefined) {
+  if (!updatedAt) return url;
+  const timestamp = new Date(updatedAt).getTime();
+  if (!Number.isFinite(timestamp)) return url;
+  return `${url}${url.includes("?") ? "&" : "?"}v=${timestamp}`;
+}
+
 async function getSeoData(c: Context): Promise<SeoData> {
   const origin = getPublicOrigin(c);
   const defaults = {
@@ -73,9 +80,10 @@ async function getSeoData(c: Context): Promise<SeoData> {
     const db = getDb();
     const [profileRows, settingRows] = await Promise.all([
       db.select({ name: profiles.name, title: profiles.title, bio: profiles.bio, avatarUrl: profiles.avatarUrl, githubUrl: profiles.githubUrl, linkedinUrl: profiles.linkedinUrl, mediumUrl: profiles.mediumUrl }).from(profiles).limit(1),
-      db.select({ key: siteSettings.key, value: siteSettings.value }).from(siteSettings),
+      db.select({ key: siteSettings.key, value: siteSettings.value, updatedAt: siteSettings.updatedAt }).from(siteSettings),
     ]);
     const settings = Object.fromEntries(settingRows.map((row) => [row.key, row.value || ""]));
+    const settingUpdatedAt = (key: string) => settingRows.find((row) => row.key === key)?.updatedAt;
     const profile = profileRows[0];
     const canonicalUrl = getAbsoluteUrl(c, settings.canonicalSiteUrl || defaults.canonicalSiteUrl, `${origin}/`).replace(/\/$/, "") + "/";
     const profileImageUrl = getAbsoluteUrl(c, profile?.avatarUrl, fallbackProfileImage);
@@ -84,9 +92,9 @@ async function getSeoData(c: Context): Promise<SeoData> {
       title: settings.seoTitle?.trim() || defaults.seoTitle,
       description: settings.seoDescription?.trim() || defaults.seoDescription,
       canonicalUrl,
-      socialImageUrl: getAbsoluteUrl(c, settings.socialPreviewImageUrl, fallbackSocialImage),
+      socialImageUrl: addAssetVersion(getAbsoluteUrl(c, settings.socialPreviewImageUrl, fallbackSocialImage), settingUpdatedAt("socialPreviewImageUrl")),
       socialImageAlt: settings.socialPreviewImageAlt?.trim() || defaults.socialPreviewImageAlt,
-      faviconUrl: getAbsoluteUrl(c, settings.faviconUrl, fallbackProfileImage),
+      faviconUrl: addAssetVersion(getAbsoluteUrl(c, settings.faviconUrl, fallbackProfileImage), settingUpdatedAt("faviconUrl")),
       profileImageUrl,
       profile: {
         name: profile?.name || "Nazmus Sakib",

@@ -63,10 +63,11 @@ function parseJson<T>(value: string, fallback: T): T {
 }
 
 export function useSettings() {
-  const { data } = trpc.settings.getAll.useQuery(undefined, {
+  const settingsQuery = trpc.settings.getAll.useQuery(undefined, {
     staleTime: 60_000,
     retry: 1,
   });
+  const { data } = settingsQuery;
 
   const settings = { ...DEFAULT_SETTINGS, ...(data || {}) };
 
@@ -88,5 +89,5 @@ export function useSettings() {
 
   const getJson = <T,>(key: string, fallback: T) => parseJson(settings[key] ?? '', fallback);
 
-  return { settings, get, getJson, isVisible, taglines };
+  return { settings, get, getJson, isVisible, taglines, settingsFetched: settingsQuery.isFetched };
 }
