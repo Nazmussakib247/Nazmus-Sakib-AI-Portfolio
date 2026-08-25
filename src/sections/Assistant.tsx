@@ -204,6 +204,39 @@ export default function Assistant() {
     setOpen((current) => !current);
   };
 
+  const playGreeting = () => {
+    if (!voiceEnabledRef.current) {
+      voiceEnabledRef.current = true;
+      setVoiceEnabled(true);
+    }
+    triggerVoiceGreeting();
+  };
+
+  const handleTriggerClick = (event: MouseEvent<HTMLButtonElement>) => {
+    if (open) {
+      toggleOpen();
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const clickY = event.clientY - rect.top;
+    if (clickY >= rect.height / 2) {
+      playGreeting();
+      return;
+    }
+    toggleOpen();
+  };
+
+  const handleTriggerPointerMove = (event: MouseEvent<HTMLButtonElement>) => {
+    if (open) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (event.clientY - rect.top >= rect.height / 2) {
+      handleVoiceHover();
+    } else {
+      resetVoiceHover();
+    }
+  };
+
   const listenToMessage = (message: ChatMessage, index: number) => {
     // A deliberate Listen click is also the recovery path after the visitor
     // has muted voice from the temporary speaker control.
@@ -257,7 +290,7 @@ export default function Assistant() {
 
   return (
     <div
-            className="xervis-widget group fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-3 z-[80] sm:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] sm:right-7 lg:bottom-7"
+            className="xervis-widget group fixed bottom-[calc(6.25rem+env(safe-area-inset-bottom))] right-3 z-[80] sm:bottom-[calc(6.25rem+env(safe-area-inset-bottom))] sm:right-7 lg:bottom-7"
 
     >
       {open && (
@@ -265,7 +298,7 @@ export default function Assistant() {
           role="dialog"
           aria-modal="false"
           aria-label="Xervis AI Assistant"
-          className="xervis-chat-panel fixed bottom-[calc(4.75rem+78px+0.75rem+env(safe-area-inset-bottom))] right-3 flex h-[min(520px,calc(100dvh-10rem))] w-[calc(100vw-1.5rem)] max-w-[390px] flex-col overflow-hidden rounded-[26px] border border-[#e8b923]/25 bg-[#080b17]/95 shadow-[0_24px_80px_rgba(0,0,0,0.65),0_0_45px_rgba(232,185,35,0.12)] backdrop-blur-2xl sm:bottom-[calc(4.75rem+90px+0.75rem+env(safe-area-inset-bottom))] sm:right-7 lg:bottom-[calc(1.75rem+90px+0.75rem)]"
+          className="xervis-chat-panel fixed bottom-[calc(6.25rem+78px+0.75rem+env(safe-area-inset-bottom))] right-3 flex h-[min(520px,calc(100dvh-10rem))] w-[calc(100vw-1.5rem)] max-w-[390px] flex-col overflow-hidden rounded-[26px] border border-[#e8b923]/25 bg-[#080b17]/95 shadow-[0_24px_80px_rgba(0,0,0,0.65),0_0_45px_rgba(232,185,35,0.12)] backdrop-blur-2xl sm:bottom-[calc(6.25rem+90px+0.75rem+env(safe-area-inset-bottom))] sm:right-7 lg:bottom-[calc(1.75rem+90px+0.75rem)]"
         >
           <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#14182a] to-[#0a0d19] px-4 py-3.5">
             <div className="flex min-w-0 items-center gap-3">
@@ -426,11 +459,9 @@ export default function Assistant() {
 
       <button
         type="button"
-        onClick={toggleOpen}
-        onMouseEnter={handleVoiceHover}
-        onMouseMove={handleVoiceHover}
+        onClick={handleTriggerClick}
+        onMouseMove={handleTriggerPointerMove}
         onMouseLeave={resetVoiceHover}
-        onFocus={handleVoiceHover}
         aria-label={open ? 'Close Xervis AI assistant' : 'Open Xervis AI assistant'}
         aria-expanded={open}
         className={`xervis-trigger relative flex h-[78px] w-[78px] items-center justify-center rounded-full border bg-[#080b17]/90 shadow-[0_12px_35px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-all duration-300 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923] sm:h-[90px] sm:w-[90px] ${open ? 'border-[#e8b923] shadow-[0_0_35px_rgba(232,185,35,0.28)]' : 'border-[#e8b923]/55 hover:border-[#e8b923] hover:shadow-[0_0_32px_rgba(232,185,35,0.25)]'}`}
@@ -473,14 +504,10 @@ export default function Assistant() {
           type="button"
           onClick={(event) => {
             event.stopPropagation();
-            if (!voiceEnabledRef.current) {
-              voiceEnabledRef.current = true;
-              setVoiceEnabled(true);
-            }
-            triggerVoiceGreeting();
+            playGreeting();
           }}
           aria-label="Play Xervis greeting"
-          className="pointer-events-auto absolute right-0 top-auto bottom-[calc(100%+0.5rem)] whitespace-nowrap rounded-full border border-white/10 bg-[#080b17]/80 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-gray-500 opacity-0 transition-opacity hover:border-[#e8b923]/45 hover:text-[#e8b923] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923] group-hover:opacity-100 lg:top-[calc(100%+0.5rem)] lg:bottom-auto"
+          className="pointer-events-auto absolute right-0 top-[calc(100%+0.5rem)] bottom-auto whitespace-nowrap rounded-full border border-white/10 bg-[#080b17]/80 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-gray-500 opacity-0 transition-opacity hover:border-[#e8b923]/45 hover:text-[#e8b923] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923] group-hover:opacity-100"
         >
           {chatMutation.isPending ? 'Xervis is thinking' : 'Talk to Xervis'}
         </button>
