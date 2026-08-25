@@ -275,12 +275,15 @@ export const siteSettings = pgTable("site_settings", {
 
 export type SiteSetting = typeof siteSettings.$inferSelect;
 
-// Privacy-safe visit events. No raw IP address or persistent visitor identity is stored.
+// Visit analytics. Raw IP access is restricted to authenticated admins and retention is bounded.
 export const visitEvents = pgTable("visit_events", {
   id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+  ipAddress: varchar("ip_address", { length: 128 }).notNull(),
   country: varchar("country", { length: 2 }).default("ZZ").notNull(),
   path: varchar("path", { length: 160 }).default("/").notNull(),
   referrerHost: varchar("referrer_host", { length: 255 }),
+  userAgent: varchar("user_agent", { length: 500 }),
+  isSuspicious: boolean("is_suspicious").default(false).notNull(),
   visitedAt: timestamp("visited_at").defaultNow().notNull(),
 });
 

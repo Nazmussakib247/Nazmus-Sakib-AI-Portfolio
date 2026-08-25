@@ -4,7 +4,7 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { trpc } from '@/providers/trpc';
 import {
   LayoutDashboard, FolderOpen, Award, BookOpen, Briefcase, FileBadge,
-  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2,
+  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2, ShieldAlert,
 } from 'lucide-react';
 import { ProjectsTab, SkillsTab, ExperiencesTab, CertificatesTab, AwardsTab, WritingsTab } from './tabs/ContentTabs';
 import { MessagesTab } from './tabs/MessagesTab';
@@ -208,7 +208,8 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
   const { data: writings } = trpc.writing.listAll.useQuery();
   const { data: skills } = trpc.skill.list.useQuery();
   const { data: messages } = trpc.contactAdmin.list.useQuery();
-  const { data: analytics } = trpc.analyticsAdmin.summary.useQuery();
+  const [analyticsDays, setAnalyticsDays] = useState(30);
+  const { data: analytics } = trpc.analyticsAdmin.summary.useQuery({ days: analyticsDays });
 
   const stats: { label: string; value: number; icon: React.ElementType; tab: TabType; highlight?: boolean }[] = [
     { label: 'Messages', value: messages?.length || 0, icon: Inbox, tab: 'messages', highlight: unreadCount > 0 },
@@ -282,17 +283,34 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
         </div>
 
         <div className="rounded-xl border border-white/5 bg-[#111527] p-6 lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="text-sm font-medium text-white">Visitor overview</h3>
-              <p className="mt-1 text-xs text-gray-500">Aggregated visits from the last 30 days; raw IP addresses are never stored.</p>
+              <h3 className="text-sm font-medium text-white">Visitor analytics</h3>
+              <p className="mt-1 text-xs text-gray-500">Raw IP visibility is restricted to this admin view. Events are automatically retained for up to one year.</p>
             </div>
-            <Globe2 className="h-5 w-5 text-[#e8b923]" />
+            <div className="flex items-center gap-2">
+              <label htmlFor="analytics-range" className="sr-only">Analytics date range</label>
+              <select id="analytics-range" value={analyticsDays} onChange={(event) => setAnalyticsDays(Number(event.target.value))} className="rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]">
+                <option value="1">Today</option>
+                <option value="7">7 days</option>
+                <option value="30">30 days</option>
+                <option value="90">3 months</option>
+                <option value="180">6 months</option>
+                <option value="365">1 year</option>
+              </select>
+              <Globe2 className="h-5 w-5 text-[#e8b923]" />
+            </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-2xl text-white">{analytics?.totalVisits || 0}</div><div className="text-xs text-gray-500">Total visits</div></div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-2xl text-white">{analytics?.totalVisits || 0}</div><div className="text-xs text-gray-500">Visits · {analyticsDays}d</div></div>
+            <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-2xl text-white">{analytics?.uniqueIps || 0}</div><div className="text-xs text-gray-500">Distinct IPs</div></div>
+            <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-2xl text-white">{analytics?.suspiciousEvents || 0}</div><div className="flex items-center gap-1 text-xs text-gray-500"><ShieldAlert className="h-3 w-3 text-orange-300" /> Traffic alerts</div></div>
             <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-sm text-gray-300">{analytics?.countries.slice(0, 4).map((country) => `${country.country === 'ZZ' ? 'Unknown' : country.country} (${country.visits})`).join(', ') || 'No country data yet'}</div><div className="mt-1 text-xs text-gray-500">Top countries</div></div>
-            <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-sm text-gray-300">{analytics?.topPaths.slice(0, 3).map((path) => `${path.path} (${path.visits})`).join(', ') || 'No path data yet'}</div><div className="mt-1 text-xs text-gray-500">Top paths</div></div>
+          </div>
+          <div className="mt-5 grid gap-5 lg:grid-cols-3">
+            <div className="min-w-0"><h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">Top paths</h4><div className="space-y-1.5">{analytics?.topPaths.slice(0, 8).map((path) => <div key={path.path} className="flex justify-between gap-3 text-xs"><span className="truncate text-gray-300">{path.path}</span><span className="shrink-0 text-gray-500">{path.visits}</span></div>) || <p className="text-xs text-gray-600">No path data yet</p>}</div></div>
+            <div className="min-w-0"><h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">Top IPs</h4><div className="max-h-32 space-y-1.5 overflow-y-auto pr-1">{analytics?.topIps.slice(0, 8).map((ip) => <div key={`${ip.ipAddress}-${ip.country}`} className="flex justify-between gap-3 text-xs"><span className="truncate font-mono text-gray-300">{ip.ipAddress}</span><span className={`shrink-0 ${ip.suspicious > 0 ? 'text-orange-300' : 'text-gray-500'}`}>{ip.visits}{ip.suspicious > 0 ? ' · alert' : ''}</span></div>) || <p className="text-xs text-gray-600">No IP data yet</p>}</div></div>
+            <div className="min-w-0"><h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">Daily activity</h4><div className="max-h-32 space-y-1.5 overflow-y-auto pr-1">{analytics?.daily.slice(-8).map((day) => <div key={day.day} className="flex justify-between gap-3 text-xs"><span className="text-gray-300">{day.day}</span><span className="text-gray-500">{day.visits}</span></div>) || <p className="text-xs text-gray-600">No daily data yet</p>}</div></div>
           </div>
         </div>
       </div>

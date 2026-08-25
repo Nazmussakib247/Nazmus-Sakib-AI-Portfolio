@@ -98,11 +98,11 @@ The source of truth is `api/router.ts` and the router files under `api/routers/`
 | `settings` | public settings query | Public | Copy, SEO, visibility, ticker settings |
 | `assistant` | `chat` | Public | Ask Xervis portfolio questions |
 | `contact` | public submission | Public | Validated visitor contact form |
-| `analytics` | `track` | Public | Records one throttled, coarse visit event |
+| `analytics` | `track` | Public | Records one throttled visit event with server-observed IP, country, path, referrer, and user-agent metadata |
 
 Protected namespaces are `admin`, `profileAdmin`, `projectAdmin`, `experienceAdmin`, `skillAdmin`, `awardAdmin`, `certificateAdmin`, `writingAdmin`, `settingsAdmin`, `contactAdmin`, `uploadAdmin`, and `analyticsAdmin`. They provide authenticated CRUD, reorder, sync, upload, message, settings, and analytics operations.
 
-`analyticsAdmin.summary` returns a 30-day aggregate of total visits, top countries, and top paths. The implementation does not retain raw IP addresses or a persistent visitor identity. Country detection uses trusted proxy country headers when available and falls back to `ZZ` (unknown).
+`analyticsAdmin.summary` accepts `{ days }` from `1` through `365` and returns total visits, distinct IPs, suspicious-event counts, top countries, top paths, per-IP counts, and daily activity. The admin overview provides Today, 7 days, 30 days, 3 months, 6 months, and 1 year filters. Country detection uses trusted proxy country headers when available and falls back to `ZZ` (unknown). Raw IP visibility is restricted to authenticated administrators and events older than 365 days are deleted when the report query runs.
 
 ## Database and CMS
 
@@ -114,13 +114,13 @@ The public writing section renders featured articles first. Each Read More click
 
 ## Security and privacy
 
-Admin mutations use same-origin protection, role checks, input validation, and expiring HttpOnly session cookies. Stored session tokens are digested. Never commit `.env`, credentials, raw session tokens, raw IP addresses, private uploads, or provider keys. Production PostgreSQL must use the Supabase TLS connection string; certificate verification must not be disabled in production.
+Admin mutations use same-origin protection, role checks, input validation, and expiring HttpOnly session cookies. Stored session tokens are digested. Never commit `.env`, credentials, raw session tokens, private uploads, or provider keys. Raw IP data is operationally sensitive and must only be displayed to authenticated administrators; do not export it to public responses, logs, or client analytics. Production PostgreSQL must use the Supabase TLS connection string; certificate verification must not be disabled in production.
 
-Visitor analytics is aggregate-only: a browser session records at most one visit, the server applies a short throttle, and only country, path, referrer host, and timestamp are stored. Add a visible privacy notice if the target audience or applicable policy requires it.
+Visitor analytics records at most one normal visit per browser session, while the server uses the observed IP for short-lived throttling and stores the IP with each recorded event for the bounded 365-day reporting window. The table also stores country, path, referrer host, user-agent, suspicious-event flag, and timestamp. The suspicious flag is a burst-traffic signal for investigation, not proof of a DDoS attack or a verified unique human visitor. Add a visible privacy notice describing purpose, fields, retention, administrator access, and deletion policy before public launch.
 
 ## Deployment on Render
 
-Render should build with `pnpm install --frozen-lockfile && pnpm run build` and start with `pnpm run start`. Configure `DATABASE_URL` and all required auth, storage, and AI variables in Render. Apply the PostgreSQL schema before the first analytics request. Add `nazmussakib.tech` as a Render custom domain and configure the provider CNAME exactly as Render instructs. Confirm HTTPS `200` on both the Render hostname and custom domain after deployment.
+Render should build with `pnpm install --frozen-lockfile && pnpm run build` and start with `pnpm run start`. Configure `DATABASE_URL` and all required auth, storage, and AI variables in Render. Apply the PostgreSQL schema before the first analytics request. The analytics boot guard is additive and idempotent, but migration `0005_raw_ip_analytics.sql` should still be applied through the normal migration workflow. Add `nazmussakib.tech` as a Render custom domain and configure the provider CNAME exactly as Render instructs. Confirm HTTPS `200` on both the Render hostname and custom domain after deployment.
 
 ## Adding a feature
 
