@@ -27,7 +27,7 @@ const floatingCards: FloatingCard[] = [
   { label: 'HTML', iconUrl: '/images/skills/html5-original.svg', left: '24%', top: '81%', driftX: '-12px', driftY: '-13px', duration: 12, delay: -1, size: 'sm' },
   { label: 'GitHub', iconUrl: '/images/skills/github-original.svg', left: '84%', top: '18%', driftX: '15px', driftY: '18px', duration: 15, delay: -3, size: 'md', iconClassName: 'brightness-0 invert opacity-100 drop-shadow-[0_0_6px_rgba(255,255,255,0.55)]' },
   { label: 'Docker', iconUrl: '/images/skills/docker-original.svg', left: '80%', top: '31%', driftX: '13px', driftY: '15px', duration: 16, delay: -14, size: 'md' },
-  { label: 'Machine Learning', iconUrl: '', icon: BrainCircuit, left: '68%', top: '46%', driftX: '-12px', driftY: '-18px', duration: 17, delay: -9, size: 'md' },
+  { label: 'Machine Learning', iconUrl: '', icon: BrainCircuit, left: '80%', top: '46%', driftX: '-12px', driftY: '-18px', duration: 17, delay: -9, size: 'md' },
   { label: 'RAG', iconUrl: '', icon: Database, left: '86%', top: '60%', driftX: '-14px', driftY: '17px', duration: 16, delay: -4, size: 'sm' },
   { label: 'scikit-learn', iconUrl: '/images/skills/scikitlearn-original.svg', left: '78%', top: '72%', driftX: '13px', driftY: '-16px', duration: 14, delay: -6, size: 'sm' },
   { label: 'n8n', iconUrl: '/images/skills/n8n-original.svg', left: '68%', top: '78%', driftX: '-13px', driftY: '15px', duration: 15, delay: -7, size: 'sm' },
