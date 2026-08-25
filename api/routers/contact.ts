@@ -26,6 +26,50 @@ function checkRate(key: string) {
   return entry.count <= MAX_PER_WINDOW;
 }
 
+function parseUserAgent(userAgent: string) {
+  const deviceType = /tablet|ipad|playbook|silk/i.test(userAgent)
+    ? 'Tablet'
+    : /mobile|iphone|android.*mobile|windows phone/i.test(userAgent)
+      ? 'Mobile'
+      : 'Desktop';
+
+  const browser = /edg\//i.test(userAgent)
+    ? 'Edge'
+    : /opr\//i.test(userAgent)
+      ? 'Opera'
+      : /chrome\//i.test(userAgent) && !/edg\//i.test(userAgent)
+        ? 'Chrome'
+        : /firefox\//i.test(userAgent)
+          ? 'Firefox'
+          : /safari\//i.test(userAgent) && !/chrome\//i.test(userAgent)
+            ? 'Safari'
+            : /googlebot|bingbot|duckduckbot/i.test(userAgent)
+              ? 'Bot'
+              : 'Other';
+
+  const operatingSystem = /windows/i.test(userAgent)
+    ? 'Windows'
+    : /android/i.test(userAgent)
+      ? 'Android'
+      : /iphone|ipad|ipod/i.test(userAgent)
+        ? 'iOS'
+        : /mac os x/i.test(userAgent)
+          ? 'macOS'
+          : /linux/i.test(userAgent)
+            ? 'Linux'
+            : 'Other';
+
+  return { deviceType, browser, operatingSystem };
+}
+
+function getClientIp(req: Request) {
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip')?.trim() ||
+    'unknown'
+  ).slice(0, 128);
+}
+
 export const contactRouter = createRouter({
   send: publicQuery
     .input(
@@ -43,22 +87,26 @@ export const contactRouter = createRouter({
         // Silently accept honeypot submissions
         return { success: true };
       }
-      const ip =
-        ctx.req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-        ctx.req.headers.get("x-real-ip") ||
-        "unknown";
+      const ip = getClientIp(ctx.req);
       if (!checkRate(ip)) {
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
           message: "Too many messages. Please try again later.",
         });
       }
+      const userAgent = (ctx.req.headers.get('user-agent') || 'unknown').slice(0, 500);
+      const { deviceType, browser, operatingSystem } = parseUserAgent(userAgent);
       const db = getDb();
       await db.insert(contactMessages).values({
         name: input.name,
         email: input.email,
         subject: input.subject || null,
         message: input.message,
+        ipAddress: ip,
+        userAgent,
+        deviceType,
+        browser,
+        operatingSystem,
       });
 
       let emailSent = false;
@@ -75,7 +123,7 @@ export const contactRouter = createRouter({
               to: [contactTo],
               reply_to: input.email,
               subject: input.subject || `Portfolio message from ${input.name}`,
-              html: `<h2>New portfolio contact</h2><p><strong>Name:</strong> ${escapeHtml(input.name)}</p><p><strong>Email:</strong> ${escapeHtml(input.email)}</p><p><strong>Message:</strong></p><p>${escapeHtml(input.message).replace(/\n/g, '<br />')}</p>`,
+              html: `<h2>New portfolio contact</h2><p><strong>Name:</strong> ${escapeHtml(input.name)}</p><p><strong>Email:</strong> ${escapeHtml(input.email)}</p><p><strong>Device:</strong> ${escapeHtml(deviceType)} · ${escapeHtml(browser)} · ${escapeHtml(operatingSystem)}</p><p><strong>IP:</strong> ${escapeHtml(ip)}</p><p><strong>Message:</strong></p><p>${escapeHtml(input.message).replace(/\n/g, '<br />')}</p>`,
             }),
             signal: AbortSignal.timeout(10000),
           });

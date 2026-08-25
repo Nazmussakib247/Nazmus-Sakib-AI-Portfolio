@@ -256,6 +256,12 @@ export const contactMessages = pgTable("contact_messages", {
   email: varchar("email", { length: 320 }).notNull(),
   subject: varchar("subject", { length: 500 }),
   message: text("message").notNull(),
+  // Server-derived abuse-monitoring metadata. These fields are returned only through admin procedures.
+  ipAddress: varchar("ip_address", { length: 128 }),
+  userAgent: varchar("user_agent", { length: 500 }),
+  deviceType: varchar("device_type", { length: 32 }),
+  browser: varchar("browser", { length: 80 }),
+  operatingSystem: varchar("operating_system", { length: 80 }),
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
