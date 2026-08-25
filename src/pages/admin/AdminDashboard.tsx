@@ -4,7 +4,7 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { trpc } from '@/providers/trpc';
 import {
   LayoutDashboard, FolderOpen, Award, BookOpen, Briefcase, FileBadge,
-  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2, ShieldAlert, ChevronLeft, ChevronRight,
+  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2, ShieldAlert, Search, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { ProjectsTab, SkillsTab, ExperiencesTab, CertificatesTab, AwardsTab, WritingsTab } from './tabs/ContentTabs';
 import { MessagesTab } from './tabs/MessagesTab';
@@ -210,11 +210,13 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
   const { data: messages } = trpc.contactAdmin.list.useQuery();
   const [analyticsDays, setAnalyticsDays] = useState(30);
   const [analyticsCountry, setAnalyticsCountry] = useState('');
+  const [analyticsSearch, setAnalyticsSearch] = useState('');
   const [analyticsPage, setAnalyticsPage] = useState(1);
   const { data: analytics } = trpc.analyticsAdmin.summary.useQuery({ days: analyticsDays });
   const { data: analyticsEvents } = trpc.analyticsAdmin.events.useQuery({
     days: analyticsDays,
     country: analyticsCountry || undefined,
+    search: analyticsSearch.trim() || undefined,
     page: analyticsPage,
     pageSize: 25,
   });
@@ -311,6 +313,12 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
                 <option value="">All countries</option>
                 {(analytics?.countries || []).map((country) => <option key={country.country} value={country.country}>{country.country === 'ZZ' ? 'Unknown' : country.country} ({country.visits})</option>)}
               </select>
+              <label htmlFor="analytics-search" className="sr-only">Search visitor events</label>
+              <div className="relative w-full sm:w-56">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" />
+                <input id="analytics-search" value={analyticsSearch} onChange={(event) => { setAnalyticsSearch(event.target.value); setAnalyticsPage(1); }} placeholder="Search IP, path, device…" className="w-full rounded-lg border border-white/10 bg-[#0a0d19] py-1.5 pl-8 pr-8 text-xs text-gray-300 outline-none placeholder:text-gray-600 focus:border-[#e8b923]" />
+                {analyticsSearch && <button type="button" aria-label="Clear visitor search" onClick={() => { setAnalyticsSearch(''); setAnalyticsPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">×</button>}
+              </div>
               <Globe2 className="h-5 w-5 text-[#e8b923]" />
             </div>
           </div>
@@ -341,7 +349,7 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
             </div>
             <div className="min-w-0">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <h4 className="text-xs uppercase tracking-[0.16em] text-gray-500">All visitor events{analyticsCountry ? ` · ${analyticsCountry === 'ZZ' ? 'Unknown' : analyticsCountry}` : ''}</h4>
+                <h4 className="text-xs uppercase tracking-[0.16em] text-gray-500">All visitor events{analyticsCountry ? ` · ${analyticsCountry === 'ZZ' ? 'Unknown' : analyticsCountry}` : ''}{analyticsSearch.trim() ? ` · Search: ${analyticsSearch.trim()}` : ''}</h4>
                 <span className="text-xs text-gray-600">{analyticsEvents?.total || 0} recorded</span>
               </div>
               <div className="max-h-[30rem] overflow-auto rounded-lg border border-white/5">

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, desc, eq, gte, lt, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, lt, or, sql } from "drizzle-orm";
 import { createRouter, publicQuery } from "../middleware";
 import { createAdminRouter, adminProcedure } from "./admin-middleware";
 import { getDb } from "../queries/connection";
@@ -115,15 +115,28 @@ export const analyticsAdminRouter = createAdminRouter({
     .input(z.object({
       days: z.number().int().min(1).max(365).default(30),
       country: z.string().trim().regex(/^[A-Z]{2}$/).optional(),
+      search: z.string().trim().max(160).optional(),
       page: z.number().int().min(1).max(10000).default(1),
       pageSize: z.number().int().min(10).max(100).default(25),
     }))
     .query(async ({ input }) => {
       const db = getDb();
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
-      const filters = input.country
-        ? and(gte(visitEvents.visitedAt, since), eq(visitEvents.country, input.country))
-        : gte(visitEvents.visitedAt, since);
+      const search = input.search?.trim();
+      const searchFilter = search
+        ? or(
+            ilike(visitEvents.ipAddress, `%${search}%`),
+            ilike(visitEvents.country, `%${search.toUpperCase()}%`),
+            ilike(visitEvents.path, `%${search}%`),
+            ilike(visitEvents.referrerHost, `%${search}%`),
+            ilike(visitEvents.userAgent, `%${search}%`),
+          )
+        : undefined;
+      const filters = and(
+        gte(visitEvents.visitedAt, since),
+        input.country ? eq(visitEvents.country, input.country) : undefined,
+        searchFilter,
+      );
       const offset = (input.page - 1) * input.pageSize;
       const [countRow] = await db.select({ total: sql<number>`count(*)` }).from(visitEvents).where(filters);
       const rows = await db.select({
