@@ -221,7 +221,7 @@ export default function Projects() {
                 <div className="flex h-full flex-col">
                   <button
                     type="button"
-                    className="block w-full flex-1 cursor-pointer text-left"
+                    className="block w-full flex-1 cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#e8b923]"
                     onClick={() => setSelected(project)}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter' || event.key === ' ') {
@@ -299,6 +299,10 @@ export default function Projects() {
           onClick={() => setSelected(null)}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="project-details-title"
+            onKeyDown={(event) => { if (event.key === 'Escape') setSelected(null); }}
             className="glass-strong project-details-panel max-h-[88vh] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-3xl"
             data-lenis-prevent="true"
             data-lenis-prevent-wheel="true"
@@ -339,14 +343,14 @@ export default function Projects() {
               <button
                 type="button"
                 onClick={() => setSelected(null)}
-                className="glass-strong absolute top-4 right-4 rounded-full p-2 text-white transition-colors hover:text-[#e8b923]"
+                className="glass-strong absolute top-4 right-4 rounded-full p-2 text-white transition-colors hover:text-[#e8b923] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923]"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
             <div className="p-7">
-              <h3 className="mb-3 text-2xl font-medium text-white">{selected.title}</h3>
+              <h3 id="project-details-title" className="mb-3 text-2xl font-medium text-white">{selected.title}</h3>
               <p className="mb-5 text-sm leading-relaxed text-gray-300">{selected.description}</p>
               <div className="mb-6 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border border-[#e8b923]/20 bg-[#e8b923]/[0.04] p-4"><p className="mb-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#e8b923]">Ownership</p><p className="text-xs leading-relaxed text-gray-400">{getOwnershipLabel(selected)}</p></div>

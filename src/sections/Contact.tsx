@@ -93,16 +93,21 @@ export default function Contact() {
                   {contactCopy.sentBlurb || ''}
                 </p>
                 <button
+                  type="button"
                   onClick={() => setSent(false)}
-                  className="glass rounded-full px-5 py-2 text-sm text-[#e8b923] transition-colors hover:border-[#e8b923]/40"
+                  className="glass rounded-full px-5 py-2 text-sm text-[#e8b923] transition-colors hover:border-[#e8b923]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05060f]"
                 >
                   {contactCopy.anotherLabel || ''}
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="glass space-y-4 rounded-3xl p-6 sm:p-8">
+              <form onSubmit={handleSubmit} className="glass space-y-4 rounded-3xl p-6 sm:p-8" aria-label="Contact form">
                 <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="sr-only" htmlFor="contact-name">Your name</label>
                   <input
+                    id="contact-name"
+                    name="name"
+                    autoComplete="name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder={contactCopy.namePlaceholder || ''}
@@ -110,7 +115,11 @@ export default function Contact() {
                     required
                     maxLength={255}
                   />
+                  <label className="sr-only" htmlFor="contact-email">Your email</label>
                   <input
+                    id="contact-email"
+                    name="email"
+                    autoComplete="email"
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -120,7 +129,11 @@ export default function Contact() {
                     maxLength={320}
                   />
                 </div>
+                <label className="sr-only" htmlFor="contact-subject">Subject</label>
                 <input
+                  id="contact-subject"
+                  name="subject"
+                  autoComplete="off"
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
                   placeholder={contactCopy.subjectPlaceholder || ''}
@@ -136,7 +149,10 @@ export default function Contact() {
                   className="absolute -left-[9999px] h-0 w-0 opacity-0"
                   aria-hidden="true"
                 />
+                <label className="sr-only" htmlFor="contact-message">Your message</label>
                 <textarea
+                  id="contact-message"
+                  name="message"
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   placeholder={contactCopy.messagePlaceholder || ''}
@@ -146,7 +162,7 @@ export default function Contact() {
                   maxLength={5000}
                 />
                 {error && (
-                  <p className="rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-2.5 text-sm text-red-400">
+                  <p role="alert" aria-live="polite" className="rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-2.5 text-sm text-red-400">
                     {error}
                   </p>
                 )}
@@ -154,7 +170,7 @@ export default function Contact() {
                   <button
                     type="submit"
                     disabled={sendMutation.isPending}
-                    className="glow-gold inline-flex items-center gap-2 rounded-full bg-[#e8b923] px-7 py-3.5 text-sm font-semibold text-[#05060f] transition-all hover:bg-[#f5cd45] disabled:opacity-60"
+                    className="glow-gold inline-flex min-h-11 items-center gap-2 rounded-full bg-[#e8b923] px-7 py-3.5 text-sm font-semibold text-[#05060f] transition-all hover:bg-[#f5cd45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05060f] disabled:opacity-60"
                   >
                     {sendMutation.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -176,7 +192,7 @@ export default function Contact() {
                 href={s.href!}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="glass card-hover group flex items-center gap-4 rounded-2xl p-5"
+                className="glass card-hover group flex min-h-11 items-center gap-4 rounded-2xl p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05060f]"
               >
                 <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5">
                   <s.icon className="h-5 w-5 text-gray-400 transition-colors group-hover:text-[#e8b923]" />
