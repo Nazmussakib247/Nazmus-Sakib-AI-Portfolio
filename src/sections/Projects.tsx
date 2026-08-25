@@ -168,6 +168,9 @@ export default function Projects() {
   useReveal(sectionRef, [dbProjects, filter]);
 
   const getThumb = (p: ProjectLike) => p.thumbnailUrl || undefined;
+  const getOwnershipLabel = (p: ProjectLike) => p.title.toLowerCase().includes('nexus')
+    ? 'Team Lead · RAG & AI Integration · Documentation · Deployment · Security'
+    : 'End-to-end ownership · Designed, built & deployed by Nazmus Sakib';
 
   return (
     <section
@@ -232,6 +235,9 @@ export default function Projects() {
                       <h3 className="mb-2 text-xl font-medium text-white transition-colors group-hover:text-[#e8b923]">
                         {project.title}
                       </h3>
+                      <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.12em] text-[#e8b923]/80">
+                        {getOwnershipLabel(project)}
+                      </p>
                       <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-gray-400">
                         {project.description}
                       </p>

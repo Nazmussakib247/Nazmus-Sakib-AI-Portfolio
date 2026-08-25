@@ -250,8 +250,11 @@ export default function Hero() {
             <span className="h-px w-10 bg-gradient-to-l from-transparent to-[#e8b923]/70" />
           </div>
 
-          <p data-hero className="mx-auto mb-8 max-w-xl text-sm leading-relaxed text-gray-400 sm:mb-10 sm:text-base">
+          <p data-hero className="mx-auto mb-4 max-w-xl text-sm leading-relaxed text-gray-400 sm:mb-5 sm:text-base">
             {get('heroSubtext')}
+          </p>
+          <p data-hero className="mx-auto mb-8 max-w-2xl font-mono text-[10px] uppercase tracking-[0.14em] text-[#e8b923]/85 sm:mb-10 sm:text-[11px] sm:tracking-[0.18em]">
+            Team Lead at Nexus Enterprise · RAG & AI Integration · Documentation · Deployment · Security
           </p>
 
           <div data-hero className="flex max-w-[340px] flex-wrap items-center justify-center gap-3 sm:max-w-none sm:gap-4">
