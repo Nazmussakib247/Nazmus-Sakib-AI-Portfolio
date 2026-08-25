@@ -183,8 +183,14 @@ export default function Hero() {
     if (!el) return;
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const items = el.querySelectorAll('[data-hero]');
-    if (prefersReduced) {
-      items.forEach((n) => ((n as HTMLElement).style.opacity = '1'));
+    const isTouchLayout = window.matchMedia('(pointer: coarse)').matches;
+    if (prefersReduced || isTouchLayout) {
+      items.forEach((n) => {
+        const element = n as HTMLElement;
+        element.style.opacity = '1';
+        element.style.transform = 'none';
+        element.style.filter = 'none';
+      });
       return;
     }
     // Keep the first viewport resilient: content should never remain hidden if
@@ -227,7 +233,10 @@ export default function Hero() {
       <div className="bg-grid absolute inset-0 z-0 opacity-60 [mask-image:radial-gradient(ellipse_60%_55%_at_50%_45%,#000_35%,transparent_80%)]" />
       <FloatingSkillLogos />
 
-      <div ref={contentRef} className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 pb-16 sm:pb-0">
+      <div
+        ref={contentRef}
+        className="relative z-10 mx-auto flex h-full w-full flex-col items-center justify-start px-4 pt-[clamp(5.25rem,14svh,8rem)] pb-4 lg:absolute lg:inset-0 lg:justify-center lg:pt-0 lg:pb-16"
+      >
         <div className="text-center">
           <div data-hero className="relative top-4 mb-6">
             <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.3em] text-[#e8b923]">
@@ -312,7 +321,7 @@ export default function Hero() {
           data-hero
           aria-label="Scroll to About section"
           onClick={() => scrollToId(scrollTarget)}
-                    className="group relative z-20 mt-6 flex min-w-[96px] -translate-y-5 flex-col items-center gap-2 rounded-2xl px-4 py-2 text-gray-500 transition-all duration-300 hover:-translate-y-6 hover:bg-white/5 hover:text-[#e8b923] sm:mt-5 sm:-translate-y-1 sm:hover:-translate-y-2"
+                    className="group relative z-20 mt-5 flex min-h-12 min-w-[96px] shrink-0 flex-col items-center gap-2 rounded-2xl px-4 py-2 text-gray-500 transition-all duration-300 hover:-translate-y-1 hover:bg-white/5 hover:text-[#e8b923] sm:mt-5 sm:-translate-y-1 sm:hover:-translate-y-2"
 
         >
           <span className="font-mono text-[10px] uppercase tracking-[0.35em]">{get('heroScrollLabel')}</span>

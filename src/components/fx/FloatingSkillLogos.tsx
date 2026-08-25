@@ -113,19 +113,21 @@ export default function FloatingSkillLogos() {
         })}
       </div>
 
-      {/* Mobile: keep every hardcoded logo visible in a compact, non-blocking logo dock. */}
-            <div className="absolute bottom-[8.5rem] left-1/2 grid w-[calc(100%-2rem)] max-w-[360px] -translate-x-1/2 grid-cols-7 gap-1.5 sm:bottom-[7.5rem] sm:w-[calc(100%-4rem)] sm:max-w-[560px] sm:grid-cols-8 lg:hidden">
+      {/* Mobile: keep every hardcoded logo visible in a compact dock below the Hero flow. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-[2] flex justify-center px-3 sm:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] lg:hidden">
+        <div className="grid w-full max-w-[23rem] grid-cols-7 gap-1 sm:max-w-[34rem] sm:grid-cols-8 sm:gap-1.5">
 
         {floatingCards.map((card, index) => (
           <div
             key={`mobile-${card.label}-${index}`}
-                        className="flex h-7 min-w-0 items-center justify-center rounded-lg border border-white/10 bg-[#0b0e1a]/70 px-1 shadow-[0_0_16px_rgba(124,92,255,0.08)] backdrop-blur-sm transition-colors duration-200 sm:h-8"
+            className="flex h-7 min-w-0 items-center justify-center rounded-lg border border-white/10 bg-[#0b0e1a]/70 px-1 shadow-[0_0_16px_rgba(124,92,255,0.08)] backdrop-blur-sm transition-colors duration-200 sm:h-8"
 
             title={card.label}
           >
             <SkillIcon card={card} mobile />
           </div>
         ))}
+        </div>
       </div>
     </div>
   );
