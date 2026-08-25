@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import Hero from '@/sections/Hero';
 import About from '@/sections/About';
 import Projects from '@/sections/Projects';
@@ -9,7 +9,7 @@ import Certificates from '@/sections/Certificates';
 import Blog from '@/sections/Blog';
 import CV from '@/sections/CV';
 import Contact from '@/sections/Contact';
-import Assistant from '@/sections/Assistant';
+const Assistant = lazy(() => import('@/sections/Assistant'));
 import SocialActivity from '@/sections/SocialActivity';
 import StatusBar from '@/sections/StatusBar';
 import Navigation from '@/sections/Navigation';
@@ -23,7 +23,7 @@ import { trpc } from '@/providers/trpc';
 
 export default function Home() {
   const location = useLocation();
-  const { get, isVisible } = useSettings();
+  const { isVisible } = useSettings();
   const trackVisit = trpc.analytics.track.useMutation();
   const isCaseStudyReturn = (location.state as { returnTo?: string } | null)?.returnTo === 'projects';
 
@@ -37,17 +37,6 @@ export default function Home() {
     }
   }, [location.pathname, trackVisit]);
 
-  // Admin-editable SEO meta
-  useEffect(() => {
-    document.title = get('seoTitle');
-    let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-    if (!meta) {
-      meta = document.createElement('meta');
-      meta.name = 'description';
-      document.head.appendChild(meta);
-    }
-    meta.content = get('seoDescription');
-  }, [get]);
 
   return (
     <SmoothScroll>
@@ -66,7 +55,7 @@ export default function Home() {
         {isVisible('certificates') && <Certificates />}
         {isVisible('blog') && <Blog />}
         <CV />
-        <Assistant />
+        <Suspense fallback={null}><Assistant /></Suspense>
         <SocialActivity />
         {isVisible('contact') && <Contact />}
         <StatusBar />
