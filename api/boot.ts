@@ -9,6 +9,7 @@ import { createOAuthCallbackHandler } from "./kimi/auth";
 import { Paths } from "@contracts/constants";
 import { serveUploadedFile } from "./lib/files";
 import { syncMediumWritings } from "./routers/writing";
+import { ensureVisitEventsTable } from "./routers/analytics";
 
 const app = new Hono<{ Bindings: HttpBindings }>();
 
@@ -48,6 +49,7 @@ if (env.isProduction) {
   });
 
   const runMediumSync = () => syncMediumWritings().then((result) => console.log(`[medium-sync] ${result.created} new, ${result.updated} updated`)).catch((error) => console.error('[medium-sync] failed', error));
+  void ensureVisitEventsTable();
   void runMediumSync();
   setInterval(runMediumSync, 1000 * 60 * 60 * 6);
 }

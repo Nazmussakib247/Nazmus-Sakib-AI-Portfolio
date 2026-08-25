@@ -275,6 +275,17 @@ export const siteSettings = pgTable("site_settings", {
 
 export type SiteSetting = typeof siteSettings.$inferSelect;
 
+// Privacy-safe visit events. No raw IP address or persistent visitor identity is stored.
+export const visitEvents = pgTable("visit_events", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+  country: varchar("country", { length: 2 }).default("ZZ").notNull(),
+  path: varchar("path", { length: 160 }).default("/").notNull(),
+  referrerHost: varchar("referrer_host", { length: 255 }),
+  visitedAt: timestamp("visited_at").defaultNow().notNull(),
+});
+
+export type VisitEvent = typeof visitEvents.$inferSelect;
+
 // Uploaded files (images/PDFs) stored in DB as base64
 export const uploads = pgTable("uploads", {
   id: integer("id").generatedByDefaultAsIdentity().primaryKey(),

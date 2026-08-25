@@ -4,7 +4,7 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { trpc } from '@/providers/trpc';
 import {
   LayoutDashboard, FolderOpen, Award, BookOpen, Briefcase, FileBadge,
-  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink,
+  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2,
 } from 'lucide-react';
 import { ProjectsTab, SkillsTab, ExperiencesTab, CertificatesTab, AwardsTab, WritingsTab } from './tabs/ContentTabs';
 import { MessagesTab } from './tabs/MessagesTab';
@@ -208,6 +208,7 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
   const { data: writings } = trpc.writing.listAll.useQuery();
   const { data: skills } = trpc.skill.list.useQuery();
   const { data: messages } = trpc.contactAdmin.list.useQuery();
+  const { data: analytics } = trpc.analyticsAdmin.summary.useQuery();
 
   const stats: { label: string; value: number; icon: React.ElementType; tab: TabType; highlight?: boolean }[] = [
     { label: 'Messages', value: messages?.length || 0, icon: Inbox, tab: 'messages', highlight: unreadCount > 0 },
@@ -278,6 +279,21 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
             <li>• <span className="text-gray-300">Site Settings</span> controls the hero text, section visibility, SEO, and footer.</li>
             <li>• Contact form submissions land in <span className="text-gray-300">Messages</span> with unread badges.</li>
           </ul>
+        </div>
+
+        <div className="rounded-xl border border-white/5 bg-[#111527] p-6 lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-medium text-white">Visitor overview</h3>
+              <p className="mt-1 text-xs text-gray-500">Aggregated visits from the last 30 days; raw IP addresses are never stored.</p>
+            </div>
+            <Globe2 className="h-5 w-5 text-[#e8b923]" />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-2xl text-white">{analytics?.totalVisits || 0}</div><div className="text-xs text-gray-500">Total visits</div></div>
+            <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-sm text-gray-300">{analytics?.countries.slice(0, 4).map((country) => `${country.country === 'ZZ' ? 'Unknown' : country.country} (${country.visits})`).join(', ') || 'No country data yet'}</div><div className="mt-1 text-xs text-gray-500">Top countries</div></div>
+            <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-sm text-gray-300">{analytics?.topPaths.slice(0, 3).map((path) => `${path.path} (${path.visits})`).join(', ') || 'No path data yet'}</div><div className="mt-1 text-xs text-gray-500">Top paths</div></div>
+          </div>
         </div>
       </div>
     </div>

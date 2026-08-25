@@ -13,6 +13,7 @@ import { settingsRouter, settingsAdminRouter } from "./routers/settings";
 import { uploadAdminRouter } from "./routers/upload";
 import { assistantRouter } from "./routers/assistant";
 import { socialRouter } from "./routers/social";
+import { analyticsRouter, analyticsAdminRouter } from "./routers/analytics";
 
 export const appRouter = createRouter({
   ping: publicQuery.query(() => ({ ok: true, ts: Date.now() })),
@@ -29,6 +30,7 @@ export const appRouter = createRouter({
   settings: settingsRouter,
   assistant: assistantRouter,
   social: socialRouter,
+  analytics: analyticsRouter,
   // Admin routers under admin prefix
   profileAdmin: profileAdminRouter,
   projectAdmin: projectAdminRouter,
@@ -40,6 +42,7 @@ export const appRouter = createRouter({
   contactAdmin: contactAdminRouter,
   settingsAdmin: settingsAdminRouter,
   uploadAdmin: uploadAdminRouter,
+  analyticsAdmin: analyticsAdminRouter,
 });
 
 export type AppRouter = typeof appRouter;
