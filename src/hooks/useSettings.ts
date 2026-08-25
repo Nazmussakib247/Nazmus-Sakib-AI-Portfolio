@@ -22,6 +22,10 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   seoTitle: 'Nazmus Sakib — ML Engineer · AI Engineer · AI Product Engineer',
   seoDescription:
     'Portfolio of Nazmus Sakib, an ML Engineer and AI Product Engineer building practical NLP, LLM, retrieval, automation, and full-stack AI systems.',
+  canonicalSiteUrl: 'https://nazmussakib.tech/',
+  socialPreviewImageUrl: '/images/hero-portrait.jpg',
+  socialPreviewImageAlt: 'Nazmus Sakib — ML Engineer and AI product builder',
+  faviconUrl: '/images/profile-avatar.jpg',
   sectionVisibility:
     '{"about":true,"projects":true,"experience":true,"skills":true,"awards":true,"certificates":true,"blog":true,"contact":true}',
   bottomBarEnabled: 'true',
