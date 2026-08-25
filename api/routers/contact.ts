@@ -117,32 +117,35 @@ export const contactRouter = createRouter({
         }
       }
 
+      let savedMessageId: number;
       try {
-        await db.insert(contactMessages).values({
+        // Always write the legacy-safe fields first. This keeps contact delivery
+        // working while metadata migrations are rolling out independently.
+        const [savedMessage] = await db.insert(contactMessages).values({
           name: input.name,
           email: input.email,
           subject: input.subject || null,
           message: input.message,
-          ipAddress,
-          userAgent,
-          deviceType: parsedAgent.deviceType,
-          browser: parsedAgent.browser,
-          operatingSystem: parsedAgent.operatingSystem,
-        });
-      } catch (metadataPersistenceError) {
-        // Keep the public contact flow working during a rolling deployment where
-        // the base contact table exists but metadata columns are not migrated yet.
-        console.error('[contact] metadata persistence unavailable; retrying base message insert:', metadataPersistenceError);
+        }).returning({ id: contactMessages.id });
+        savedMessageId = savedMessage.id;
+      } catch (error) {
+        console.error('[contact] message persistence failed:', error);
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Unable to send your message right now. Please try again later." });
+      }
+
+      // Enrich the saved message when the optional metadata columns exist. A
+      // missing migration must never roll back or hide the original message.
+      if (savedMessageId && (ipAddress || userAgent || parsedAgent.deviceType || parsedAgent.browser || parsedAgent.operatingSystem)) {
         try {
-          await db.insert(contactMessages).values({
-            name: input.name,
-            email: input.email,
-            subject: input.subject || null,
-            message: input.message,
-          });
-        } catch (error) {
-          console.error('[contact] message persistence failed:', error);
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Unable to send your message right now. Please try again later." });
+          await db.update(contactMessages).set({
+            ipAddress,
+            userAgent,
+            deviceType: parsedAgent.deviceType,
+            browser: parsedAgent.browser,
+            operatingSystem: parsedAgent.operatingSystem,
+          }).where(eq(contactMessages.id, savedMessageId));
+        } catch (metadataPersistenceError) {
+          console.error('[contact] optional metadata unavailable:', metadataPersistenceError);
         }
       }
 
