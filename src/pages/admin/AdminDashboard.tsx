@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { trpc } from '@/providers/trpc';
 import {
   LayoutDashboard, FolderOpen, Award, BookOpen, Briefcase, FileBadge,
-  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2, ShieldAlert, Search, ChevronLeft, ChevronRight,
+  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2, ShieldAlert, Search, Trash2, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { ProjectsTab, SkillsTab, ExperiencesTab, CertificatesTab, AwardsTab, WritingsTab } from './tabs/ContentTabs';
 import { MessagesTab } from './tabs/MessagesTab';
@@ -211,15 +211,45 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
   const [analyticsDays, setAnalyticsDays] = useState(30);
   const [analyticsCountry, setAnalyticsCountry] = useState('');
   const [analyticsSearch, setAnalyticsSearch] = useState('');
+  const [analyticsTimePreset, setAnalyticsTimePreset] = useState('default');
+  const [analyticsStart, setAnalyticsStart] = useState('');
+  const [analyticsEnd, setAnalyticsEnd] = useState('');
   const [analyticsPage, setAnalyticsPage] = useState(1);
-  const { data: analytics } = trpc.analyticsAdmin.summary.useQuery({ days: analyticsDays });
-  const { data: analyticsEvents } = trpc.analyticsAdmin.events.useQuery({
+  const analyticsRange = useMemo(() => {
+    if (analyticsTimePreset === 'custom') {
+      return {
+        startDate: analyticsStart ? new Date(analyticsStart).toISOString() : undefined,
+        endDate: analyticsEnd ? new Date(analyticsEnd).toISOString() : undefined,
+      };
+    }
+    if (analyticsTimePreset === 'default') return { startDate: undefined, endDate: undefined };
+    const now = Date.now();
+    const start = analyticsTimePreset === 'today'
+      ? new Date(new Date().setHours(0, 0, 0, 0)).toISOString()
+      : new Date(now - Number(analyticsTimePreset) * 60 * 60 * 1000).toISOString();
+    return { startDate: start, endDate: undefined };
+  }, [analyticsTimePreset, analyticsStart, analyticsEnd]);
+  const analyticsFilter = {
     days: analyticsDays,
     country: analyticsCountry || undefined,
     search: analyticsSearch.trim() || undefined,
+    ...analyticsRange,
+  };
+  const { data: analytics } = trpc.analyticsAdmin.summary.useQuery({ days: analyticsDays });
+  const { data: analyticsEvents, refetch: refetchAnalyticsEvents } = trpc.analyticsAdmin.events.useQuery({
+    ...analyticsFilter,
     page: analyticsPage,
     pageSize: 25,
   });
+  const deleteFiltered = trpc.analyticsAdmin.deleteFiltered.useMutation();
+  const handleDeleteFiltered = async () => {
+    const total = analyticsEvents?.total || 0;
+    if (!total || !window.confirm(`Delete ${total} visitor event${total === 1 ? '' : 's'} matching the current filters? This cannot be undone.`)) return;
+    const result = await deleteFiltered.mutateAsync(analyticsFilter);
+    setAnalyticsPage(1);
+    await refetchAnalyticsEvents();
+    window.alert(`${result.deletedCount} visitor event${result.deletedCount === 1 ? '' : 's'} deleted.`);
+  };
 
   const stats: { label: string; value: number; icon: React.ElementType; tab: TabType; highlight?: boolean }[] = [
     { label: 'Messages', value: messages?.length || 0, icon: Inbox, tab: 'messages', highlight: unreadCount > 0 },
@@ -308,6 +338,21 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
                 <option value="180">6 months</option>
                 <option value="365">1 year</option>
               </select>
+              <label htmlFor="analytics-time-preset" className="sr-only">Visitor time filter</label>
+              <select id="analytics-time-preset" value={analyticsTimePreset} onChange={(event) => { setAnalyticsTimePreset(event.target.value); setAnalyticsPage(1); }} className="rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]">
+                <option value="default">Range: {analyticsDays}d</option>
+                <option value="1">Last hour</option>
+                <option value="6">Last 6 hours</option>
+                <option value="24">Last 24 hours</option>
+                <option value="today">Today</option>
+                <option value="custom">Custom time</option>
+              </select>
+              {analyticsTimePreset === 'custom' && <>
+                <label htmlFor="analytics-start" className="sr-only">Custom start date and time</label>
+                <input id="analytics-start" type="datetime-local" value={analyticsStart} onChange={(event) => { setAnalyticsStart(event.target.value); setAnalyticsPage(1); }} className="rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]" />
+                <label htmlFor="analytics-end" className="sr-only">Custom end date and time</label>
+                <input id="analytics-end" type="datetime-local" value={analyticsEnd} onChange={(event) => { setAnalyticsEnd(event.target.value); setAnalyticsPage(1); }} className="rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]" />
+              </>}
               <label htmlFor="analytics-country" className="sr-only">Filter visitor events by country</label>
               <select id="analytics-country" value={analyticsCountry} onChange={(event) => { setAnalyticsCountry(event.target.value); setAnalyticsPage(1); }} className="max-w-36 rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]">
                 <option value="">All countries</option>
@@ -319,6 +364,7 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
                 <input id="analytics-search" value={analyticsSearch} onChange={(event) => { setAnalyticsSearch(event.target.value); setAnalyticsPage(1); }} placeholder="Search IP, path, device…" className="w-full rounded-lg border border-white/10 bg-[#0a0d19] py-1.5 pl-8 pr-8 text-xs text-gray-300 outline-none placeholder:text-gray-600 focus:border-[#e8b923]" />
                 {analyticsSearch && <button type="button" aria-label="Clear visitor search" onClick={() => { setAnalyticsSearch(''); setAnalyticsPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">×</button>}
               </div>
+              <button type="button" onClick={handleDeleteFiltered} disabled={!analyticsEvents?.total || deleteFiltered.isPending} className="inline-flex items-center gap-1.5 rounded-lg border border-red-400/20 px-2.5 py-1.5 text-xs text-red-300 transition-colors hover:border-red-400/50 hover:bg-red-400/10 disabled:cursor-not-allowed disabled:opacity-40" title="Delete events matching the active filters"><Trash2 className="h-3.5 w-3.5" />{deleteFiltered.isPending ? 'Deleting…' : 'Delete filtered'}</button>
               <Globe2 className="h-5 w-5 text-[#e8b923]" />
             </div>
           </div>

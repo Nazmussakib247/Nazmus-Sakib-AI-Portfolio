@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { and, desc, eq, gte, ilike, lt, or, sql } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+import { and, desc, eq, gte, ilike, lt, lte, or, sql } from "drizzle-orm";
 import { createRouter, publicQuery } from "../middleware";
 import { createAdminRouter, adminProcedure } from "./admin-middleware";
 import { getDb } from "../queries/connection";
@@ -10,6 +11,40 @@ const EVENT_WINDOW_MS = 5 * 60 * 1000;
 const EVENT_THROTTLE_MS = 15 * 60 * 1000;
 const SUSPICIOUS_REQUEST_LIMIT = 30;
 const RETENTION_DAYS = 365;
+
+const visitorFilterSchema = z.object({
+  days: z.number().int().min(1).max(365).default(30),
+  country: z.string().trim().regex(/^[A-Z]{2}$/).optional(),
+  search: z.string().trim().max(160).optional(),
+  startDate: z.string().datetime({ offset: true }).optional(),
+  endDate: z.string().datetime({ offset: true }).optional(),
+});
+
+type VisitorFilterInput = z.infer<typeof visitorFilterSchema>;
+
+function buildVisitorFilters(input: VisitorFilterInput) {
+  const start = input.startDate ? new Date(input.startDate) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+  const end = input.endDate ? new Date(input.endDate) : undefined;
+  if (end && start > end) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "The visitor date range is invalid." });
+  }
+  const search = input.search?.trim();
+  const searchFilter = search
+    ? or(
+        ilike(visitEvents.ipAddress, `%${search}%`),
+        ilike(visitEvents.country, `%${search.toUpperCase()}%`),
+        ilike(visitEvents.path, `%${search}%`),
+        ilike(visitEvents.referrerHost, `%${search}%`),
+        ilike(visitEvents.userAgent, `%${search}%`),
+      )
+    : undefined;
+  return and(
+    gte(visitEvents.visitedAt, start),
+    end ? lte(visitEvents.visitedAt, end) : undefined,
+    input.country ? eq(visitEvents.country, input.country) : undefined,
+    searchFilter,
+  );
+}
 
 function normalizeCountry(value: string | null) {
   const country = value?.trim().toUpperCase() || "ZZ";
@@ -112,31 +147,13 @@ export const analyticsAdminRouter = createAdminRouter({
   }),
 
   events: adminProcedure
-    .input(z.object({
-      days: z.number().int().min(1).max(365).default(30),
-      country: z.string().trim().regex(/^[A-Z]{2}$/).optional(),
-      search: z.string().trim().max(160).optional(),
+    .input(visitorFilterSchema.extend({
       page: z.number().int().min(1).max(10000).default(1),
       pageSize: z.number().int().min(10).max(100).default(25),
     }))
     .query(async ({ input }) => {
       const db = getDb();
-      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
-      const search = input.search?.trim();
-      const searchFilter = search
-        ? or(
-            ilike(visitEvents.ipAddress, `%${search}%`),
-            ilike(visitEvents.country, `%${search.toUpperCase()}%`),
-            ilike(visitEvents.path, `%${search}%`),
-            ilike(visitEvents.referrerHost, `%${search}%`),
-            ilike(visitEvents.userAgent, `%${search}%`),
-          )
-        : undefined;
-      const filters = and(
-        gte(visitEvents.visitedAt, since),
-        input.country ? eq(visitEvents.country, input.country) : undefined,
-        searchFilter,
-      );
+      const filters = buildVisitorFilters(input);
       const offset = (input.page - 1) * input.pageSize;
       const [countRow] = await db.select({ total: sql<number>`count(*)` }).from(visitEvents).where(filters);
       const rows = await db.select({
@@ -157,5 +174,14 @@ export const analyticsAdminRouter = createAdminRouter({
         totalPages: Math.max(1, Math.ceil(total / input.pageSize)),
         events: rows,
       };
+    }),
+
+  deleteFiltered: adminProcedure
+    .input(visitorFilterSchema)
+    .mutation(async ({ input }) => {
+      const db = getDb();
+      const filters = buildVisitorFilters(input);
+      const deleted = await db.delete(visitEvents).where(filters).returning({ id: visitEvents.id });
+      return { deletedCount: deleted.length };
     }),
 });
