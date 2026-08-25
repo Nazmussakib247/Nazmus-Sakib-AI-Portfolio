@@ -1,11 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
-import { BookOpen, Download, Eye, FileText, Github, Linkedin, X } from 'lucide-react';
+import { BookOpen, Download, Eye, FileText, Github, Linkedin, Link2, X } from 'lucide-react';
 import { trpc } from '@/providers/trpc';
 import { useReveal } from '@/components/fx/useReveal';
 import SectionHeading from '@/components/fx/SectionHeading';
 import { useSettings } from '@/hooks/useSettings';
 
 export const CV_PREVIEW_EVENT = 'portfolio:open-cv-preview';
+
+const EXTRA_PLATFORM_OPTIONS = [
+  { key: 'hackerrank', label: 'HackerRank', mark: 'HR' },
+  { key: 'kaggle', label: 'Kaggle', mark: 'K' },
+  { key: 'leetcode', label: 'LeetCode', mark: 'LC' },
+  { key: 'codeforces', label: 'Codeforces', mark: 'CF' },
+  { key: 'huggingface', label: 'Hugging Face', mark: 'HF' },
+  { key: 'gitlab', label: 'GitLab', mark: 'GL' },
+  { key: 'stackoverflow', label: 'Stack Overflow', mark: 'SO' },
+  { key: 'devto', label: 'DEV Community', mark: 'DEV' },
+  { key: 'behance', label: 'Behance', mark: 'BE' },
+  { key: 'dribbble', label: 'Dribbble', mark: 'DB' },
+] as const;
 
 export default function CV() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -108,10 +121,15 @@ export default function CV() {
               </div>
               <div className="glass card-hover rounded-2xl p-5">
                 <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.25em] text-[#e8b923]">{cvCopy.connectLabel || ''}</p>
-                <div className="flex items-center gap-3 text-gray-400">
-                  {profile?.githubUrl && <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" aria-label={cvCopy.githubLabel || ''} className="transition-colors hover:text-[#e8b923]"><Github className="h-4 w-4" /></a>}
-                  {profile?.linkedinUrl && <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" aria-label={cvCopy.linkedinLabel || ''} className="transition-colors hover:text-[#e8b923]"><Linkedin className="h-4 w-4" /></a>}
-                  {profile?.mediumUrl && <a href={profile.mediumUrl} target="_blank" rel="noopener noreferrer" aria-label={cvCopy.mediumLabel || ''} className="transition-colors hover:text-[#e8b923]"><BookOpen className="h-4 w-4" /></a>}
+                <div className="flex flex-wrap items-center gap-2 text-gray-400">
+                  {profile?.githubUrl && <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" aria-label={cvCopy.githubLabel || 'GitHub'} title={cvCopy.githubLabel || 'GitHub'} className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 transition-colors hover:border-[#e8b923]/50 hover:text-[#e8b923]"><Github className="h-4 w-4" /></a>}
+                  {profile?.linkedinUrl && <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" aria-label={cvCopy.linkedinLabel || 'LinkedIn'} title={cvCopy.linkedinLabel || 'LinkedIn'} className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 transition-colors hover:border-[#e8b923]/50 hover:text-[#e8b923]"><Linkedin className="h-4 w-4" /></a>}
+                  {profile?.mediumUrl && <a href={profile.mediumUrl} target="_blank" rel="noopener noreferrer" aria-label={cvCopy.mediumLabel || 'Medium'} title={cvCopy.mediumLabel || 'Medium'} className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 transition-colors hover:border-[#e8b923]/50 hover:text-[#e8b923]"><BookOpen className="h-4 w-4" /></a>}
+                  {EXTRA_PLATFORM_OPTIONS.map((platform) => {
+                    const url = profile?.platformLinks?.[platform.key];
+                    if (!url) return null;
+                    return <a key={platform.key} href={url} target="_blank" rel="noopener noreferrer" aria-label={platform.label} title={platform.label} className="inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-full border border-white/10 px-2 font-mono text-[9px] font-semibold tracking-tight transition-colors hover:border-[#e8b923]/50 hover:text-[#e8b923]"><Link2 className="h-3 w-3" /><span>{platform.mark}</span></a>;
+                  })}
                 </div>
               </div>
             </div>

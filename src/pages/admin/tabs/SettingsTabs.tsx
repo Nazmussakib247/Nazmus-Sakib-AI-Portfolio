@@ -10,6 +10,19 @@ import { ImageUploadField } from '../ImageUpload';
 
 /* ============ Profile ============ */
 
+const PLATFORM_OPTIONS = [
+  { key: 'hackerrank', label: 'HackerRank', placeholder: 'https://www.hackerrank.com/your-handle' },
+  { key: 'kaggle', label: 'Kaggle', placeholder: 'https://www.kaggle.com/your-handle' },
+  { key: 'leetcode', label: 'LeetCode', placeholder: 'https://leetcode.com/u/your-handle' },
+  { key: 'codeforces', label: 'Codeforces', placeholder: 'https://codeforces.com/profile/your-handle' },
+  { key: 'huggingface', label: 'Hugging Face', placeholder: 'https://huggingface.co/your-handle' },
+  { key: 'gitlab', label: 'GitLab', placeholder: 'https://gitlab.com/your-handle' },
+  { key: 'stackoverflow', label: 'Stack Overflow', placeholder: 'https://stackoverflow.com/users/your-id' },
+  { key: 'devto', label: 'DEV Community', placeholder: 'https://dev.to/your-handle' },
+  { key: 'behance', label: 'Behance', placeholder: 'https://www.behance.net/your-handle' },
+  { key: 'dribbble', label: 'Dribbble', placeholder: 'https://dribbble.com/your-handle' },
+] as const;
+
 export function ProfileTab() {
   const { data: profile, refetch } = trpc.profile.get.useQuery();
   const update = trpc.profileAdmin.update.useMutation({
@@ -19,6 +32,7 @@ export function ProfileTab() {
 
   const [form, setForm] = useState({
     name: '', title: '', bio: '', email: '', githubUrl: '', linkedinUrl: '', mediumUrl: '',
+    platformLinks: Object.fromEntries(PLATFORM_OPTIONS.map(({ key }) => [key, ''])) as Record<string, string>,
     location: '', age: 0, university: '', department: '', semester: '', avatarUrl: '', cvUrl: '',
   });
 
@@ -27,7 +41,9 @@ export function ProfileTab() {
       setForm({
         name: profile.name || '', title: profile.title || '', bio: profile.bio || '',
         email: profile.email || '', githubUrl: profile.githubUrl || '', linkedinUrl: profile.linkedinUrl || '',
-        mediumUrl: profile.mediumUrl || '', location: profile.location || '', age: profile.age || 0,
+        mediumUrl: profile.mediumUrl || '',
+        platformLinks: Object.fromEntries(PLATFORM_OPTIONS.map(({ key }) => [key, profile.platformLinks?.[key] || ''])) as Record<string, string>,
+        location: profile.location || '', age: profile.age || 0,
         university: profile.university || '', department: profile.department || '', semester: profile.semester || '',
         avatarUrl: profile.avatarUrl || '', cvUrl: profile.cvUrl || '',
       });
@@ -64,10 +80,29 @@ export function ProfileTab() {
         </div>
         <Field label="Semester"><input value={form.semester} onChange={(e) => setForm({ ...form, semester: e.target.value })} className={inputCls} /></Field>
         <ImageUploadField label="Profile photo" value={form.avatarUrl} onChange={(url) => setForm({ ...form, avatarUrl: url })} />
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Field label="GitHub"><input value={form.githubUrl} onChange={(e) => setForm({ ...form, githubUrl: e.target.value })} className={inputCls} /></Field>
           <Field label="LinkedIn"><input value={form.linkedinUrl} onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })} className={inputCls} /></Field>
           <Field label="Medium"><input value={form.mediumUrl} onChange={(e) => setForm({ ...form, mediumUrl: e.target.value })} className={inputCls} /></Field>
+        </div>
+        <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+          <div>
+            <p className="text-sm font-medium text-white">More professional platforms</p>
+            <p className="mt-1 text-xs leading-relaxed text-gray-500">Add a valid profile URL to publish that platform in the public Connect section. Leave it empty to keep it hidden.</p>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {PLATFORM_OPTIONS.map((platform) => (
+              <Field key={platform.key} label={platform.label}>
+                <input
+                  type="url"
+                  value={form.platformLinks[platform.key] || ''}
+                  onChange={(e) => setForm({ ...form, platformLinks: { ...form.platformLinks, [platform.key]: e.target.value } })}
+                  className={inputCls}
+                  placeholder={platform.placeholder}
+                />
+              </Field>
+            ))}
+          </div>
         </div>
         <ImageUploadField label="CV / Resume (PDF)" value={form.cvUrl} onChange={(url) => setForm({ ...form, cvUrl: url })} accept="application/pdf" />
         <Field label="CV PDF URL (advanced)"><input value={form.cvUrl} onChange={(e) => setForm({ ...form, cvUrl: e.target.value })} className={inputCls} placeholder="/api/files/123" /></Field>

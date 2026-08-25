@@ -45,6 +45,7 @@ export const profiles = pgTable("profiles", {
   githubUrl: text("github_url"),
   linkedinUrl: text("linkedin_url"),
   mediumUrl: text("medium_url"),
+  platformLinks: jsonb("platform_links").$type<Record<string, string>>(),
   location: varchar("location", { length: 255 }),
   age: integer("age"),
   university: varchar("university", { length: 255 }),

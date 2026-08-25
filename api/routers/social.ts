@@ -1,6 +1,7 @@
 import { createRouter, publicQuery } from '../middleware';
 import { getDb } from '../queries/connection';
 import { profiles } from '@db/schema';
+import { ensureProfilePlatformLinksColumn } from '../lib/profile';
 
 type SocialCache = { expiresAt: number; value: SocialActivity };
 type SocialActivity = {
@@ -94,6 +95,7 @@ export const socialRouter = createRouter({
   activity: publicQuery.query(async () => {
     if (cache && cache.expiresAt > Date.now()) return cache.value;
     const db = getDb();
+    await ensureProfilePlatformLinksColumn(db);
     const [profile] = await db.select().from(profiles).limit(1);
     const githubUrl = profile?.githubUrl || '';
     const mediumUrl = profile?.mediumUrl || '';

@@ -4,6 +4,7 @@ import { createRouter, publicQuery } from '../middleware';
 import { getDb } from '../queries/connection';
 import { profiles, projects, experiences, awards, certificates, writings, skills, siteSettings } from '@db/schema';
 import { desc, eq } from 'drizzle-orm';
+import { ensureProfilePlatformLinksColumn } from '../lib/profile';
 
 const rateMap = new Map<string, { count: number; resetAt: number }>();
 const WINDOW_MS = 10 * 60 * 1000;
@@ -42,6 +43,7 @@ function buildRetrievalPlan(question: string): RetrievalPlan {
 
 async function retrievePortfolioContext(plan: RetrievalPlan) {
   const db = getDb();
+  await ensureProfilePlatformLinksColumn(db);
   const selected = new Set(plan.collections);
   const [profileRows, projectRows, experienceRows, awardRows, certificateRows, writingRows, skillRows] = await Promise.all([
     selected.has('profile') ? db.select().from(profiles) : Promise.resolve([]),
