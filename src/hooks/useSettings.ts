@@ -16,7 +16,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   heroScrollTarget: 'about',
   availableForWork: 'true',
   availabilityText: 'Open to opportunities',
-  footerText: 'Designed and developed by Nazmus Sakib — ML Engineer · AI Engineer · AI Product Engineer.',
+  footerText: 'Building practical AI systems, retrieval workflows, and intelligent automation.',
   bloggerUrl: 'https://nazmuss247.blogspot.com/',
   xUrl: 'https://x.com/Nazmussakib0247',
   seoTitle: 'Nazmus Sakib — ML Engineer · AI Engineer · AI Product Engineer',
