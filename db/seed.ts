@@ -20,7 +20,7 @@ async function seed() {
   if (existingProfile.length === 0) {
     await db.insert(profiles).values({
       name: "Nazmus Sakib",
-      title: "ML Engineer \u00b7 Full Stack Developer \u00b7 Automation Architect",
+      title: "AI Engineer · RAG & LLM Systems · Intelligent Automation",
       bio: "I'm Nazmus Sakib, a 24-year-old Computer Science & Engineering student in my final semester at Northern University of Business & Technology, Khulna. From running a gaming subscription business during COVID to building ML systems and business automation platforms \u2014 I thrive at the intersection of software engineering and intelligent automation. Currently interning as a Machine Learning Engineer at Flyrank AI (Chicago) and on the MERN stack at Appstic.",
       email: "nazmus.sakib@example.com",
       githubUrl: "https://github.com/Nazmussakib247",

@@ -29,8 +29,8 @@ type SeoData = {
 
 const fallbackProfileImage = "/images/profile-avatar.jpg";
 const fallbackSocialImage = "/images/hero-portrait.jpg";
-const fallbackTitle = "Nazmus Sakib — ML Engineer · AI Engineer · AI Product Engineer";
-const fallbackDescription = "Portfolio of Nazmus Sakib, an ML Engineer and AI product builder working across NLP, LLMs, retrieval, full-stack systems, and intelligent automation.";
+const fallbackTitle = "Nazmus Sakib — AI Engineer | RAG, LLM & Automation";
+const fallbackDescription = "Portfolio of Nazmus Sakib, an AI Engineer specializing in RAG, LLM systems, NLP, intelligent automation, and full-stack AI products.";
 
 function escapeHtmlAttribute(value: string) {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -90,7 +90,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
       profileImageUrl,
       profile: {
         name: profile?.name || "Nazmus Sakib",
-        title: profile?.title || "ML Engineer",
+        title: profile?.title || "AI Engineer",
         bio: profile?.bio || fallbackDescription,
         githubUrl: profile?.githubUrl || null,
         linkedinUrl: profile?.linkedinUrl || null,
@@ -107,7 +107,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
       socialImageAlt: defaults.socialPreviewImageAlt,
       faviconUrl: getAbsoluteUrl(c, defaults.faviconUrl, fallbackProfileImage),
       profileImageUrl: getAbsoluteUrl(c, fallbackProfileImage, fallbackProfileImage),
-      profile: { name: "Nazmus Sakib", title: "ML Engineer", bio: fallbackDescription, githubUrl: null, linkedinUrl: null, mediumUrl: null },
+      profile: { name: "Nazmus Sakib", title: "AI Engineer", bio: fallbackDescription, githubUrl: null, linkedinUrl: null, mediumUrl: null },
     };
   }
 }

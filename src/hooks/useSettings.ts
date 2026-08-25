@@ -2,7 +2,7 @@ import { trpc } from '@/providers/trpc';
 
 
 export const DEFAULT_SETTINGS: Record<string, string> = {
-  heroBadge: 'AI ENGINEER · RAG · AUTOMATION',
+  heroBadge: 'AI ENGINEER · RAG · LLM SYSTEMS',
   heroHeadline: 'NAZMUS SAKIB',
   heroTagline: 'RAG & LLM Systems,AI Product Engineering,Intelligent Automation',
   heroSubtext:
@@ -19,9 +19,9 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   footerText: 'Building practical AI systems, retrieval workflows, and intelligent automation.',
   bloggerUrl: 'https://nazmuss247.blogspot.com/',
   xUrl: 'https://x.com/Nazmussakib0247',
-  seoTitle: 'Nazmus Sakib — ML Engineer · AI Engineer · AI Product Engineer',
+  seoTitle: 'Nazmus Sakib — AI Engineer | RAG, LLM & Automation',
   seoDescription:
-    'Portfolio of Nazmus Sakib, an ML Engineer and AI Product Engineer building practical NLP, LLM, retrieval, automation, and full-stack AI systems.',
+    'Portfolio of Nazmus Sakib, an AI Engineer specializing in RAG, LLM systems, NLP, intelligent automation, and full-stack AI products.',
   canonicalSiteUrl: 'https://nazmussakib.tech/',
   socialPreviewImageUrl: '/images/hero-portrait.jpg',
   socialPreviewImageAlt: 'Nazmus Sakib — ML Engineer and AI product builder',
