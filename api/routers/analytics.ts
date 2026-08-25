@@ -89,7 +89,7 @@ export const analyticsAdminRouter = createAdminRouter({
     const range = gte(visitEvents.visitedAt, since);
     const [totals] = await db.select({ total: sql<number>`count(*)`, uniqueIps: sql<number>`count(distinct ${visitEvents.ipAddress})` }).from(visitEvents).where(range);
     const [alerts] = await db.select({ total: sql<number>`count(*)` }).from(visitEvents).where(and(range, eq(visitEvents.isSuspicious, true)));
-    const countries = await db.select({ country: visitEvents.country, visits: sql<number>`count(*)` }).from(visitEvents).where(range).groupBy(visitEvents.country).orderBy(desc(sql`count(*)`)).limit(20);
+    const countries = await db.select({ country: visitEvents.country, visits: sql<number>`count(*)` }).from(visitEvents).where(range).groupBy(visitEvents.country).orderBy(desc(sql`count(*)`));
     const paths = await db.select({ path: visitEvents.path, visits: sql<number>`count(*)` }).from(visitEvents).where(range).groupBy(visitEvents.path).orderBy(desc(sql`count(*)`)).limit(20);
     const ips = await db.select({ ipAddress: visitEvents.ipAddress, country: visitEvents.country, visits: sql<number>`count(*)`, suspicious: sql<number>`sum(case when ${visitEvents.isSuspicious} then 1 else 0 end)` }).from(visitEvents).where(range).groupBy(visitEvents.ipAddress, visitEvents.country).orderBy(desc(sql`count(*)`)).limit(50);
     const daily = await db.select({ day: sql<string>`to_char(date_trunc('day', ${visitEvents.visitedAt}), 'YYYY-MM-DD')`, visits: sql<number>`count(*)` }).from(visitEvents).where(range).groupBy(sql`date_trunc('day', ${visitEvents.visitedAt})`).orderBy(sql`date_trunc('day', ${visitEvents.visitedAt})`);
@@ -104,4 +104,39 @@ export const analyticsAdminRouter = createAdminRouter({
       daily: daily.map((row) => ({ day: row.day, visits: Number(row.visits) })),
     };
   }),
+
+  events: adminProcedure
+    .input(z.object({
+      days: z.number().int().min(1).max(365).default(30),
+      country: z.string().trim().regex(/^[A-Z]{2}$/).optional(),
+      page: z.number().int().min(1).max(10000).default(1),
+      pageSize: z.number().int().min(10).max(100).default(25),
+    }))
+    .query(async ({ input }) => {
+      const db = getDb();
+      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      const filters = input.country
+        ? and(gte(visitEvents.visitedAt, since), eq(visitEvents.country, input.country))
+        : gte(visitEvents.visitedAt, since);
+      const offset = (input.page - 1) * input.pageSize;
+      const [countRow] = await db.select({ total: sql<number>`count(*)` }).from(visitEvents).where(filters);
+      const rows = await db.select({
+        id: visitEvents.id,
+        ipAddress: visitEvents.ipAddress,
+        country: visitEvents.country,
+        path: visitEvents.path,
+        referrerHost: visitEvents.referrerHost,
+        userAgent: visitEvents.userAgent,
+        suspicious: visitEvents.isSuspicious,
+        visitedAt: visitEvents.visitedAt,
+      }).from(visitEvents).where(filters).orderBy(desc(visitEvents.visitedAt)).limit(input.pageSize).offset(offset);
+      const total = Number(countRow?.total || 0);
+      return {
+        page: input.page,
+        pageSize: input.pageSize,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / input.pageSize)),
+        events: rows,
+      };
+    }),
 });

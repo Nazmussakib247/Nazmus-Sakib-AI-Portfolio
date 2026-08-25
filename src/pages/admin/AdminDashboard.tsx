@@ -4,7 +4,7 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { trpc } from '@/providers/trpc';
 import {
   LayoutDashboard, FolderOpen, Award, BookOpen, Briefcase, FileBadge,
-  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2, ShieldAlert,
+  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2, ShieldAlert, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { ProjectsTab, SkillsTab, ExperiencesTab, CertificatesTab, AwardsTab, WritingsTab } from './tabs/ContentTabs';
 import { MessagesTab } from './tabs/MessagesTab';
@@ -209,7 +209,15 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
   const { data: skills } = trpc.skill.list.useQuery();
   const { data: messages } = trpc.contactAdmin.list.useQuery();
   const [analyticsDays, setAnalyticsDays] = useState(30);
+  const [analyticsCountry, setAnalyticsCountry] = useState('');
+  const [analyticsPage, setAnalyticsPage] = useState(1);
   const { data: analytics } = trpc.analyticsAdmin.summary.useQuery({ days: analyticsDays });
+  const { data: analyticsEvents } = trpc.analyticsAdmin.events.useQuery({
+    days: analyticsDays,
+    country: analyticsCountry || undefined,
+    page: analyticsPage,
+    pageSize: 25,
+  });
 
   const stats: { label: string; value: number; icon: React.ElementType; tab: TabType; highlight?: boolean }[] = [
     { label: 'Messages', value: messages?.length || 0, icon: Inbox, tab: 'messages', highlight: unreadCount > 0 },
@@ -290,13 +298,18 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
             </div>
             <div className="flex items-center gap-2">
               <label htmlFor="analytics-range" className="sr-only">Analytics date range</label>
-              <select id="analytics-range" value={analyticsDays} onChange={(event) => setAnalyticsDays(Number(event.target.value))} className="rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]">
+              <select id="analytics-range" value={analyticsDays} onChange={(event) => { setAnalyticsDays(Number(event.target.value)); setAnalyticsPage(1); }} className="rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]">
                 <option value="1">Today</option>
                 <option value="7">7 days</option>
                 <option value="30">30 days</option>
                 <option value="90">3 months</option>
                 <option value="180">6 months</option>
                 <option value="365">1 year</option>
+              </select>
+              <label htmlFor="analytics-country" className="sr-only">Filter visitor events by country</label>
+              <select id="analytics-country" value={analyticsCountry} onChange={(event) => { setAnalyticsCountry(event.target.value); setAnalyticsPage(1); }} className="max-w-36 rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]">
+                <option value="">All countries</option>
+                {(analytics?.countries || []).map((country) => <option key={country.country} value={country.country}>{country.country === 'ZZ' ? 'Unknown' : country.country} ({country.visits})</option>)}
               </select>
               <Globe2 className="h-5 w-5 text-[#e8b923]" />
             </div>
@@ -311,6 +324,52 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
             <div className="min-w-0"><h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">Top paths</h4><div className="space-y-1.5">{analytics?.topPaths.slice(0, 8).map((path) => <div key={path.path} className="flex justify-between gap-3 text-xs"><span className="truncate text-gray-300">{path.path}</span><span className="shrink-0 text-gray-500">{path.visits}</span></div>) || <p className="text-xs text-gray-600">No path data yet</p>}</div></div>
             <div className="min-w-0"><h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">Top IPs</h4><div className="max-h-32 space-y-1.5 overflow-y-auto pr-1">{analytics?.topIps.slice(0, 8).map((ip) => <div key={`${ip.ipAddress}-${ip.country}`} className="flex justify-between gap-3 text-xs"><span className="truncate font-mono text-gray-300">{ip.ipAddress}</span><span className={`shrink-0 ${ip.suspicious > 0 ? 'text-orange-300' : 'text-gray-500'}`}>{ip.visits}{ip.suspicious > 0 ? ' · alert' : ''}</span></div>) || <p className="text-xs text-gray-600">No IP data yet</p>}</div></div>
             <div className="min-w-0"><h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">Daily activity</h4><div className="max-h-32 space-y-1.5 overflow-y-auto pr-1">{analytics?.daily.slice(-8).map((day) => <div key={day.day} className="flex justify-between gap-3 text-xs"><span className="text-gray-300">{day.day}</span><span className="text-gray-500">{day.visits}</span></div>) || <p className="text-xs text-gray-600">No daily data yet</p>}</div></div>
+          </div>
+          <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+            <div className="min-w-0">
+              <h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">All countries</h4>
+              <div className="max-h-52 space-y-1.5 overflow-y-auto pr-1">
+                {(analytics?.countries || []).map((country) => (
+                  <button key={country.country} type="button" onClick={() => { setAnalyticsCountry(country.country); setAnalyticsPage(1); }} className={`flex w-full items-center justify-between gap-3 rounded-md px-2 py-1.5 text-left text-xs transition-colors hover:bg-white/[0.05] ${analyticsCountry === country.country ? 'bg-[#e8b923]/10 text-[#e8b923]' : 'text-gray-300'}`}>
+                    <span>{country.country === 'ZZ' ? 'Unknown' : country.country}</span>
+                    <span className="text-gray-500">{country.visits}</span>
+                  </button>
+                ))}
+                {!analytics?.countries.length && <p className="text-xs text-gray-600">No country data yet</p>}
+              </div>
+              {analyticsCountry && <button type="button" onClick={() => { setAnalyticsCountry(''); setAnalyticsPage(1); }} className="mt-2 text-xs text-[#e8b923] hover:underline">Show all countries</button>}
+            </div>
+            <div className="min-w-0">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <h4 className="text-xs uppercase tracking-[0.16em] text-gray-500">All visitor events{analyticsCountry ? ` · ${analyticsCountry === 'ZZ' ? 'Unknown' : analyticsCountry}` : ''}</h4>
+                <span className="text-xs text-gray-600">{analyticsEvents?.total || 0} recorded</span>
+              </div>
+              <div className="overflow-x-auto rounded-lg border border-white/5">
+                <table className="min-w-[760px] w-full text-left text-xs">
+                  <thead className="bg-white/[0.03] text-gray-500"><tr><th className="px-3 py-2 font-medium">Time</th><th className="px-3 py-2 font-medium">IP</th><th className="px-3 py-2 font-medium">Country</th><th className="px-3 py-2 font-medium">Path</th><th className="px-3 py-2 font-medium">Referrer</th><th className="px-3 py-2 font-medium">Device</th></tr></thead>
+                  <tbody className="divide-y divide-white/5">
+                    {(analyticsEvents?.events || []).map((event) => (
+                      <tr key={event.id} className={event.suspicious ? 'bg-orange-400/[0.06]' : ''}>
+                        <td className="whitespace-nowrap px-3 py-2 text-gray-400">{new Date(event.visitedAt).toLocaleString()}</td>
+                        <td className={`whitespace-nowrap px-3 py-2 font-mono ${event.ipAddress === 'unknown' ? 'text-gray-500' : 'text-gray-200'}`}>{event.ipAddress || 'unknown'}{event.suspicious ? <span className="ml-1 text-orange-300">!</span> : null}</td>
+                        <td className="px-3 py-2 text-gray-300">{event.country === 'ZZ' ? 'Unknown' : event.country}</td>
+                        <td className="max-w-40 truncate px-3 py-2 text-gray-400" title={event.path}>{event.path}</td>
+                        <td className="max-w-32 truncate px-3 py-2 text-gray-500" title={event.referrerHost || undefined}>{event.referrerHost || 'Direct'}</td>
+                        <td className="max-w-52 truncate px-3 py-2 text-gray-500" title={event.userAgent || undefined}>{event.userAgent || 'Unknown'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {!analyticsEvents?.events.length && <p className="px-3 py-5 text-xs text-gray-600">No visitor events in this range.</p>}
+              </div>
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <span className="text-xs text-gray-500">Page {analyticsEvents?.page || analyticsPage} of {analyticsEvents?.totalPages || 1}</span>
+                <div className="flex items-center gap-1">
+                  <button type="button" aria-label="Previous visitor events page" disabled={analyticsPage <= 1} onClick={() => setAnalyticsPage((page) => Math.max(1, page - 1))} className="rounded-md border border-white/10 p-1.5 text-gray-400 transition-colors hover:border-[#e8b923]/50 hover:text-[#e8b923] disabled:cursor-not-allowed disabled:opacity-30"><ChevronLeft className="h-4 w-4" /></button>
+                  <button type="button" aria-label="Next visitor events page" disabled={analyticsPage >= (analyticsEvents?.totalPages || 1)} onClick={() => setAnalyticsPage((page) => page + 1)} className="rounded-md border border-white/10 p-1.5 text-gray-400 transition-colors hover:border-[#e8b923]/50 hover:text-[#e8b923] disabled:cursor-not-allowed disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
