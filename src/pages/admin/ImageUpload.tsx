@@ -122,7 +122,7 @@ export function ImageUploadField({
       <label className={labelCls}>{label}</label>
       {value ? (
         <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-[#05060f] p-2">
-          {value.toLowerCase().includes('.pdf') || !value.match(/^(\/api\/files\/|http|\/)/) ? (
+          {isPdf || !value.match(/^(\/api\/files\/|http|\/)/) ? (
             <span className="flex h-14 w-14 items-center justify-center rounded-md bg-white/5">
               <FileText className="h-5 w-5 text-gray-400" />
             </span>

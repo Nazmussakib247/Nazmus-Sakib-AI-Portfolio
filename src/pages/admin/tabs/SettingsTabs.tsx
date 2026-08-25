@@ -69,7 +69,7 @@ export function ProfileTab() {
           <Field label="LinkedIn"><input value={form.linkedinUrl} onChange={(e) => setForm({ ...form, linkedinUrl: e.target.value })} className={inputCls} /></Field>
           <Field label="Medium"><input value={form.mediumUrl} onChange={(e) => setForm({ ...form, mediumUrl: e.target.value })} className={inputCls} /></Field>
         </div>
-        <ImageUploadField label="CV / Resume (PDF)" value={form.cvUrl} onChange={(url) => setForm({ ...form, cvUrl: url })} accept="application/pdf,image/*" />
+        <ImageUploadField label="CV / Resume (PDF)" value={form.cvUrl} onChange={(url) => setForm({ ...form, cvUrl: url })} accept="application/pdf" />
         <div className="pt-2">
           <button type="submit" disabled={update.isPending} className={btnPrimary}>
             <Save className="h-4 w-4" /> {update.isPending ? 'Saving…' : 'Save Profile'}
