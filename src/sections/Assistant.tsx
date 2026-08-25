@@ -468,9 +468,23 @@ export default function Assistant() {
         </button>
       )}
 
-      <div className="pointer-events-none absolute right-0 top-[calc(100%+0.5rem)] whitespace-nowrap rounded-full border border-white/10 bg-[#080b17]/80 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-gray-500 opacity-0 transition-opacity group-hover:opacity-100">
-        {chatMutation.isPending ? 'Xervis is thinking' : 'Talk to Xervis'}
-      </div>
+      {!open && (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            if (!voiceEnabledRef.current) {
+              voiceEnabledRef.current = true;
+              setVoiceEnabled(true);
+            }
+            triggerVoiceGreeting();
+          }}
+          aria-label="Play Xervis greeting"
+          className="pointer-events-auto absolute right-0 top-[calc(100%+0.5rem)] whitespace-nowrap rounded-full border border-white/10 bg-[#080b17]/80 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-gray-500 opacity-0 transition-opacity hover:border-[#e8b923]/45 hover:text-[#e8b923] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923] group-hover:opacity-100"
+        >
+          {chatMutation.isPending ? 'Xervis is thinking' : 'Talk to Xervis'}
+        </button>
+      )}
     </div>
   );
 }
