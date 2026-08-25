@@ -228,14 +228,12 @@ export default function Hero() {
   ];
 
   return (
-    <section id="hero" className="relative h-[100svh] min-h-[100svh] w-full overflow-hidden lg:h-screen lg:min-h-0" style={{ background: '#05060f' }}>
+    <section id="hero" className="relative min-h-[100svh] w-full overflow-hidden lg:h-screen lg:min-h-0" style={{ background: '#05060f' }}>
       <canvas ref={canvasRef} className="absolute inset-0 z-0" />
       <div className="bg-grid absolute inset-0 z-0 opacity-60 [mask-image:radial-gradient(ellipse_60%_55%_at_50%_45%,#000_35%,transparent_80%)]" />
-      <FloatingSkillLogos />
-
       <div
         ref={contentRef}
-        className="relative z-10 mx-auto flex h-full w-full flex-col items-center justify-start px-4 pt-[clamp(5.25rem,14svh,8rem)] pb-4 lg:absolute lg:inset-0 lg:justify-center lg:pt-0 lg:pb-16"
+        className="relative z-10 mx-auto flex h-auto min-h-[100svh] w-full flex-col items-center justify-start px-4 pt-[clamp(4rem,10svh,6.5rem)] pb-4 max-[700px]:-translate-y-8 max-[700px]:pt-[1.5rem] lg:absolute lg:inset-0 lg:h-full lg:min-h-0 lg:justify-center lg:pt-0 lg:pb-16 lg:translate-y-0"
       >
         <div className="text-center">
           <div data-hero className="relative top-4 mb-6">
@@ -300,7 +298,7 @@ export default function Hero() {
             </Magnetic>
           </div>
 
-          <div data-hero className="mt-4 flex items-center justify-center gap-3 sm:mt-7">
+          <div data-hero className="mt-4 flex items-center justify-center gap-3 max-[700px]:mt-2 max-[700px]:gap-2 sm:mt-7">
             {socialLinks.map(({ label, href, icon: Icon }) => href ? (
               <a
                 key={label}
@@ -308,7 +306,7 @@ export default function Hero() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="glass inline-flex h-10 w-10 items-center justify-center rounded-full text-gray-400 transition-all duration-300 hover:-translate-y-1 hover:border-[#e8b923]/50 hover:text-[#e8b923]"
+                className="glass inline-flex h-10 w-10 items-center justify-center rounded-full text-gray-400 transition-all duration-300 hover:-translate-y-1 hover:border-[#e8b923]/50 hover:text-[#e8b923] max-[700px]:h-9 max-[700px]:w-9"
               >
                 <Icon className="h-4 w-4" />
               </a>
@@ -316,12 +314,14 @@ export default function Hero() {
           </div>
         </div>
 
+        <FloatingSkillLogos />
+
         <button
           type="button"
           data-hero
           aria-label="Scroll to About section"
           onClick={() => scrollToId(scrollTarget)}
-                    className="group absolute bottom-[calc(0.5rem+env(safe-area-inset-bottom))] left-1/2 z-20 flex min-h-12 min-w-[96px] -translate-x-1/2 flex-col items-center gap-2 rounded-2xl px-4 py-2 text-gray-500 transition-all duration-300 hover:-translate-y-1 hover:bg-white/5 hover:text-[#e8b923] lg:relative lg:bottom-auto lg:left-auto lg:mt-5 lg:min-h-0 lg:translate-x-0 lg:shrink-0 lg:-translate-y-1 lg:hover:-translate-y-2"
+                    className="group relative z-20 mt-3 flex min-h-12 min-w-[96px] shrink-0 flex-col items-center gap-2 rounded-2xl px-4 py-2 text-gray-500 transition-all duration-300 hover:-translate-y-1 hover:bg-white/5 hover:text-[#e8b923] max-[700px]:mt-1 max-[700px]:min-h-10 max-[700px]:gap-1 max-[700px]:py-1 lg:relative lg:bottom-auto lg:left-auto lg:mt-5 lg:min-h-0 lg:translate-x-0 lg:shrink-0 lg:-translate-y-1 lg:hover:-translate-y-2"
 
         >
           <span className="font-mono text-[10px] uppercase tracking-[0.35em]">{get('heroScrollLabel')}</span>

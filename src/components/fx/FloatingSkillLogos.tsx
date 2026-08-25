@@ -82,7 +82,7 @@ export default function FloatingSkillLogos() {
   }, []);
 
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1]">
+    <div aria-hidden="true" className="pointer-events-none relative z-[1] lg:absolute lg:inset-0">
       {/* Desktop: preserve the original asymmetric floating arrangement. */}
       <div className="absolute inset-0 hidden opacity-70 lg:block">
         {floatingCards.map((card, index) => {
@@ -114,7 +114,7 @@ export default function FloatingSkillLogos() {
       </div>
 
       {/* Mobile: keep every hardcoded logo visible in a compact dock below the Hero flow. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-[calc(8.5rem+env(safe-area-inset-bottom))] z-[2] flex justify-center px-3 sm:bottom-[calc(9rem+env(safe-area-inset-bottom))] lg:hidden">
+      <div className="pointer-events-none relative z-[2] flex justify-center px-3 py-2 lg:absolute lg:inset-x-0 lg:bottom-[calc(8.5rem+env(safe-area-inset-bottom))] lg:hidden lg:px-3 lg:py-0">
         <div className="grid w-full max-w-[23rem] grid-cols-7 gap-1 sm:max-w-[34rem] sm:grid-cols-8 sm:gap-1.5">
 
         {floatingCards.map((card, index) => (

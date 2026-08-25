@@ -824,3 +824,10 @@
     animation: none;
   }
 }
+
+
+@media (max-width: 1023px) and (max-height: 700px) {
+  .xervis-greeting {
+    display: none !important;
+  }
+}
