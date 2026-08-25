@@ -292,10 +292,10 @@ export function SiteTab() {
         <section className="space-y-4 rounded-xl border border-white/5 bg-[#111527] p-6">
           <div>
             <h3 className="text-sm font-medium text-[#e8b923]">SEO & Footer</h3>
-            <p className="mt-1 text-xs leading-relaxed text-gray-500">Profile photo, social preview image, and browser tab icon are managed independently.</p>
+            <p className="mt-1 text-xs leading-relaxed text-gray-500">SEO title and description control Google, LinkedIn, and other link previews. Profile photo, social preview image, and browser tab icon are managed independently.</p>
           </div>
-          <Field label="SEO title"><input value={form.seoTitle} onChange={(e) => set('seoTitle', e.target.value)} className={inputCls} /></Field>
-          <Field label="SEO description"><textarea value={form.seoDescription} onChange={(e) => set('seoDescription', e.target.value)} className={`${inputCls} h-16`} /></Field>
+          <Field label="SEO / LinkedIn preview title"><input value={form.seoTitle} onChange={(e) => set('seoTitle', e.target.value)} className={inputCls} placeholder="Nazmus Sakib — ML Engineer · AI Engineer · AI Product Engineer" /></Field>
+          <Field label="SEO / LinkedIn preview description"><textarea value={form.seoDescription} onChange={(e) => set('seoDescription', e.target.value)} className={`${inputCls} h-16`} placeholder="Production-minded AI systems, bilingual NLP, LLM workflows, retrieval, full-stack engineering, and intelligent automation." /></Field>
           <Field label="Canonical site URL"><input type="url" value={form.canonicalSiteUrl} onChange={(e) => set('canonicalSiteUrl', e.target.value)} className={inputCls} placeholder="https://nazmussakib.tech/" /></Field>
           <ImageUploadField label="Social preview image (Open Graph / Twitter)" value={form.socialPreviewImageUrl} onChange={(url) => set('socialPreviewImageUrl', url)} accept="image/*" />
           <Field label="Social preview image alt text"><input value={form.socialPreviewImageAlt} onChange={(e) => set('socialPreviewImageAlt', e.target.value)} className={inputCls} /></Field>

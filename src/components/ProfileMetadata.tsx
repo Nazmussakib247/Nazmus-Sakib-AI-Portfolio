@@ -72,7 +72,7 @@ export default function ProfileMetadata() {
     if (!settingsFetched) return;
 
     const title = get('seoTitle').trim() || 'Nazmus Sakib — ML Engineer · AI Engineer · AI Product Engineer';
-    const description = get('seoDescription').trim() || 'Portfolio of Nazmus Sakib, an ML Engineer and AI product builder working across NLP, LLMs, retrieval, full-stack systems, and intelligent automation.';
+    const description = get('seoDescription').trim() || 'Production-minded AI systems, bilingual NLP, LLM workflows, retrieval, full-stack engineering, and intelligent automation.';
     const siteUrl = toAbsoluteUrl(get('canonicalSiteUrl') || '/', window.location.origin).replace(/\/$/, '') + '/';
     const profileImageUrl = toAbsoluteUrl(profile?.avatarUrl || fallbackProfileImage, fallbackProfileImage);
     const socialImageUrl = toAbsoluteUrl(get('socialPreviewImageUrl') || fallbackSocialImage, fallbackSocialImage);

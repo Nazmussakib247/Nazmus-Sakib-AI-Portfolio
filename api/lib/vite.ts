@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 import { getDb } from "../queries/connection";
 import { profiles, siteSettings } from "@db/schema";
+import { DEFAULT_SEO_DESCRIPTION, DEFAULT_SEO_TITLE, normalizeSeoSetting } from "./seo";
 
 type App = Hono<{ Bindings: HttpBindings }>;
 
@@ -29,8 +30,8 @@ type SeoData = {
 
 const fallbackProfileImage = "/images/profile-avatar.jpg";
 const fallbackSocialImage = "/images/hero-portrait.jpg";
-const fallbackTitle = "Nazmus Sakib — AI Engineer | RAG, LLM & Automation";
-const fallbackDescription = "Portfolio of Nazmus Sakib, an AI Engineer specializing in RAG, LLM systems, NLP, intelligent automation, and full-stack AI products.";
+const fallbackTitle = DEFAULT_SEO_TITLE;
+const fallbackDescription = DEFAULT_SEO_DESCRIPTION;
 
 function escapeHtmlAttribute(value: string) {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -89,8 +90,8 @@ async function getSeoData(c: Context): Promise<SeoData> {
     const profileImageUrl = getAbsoluteUrl(c, profile?.avatarUrl, fallbackProfileImage);
 
     return {
-      title: settings.seoTitle?.trim() || defaults.seoTitle,
-      description: settings.seoDescription?.trim() || defaults.seoDescription,
+      title: normalizeSeoSetting("seoTitle", settings.seoTitle) || defaults.seoTitle,
+      description: normalizeSeoSetting("seoDescription", settings.seoDescription) || defaults.seoDescription,
       canonicalUrl,
       socialImageUrl: addAssetVersion(getAbsoluteUrl(c, settings.socialPreviewImageUrl, fallbackSocialImage), settingUpdatedAt("socialPreviewImageUrl")),
       socialImageAlt: settings.socialPreviewImageAlt?.trim() || defaults.socialPreviewImageAlt,

@@ -5,6 +5,7 @@ import { getDb } from "../queries/connection";
 import { siteSettings } from "@db/schema";
 import { eq } from "drizzle-orm";
 import { recordSiteSettingsChange, snapshotSiteSettings } from "./change-log";
+import { normalizeSeoSetting } from "../lib/seo";
 
 /**
  * Site settings — a key/value store powering admin-editable site chrome:
@@ -23,7 +24,7 @@ export const settingsRouter = createRouter({
     const rows = await db.select(settingColumns).from(siteSettings);
     const map: Record<string, string> = {};
     for (const row of rows) {
-      if (row.value !== null && !PRIVATE_SETTING_KEYS.has(row.key)) map[row.key] = row.value;
+      if (row.value !== null && !PRIVATE_SETTING_KEYS.has(row.key)) map[row.key] = normalizeSeoSetting(row.key, row.value);
     }
     return map;
   }),
