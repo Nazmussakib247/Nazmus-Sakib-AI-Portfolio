@@ -21,6 +21,10 @@ type ProjectLike = {
   isFeatured?: boolean | null;
   slug?: string | null;
   caseStudyEnabled?: boolean | null;
+  caseStudySummary?: string | null;
+  problemStatement?: string | null;
+  roleDescription?: string | null;
+  outcomeSummary?: string | null;
   liveLabel?: string;
 };
 
@@ -241,6 +245,12 @@ export default function Projects() {
                       <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-gray-400">
                         {project.description}
                       </p>
+                      {(project.problemStatement || project.outcomeSummary) && (
+                        <div className="mb-5 grid gap-2 sm:grid-cols-2">
+                          {project.problemStatement && <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3"><p className="mb-1 font-mono text-[9px] uppercase tracking-[0.14em] text-[#e8b923]/80">Problem</p><p className="line-clamp-2 text-xs leading-relaxed text-gray-400">{project.problemStatement}</p></div>}
+                          {project.outcomeSummary && <div className="rounded-xl border border-white/10 bg-white/[0.025] p-3"><p className="mb-1 font-mono text-[9px] uppercase tracking-[0.14em] text-[#e8b923]/80">Outcome</p><p className="line-clamp-2 text-xs leading-relaxed text-gray-400">{project.outcomeSummary}</p></div>}
+                        </div>
+                      )}
                       <div className="mb-5 flex flex-wrap gap-2">
                         {normalizeStringArray(project.techStack).slice(0, 5).map((tech) => (
                           <span
@@ -338,6 +348,11 @@ export default function Projects() {
             <div className="p-7">
               <h3 className="mb-3 text-2xl font-medium text-white">{selected.title}</h3>
               <p className="mb-5 text-sm leading-relaxed text-gray-300">{selected.description}</p>
+              <div className="mb-6 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-[#e8b923]/20 bg-[#e8b923]/[0.04] p-4"><p className="mb-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#e8b923]">Ownership</p><p className="text-xs leading-relaxed text-gray-400">{getOwnershipLabel(selected)}</p></div>
+                {selected.problemStatement && <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4"><p className="mb-2 font-mono text-[10px] uppercase tracking-[0.16em] text-gray-500">Problem</p><p className="text-xs leading-relaxed text-gray-400">{selected.problemStatement}</p></div>}
+                {selected.outcomeSummary && <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-4"><p className="mb-2 font-mono text-[10px] uppercase tracking-[0.16em] text-gray-500">Outcome</p><p className="text-xs leading-relaxed text-gray-400">{selected.outcomeSummary}</p></div>}
+              </div>
               <div className="mb-6 flex flex-wrap gap-2">
                 {normalizeStringArray(selected.techStack).map((tech) => (
                   <span
