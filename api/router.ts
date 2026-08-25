@@ -14,6 +14,7 @@ import { uploadAdminRouter } from "./routers/upload";
 import { assistantRouter } from "./routers/assistant";
 import { socialRouter } from "./routers/social";
 import { analyticsRouter, analyticsAdminRouter } from "./routers/analytics";
+import { changeLogAdminRouter } from "./routers/change-log";
 
 export const appRouter = createRouter({
   ping: publicQuery.query(() => ({ ok: true, ts: Date.now() })),
@@ -43,6 +44,7 @@ export const appRouter = createRouter({
   settingsAdmin: settingsAdminRouter,
   uploadAdmin: uploadAdminRouter,
   analyticsAdmin: analyticsAdminRouter,
+  changeLogAdmin: changeLogAdminRouter,
 });
 
 export type AppRouter = typeof appRouter;

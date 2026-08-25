@@ -4,15 +4,16 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { trpc } from '@/providers/trpc';
 import {
   LayoutDashboard, FolderOpen, Award, BookOpen, Briefcase, FileBadge,
-  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2, ShieldAlert, Search, Trash2, ChevronLeft, ChevronRight,
+  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2, ShieldAlert, Search, Trash2, ChevronLeft, ChevronRight, History,
 } from 'lucide-react';
 import { ProjectsTab, SkillsTab, ExperiencesTab, CertificatesTab, AwardsTab, WritingsTab } from './tabs/ContentTabs';
 import { MessagesTab } from './tabs/MessagesTab';
 import { ProfileTab, SecurityTab, SiteTab } from './tabs/SettingsTabs';
+import { ChangeLogTab } from './tabs/ChangeLogTab';
 
 type TabType =
   | 'overview' | 'profile' | 'projects' | 'skills' | 'experiences'
-  | 'certificates' | 'awards' | 'writings' | 'messages' | 'security' | 'site';
+  | 'certificates' | 'awards' | 'writings' | 'messages' | 'security' | 'site' | 'changeLog';
 
 const tabs: { id: TabType; label: string; icon: React.ElementType }[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -26,6 +27,7 @@ const tabs: { id: TabType; label: string; icon: React.ElementType }[] = [
   { id: 'writings', label: 'Writings', icon: BookOpen },
   { id: 'security', label: 'Security', icon: ShieldCheck },
   { id: 'site', label: 'Site Settings', icon: Settings },
+  { id: 'changeLog', label: 'Change Log', icon: History },
 ];
 
 export default function AdminDashboard() {
@@ -143,6 +145,7 @@ export default function AdminDashboard() {
           {activeTab === 'writings' && <WritingsTab />}
           {activeTab === 'security' && <SecurityTab />}
           {activeTab === 'site' && <SiteTab />}
+          {activeTab === 'changeLog' && <ChangeLogTab />}
         </div>
       </main>
     </div>

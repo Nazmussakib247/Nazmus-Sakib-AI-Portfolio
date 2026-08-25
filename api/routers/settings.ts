@@ -4,6 +4,7 @@ import { createAdminRouter, adminProcedure } from "./admin-middleware";
 import { getDb } from "../queries/connection";
 import { siteSettings } from "@db/schema";
 import { eq } from "drizzle-orm";
+import { recordSiteSettingsChange, snapshotSiteSettings } from "./change-log";
 
 /**
  * Site settings — a key/value store powering admin-editable site chrome:
@@ -57,6 +58,7 @@ export const settingsAdminRouter = createAdminRouter({
   set: adminProcedure
     .input(z.object({ key: z.string().min(1).max(100), value: z.string() }))
     .mutation(async ({ input }) => {
+      const beforeState = await snapshotSiteSettings();
       const db = getDb();
       const existing = await db
         .select()
@@ -71,12 +73,15 @@ export const settingsAdminRouter = createAdminRouter({
       } else {
         await db.insert(siteSettings).values(input);
       }
+      const afterState = await snapshotSiteSettings();
+      await recordSiteSettingsChange(beforeState, afterState, `Updated site setting: ${input.key}`);
       return { success: true };
     }),
 
   setMany: adminProcedure
     .input(z.array(z.object({ key: z.string().min(1).max(100), value: z.string() })))
     .mutation(async ({ input }) => {
+      const beforeState = await snapshotSiteSettings();
       const db = getDb();
       for (const { key, value } of input) {
         const existing = await db
@@ -93,6 +98,8 @@ export const settingsAdminRouter = createAdminRouter({
           await db.insert(siteSettings).values({ key, value });
         }
       }
+      const afterState = await snapshotSiteSettings();
+      await recordSiteSettingsChange(beforeState, afterState, `Updated ${input.length} site settings`);
       return { success: true };
     }),
 });

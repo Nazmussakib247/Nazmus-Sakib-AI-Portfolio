@@ -296,6 +296,21 @@ export const siteSettings = pgTable("site_settings", {
 
 export type SiteSetting = typeof siteSettings.$inferSelect;
 
+// Admin CMS change history. Snapshots are kept in JSON so prior settings/content states can be restored safely.
+export const adminChangeLogs = pgTable("admin_change_logs", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+  scope: varchar("scope", { length: 100 }).notNull(),
+  entityType: varchar("entity_type", { length: 100 }).notNull(),
+  entityId: varchar("entity_id", { length: 100 }),
+  action: varchar("action", { length: 40 }).notNull(),
+  summary: varchar("summary", { length: 255 }).notNull(),
+  beforeState: jsonb("before_state"),
+  afterState: jsonb("after_state"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type AdminChangeLog = typeof adminChangeLogs.$inferSelect;
+
 // Visit analytics. Raw IP access is restricted to authenticated admins and retention is bounded.
 export const visitEvents = pgTable("visit_events", {
   id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
