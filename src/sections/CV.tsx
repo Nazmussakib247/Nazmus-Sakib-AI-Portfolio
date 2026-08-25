@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { BookOpen, Download, Eye, FileText, Github, Linkedin, Link2, X } from 'lucide-react';
+import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { trpc } from '@/providers/trpc';
 import { useReveal } from '@/components/fx/useReveal';
 import SectionHeading from '@/components/fx/SectionHeading';
 import { useSettings } from '@/hooks/useSettings';
 
 export const CV_PREVIEW_EVENT = 'portfolio:open-cv-preview';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 const EXTRA_PLATFORM_OPTIONS = [
   { key: 'hackerrank', label: 'HackerRank', mark: 'HR' },
@@ -19,6 +23,65 @@ const EXTRA_PLATFORM_OPTIONS = [
   { key: 'behance', label: 'Behance', mark: 'BE' },
   { key: 'dribbble', label: 'Dribbble', mark: 'DB' },
 ] as const;
+
+function MobilePdfPreview({ url, title }: { url: string; title: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRefs = useRef<Array<HTMLCanvasElement | null>>([]);
+  const [pdf, setPdf] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
+  const [pageCount, setPageCount] = useState(0);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+
+  useEffect(() => {
+    let cancelled = false;
+    setStatus('loading');
+    setPdf(null);
+    setPageCount(0);
+    pdfjsLib.getDocument(url).promise.then((document) => {
+      if (cancelled) {
+        void document.destroy();
+        return;
+      }
+      setPdf(document);
+      setPageCount(document.numPages);
+      setStatus('ready');
+    }).catch(() => {
+      if (!cancelled) setStatus('error');
+    });
+    return () => { cancelled = true; };
+  }, [url]);
+
+  useEffect(() => {
+    if (!pdf || !pageCount) return;
+    let cancelled = false;
+    const renderPages = async () => {
+      const containerWidth = Math.max(280, (containerRef.current?.clientWidth || 360) - 24);
+      for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
+        if (cancelled) return;
+        const page = await pdf.getPage(pageNumber);
+        const canvas = canvasRefs.current[pageNumber - 1];
+        if (!canvas) continue;
+        const baseViewport = page.getViewport({ scale: 1 });
+        const viewport = page.getViewport({ scale: Math.min(1.5, containerWidth / baseViewport.width) });
+        const context = canvas.getContext('2d');
+        if (!context) continue;
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(viewport.width * pixelRatio);
+        canvas.height = Math.floor(viewport.height * pixelRatio);
+        canvas.style.width = `${viewport.width}px`;
+        canvas.style.height = `${viewport.height}px`;
+        context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+        await page.render({ canvasContext: context, viewport }).promise;
+      }
+    };
+    void renderPages();
+    return () => { cancelled = true; };
+  }, [pdf, pageCount]);
+
+  if (status === 'error') {
+    return <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center text-sm text-gray-400"><p>Mobile preview could not render this PDF.</p><a href={url} target="_blank" rel="noopener noreferrer" className="rounded-full border border-[#e8b923]/40 px-4 py-2 text-[#e8b923]">Open CV PDF</a></div>;
+  }
+  return <div ref={containerRef} aria-label={title} className="h-full overflow-y-auto bg-[#202124] p-3"><div className="mx-auto flex w-fit min-w-full flex-col items-center gap-3">{status === 'loading' && <p className="py-8 text-sm text-gray-500">Loading CV preview…</p>}{Array.from({ length: pageCount }, (_, index) => <canvas key={index} ref={(canvas) => { canvasRefs.current[index] = canvas; }} className="block max-w-full bg-white shadow-lg" aria-label={`${title} page ${index + 1}`} />)}</div></div>;
+}
 
 export default function CV() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -167,7 +230,12 @@ export default function CV() {
             </div>
 
             <div className="min-h-0 flex-1 bg-white">
-              {cvUrl ? <iframe src={`${cvUrl}${cvUrl.includes('?') ? '&' : '?'}preview=1`} title={`${profile?.name || cvCopy.profileFallback || ''} ${cvCopy.previewTitleSuffix || ''}`} className="h-full w-full" /> : <div className="flex h-full items-center justify-center px-6 text-center text-sm text-gray-500">{cvCopy.noPreview || ''}</div>}
+              {cvUrl ? (
+                <>
+                  <iframe src={`${cvUrl}${cvUrl.includes('?') ? '&' : '?'}preview=1`} title={`${profile?.name || cvCopy.profileFallback || ''} ${cvCopy.previewTitleSuffix || ''}`} className="hidden h-full w-full sm:block" />
+                  <div className="h-full sm:hidden"><MobilePdfPreview url={`${cvUrl}${cvUrl.includes('?') ? '&' : '?'}preview=1`} title={`${profile?.name || cvCopy.profileFallback || ''} ${cvCopy.previewTitleSuffix || ''}`} /></div>
+                </>
+              ) : <div className="flex h-full items-center justify-center px-6 text-center text-sm text-gray-500">{cvCopy.noPreview || ''}</div>}
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-3 sm:px-6">
