@@ -28,6 +28,29 @@ export default function Home() {
   const isCaseStudyReturn = (location.state as { returnTo?: string } | null)?.returnTo === 'projects';
 
   useEffect(() => {
+    // Mobile browsers can report a provisional viewport during the first paint
+    // while the browser chrome is settling. Capture the visual viewport once
+    // immediately and once after the first frame so the Hero/fixed controls
+    // start in their final position without requiring a manual resize.
+    const syncViewport = () => {
+      const height = window.visualViewport?.height || window.innerHeight;
+      document.documentElement.style.setProperty('--portfolio-vh', `${Math.round(height)}px`);
+    };
+
+    syncViewport();
+    const frame = window.requestAnimationFrame(syncViewport);
+    const settleTimer = window.setTimeout(syncViewport, 260);
+    const handleOrientation = () => window.setTimeout(syncViewport, 80);
+    window.addEventListener('orientationchange', handleOrientation, { passive: true });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(settleTimer);
+      window.removeEventListener('orientationchange', handleOrientation);
+    };
+  }, []);
+
+  useEffect(() => {
     try {
       if (sessionStorage.getItem('portfolio:visit-tracked') === '1') return;
       sessionStorage.setItem('portfolio:visit-tracked', '1');
