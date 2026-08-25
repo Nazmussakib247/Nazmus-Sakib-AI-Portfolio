@@ -262,11 +262,26 @@ export const contactMessages = pgTable("contact_messages", {
   deviceType: varchar("device_type", { length: 32 }),
   browser: varchar("browser", { length: 80 }),
   operatingSystem: varchar("operating_system", { length: 80 }),
+  isSpam: boolean("is_spam").default(false).notNull(),
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export type ContactMessage = typeof contactMessages.$inferSelect;
+
+export const blockedContactIps = pgTable("blocked_contact_ips", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+  ipAddress: varchar("ip_address", { length: 128 }).notNull().unique(),
+  note: varchar("note", { length: 255 }),
+  blockedAt: timestamp("blocked_at").defaultNow().notNull(),
+});
+
+export const contactRateLimits = pgTable("contact_rate_limits", {
+  ipAddress: varchar("ip_address", { length: 128 }).primaryKey(),
+  windowStartedAt: timestamp("window_started_at").defaultNow().notNull(),
+  messageCount: integer("message_count").default(0).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
 // Site settings key-value store
 export const siteSettings = pgTable("site_settings", {

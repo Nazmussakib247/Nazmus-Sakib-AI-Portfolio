@@ -3,11 +3,9 @@ import { TRPCError } from "@trpc/server";
 import { createRouter, publicQuery } from "../middleware";
 import { createAdminRouter, adminProcedure } from "./admin-middleware";
 import { getDb } from "../queries/connection";
-import { contactMessages } from "@db/schema";
+import { blockedContactIps, contactMessages, contactRateLimits } from "@db/schema";
 import { desc, eq } from "drizzle-orm";
 
-// Naive in-memory rate limit: max 5 messages per IP per 10 minutes
-const rateMap = new Map<string, { count: number; resetAt: number }>();
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_WINDOW = 5;
 
@@ -15,15 +13,22 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>\"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[char] || char));
 }
 
-function checkRate(key: string) {
-  const now = Date.now();
-  const entry = rateMap.get(key);
-  if (!entry || now > entry.resetAt) {
-    rateMap.set(key, { count: 1, resetAt: now + WINDOW_MS });
+async function checkRate(db: ReturnType<typeof getDb>, ipAddress: string) {
+  const now = new Date();
+  const rows = await db.select().from(contactRateLimits).where(eq(contactRateLimits.ipAddress, ipAddress)).limit(1);
+  const current = rows[0];
+
+  if (!current || now.getTime() - current.windowStartedAt.getTime() >= WINDOW_MS) {
+    await db.insert(contactRateLimits).values({ ipAddress, windowStartedAt: now, messageCount: 1, updatedAt: now }).onConflictDoUpdate({
+      target: contactRateLimits.ipAddress,
+      set: { windowStartedAt: now, messageCount: 1, updatedAt: now },
+    });
     return true;
   }
-  entry.count += 1;
-  return entry.count <= MAX_PER_WINDOW;
+
+  if (current.messageCount >= MAX_PER_WINDOW) return false;
+  await db.update(contactRateLimits).set({ messageCount: current.messageCount + 1, updatedAt: now }).where(eq(contactRateLimits.ipAddress, ipAddress));
+  return true;
 }
 
 function parseUserAgent(userAgent: string) {
@@ -88,7 +93,12 @@ export const contactRouter = createRouter({
         return { success: true };
       }
       const ip = getClientIp(ctx.req);
-      if (!checkRate(ip)) {
+      const db = getDb();
+      const blocked = await db.select({ id: blockedContactIps.id }).from(blockedContactIps).where(eq(blockedContactIps.ipAddress, ip)).limit(1);
+      if (blocked.length) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Messages from this address are not accepted." });
+      }
+      if (!(await checkRate(db, ip))) {
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
           message: "Too many messages. Please try again later.",
@@ -96,7 +106,7 @@ export const contactRouter = createRouter({
       }
       const userAgent = (ctx.req.headers.get('user-agent') || 'unknown').slice(0, 500);
       const { deviceType, browser, operatingSystem } = parseUserAgent(userAgent);
-      const db = getDb();
+      const isSpam = deviceType === 'Bot';
       await db.insert(contactMessages).values({
         name: input.name,
         email: input.email,
@@ -107,6 +117,7 @@ export const contactRouter = createRouter({
         deviceType,
         browser,
         operatingSystem,
+        isSpam,
       });
 
       let emailSent = false;
@@ -165,6 +176,31 @@ export const contactAdminRouter = createAdminRouter({
       return { success: true };
     }),
 
+  toggleSpam: adminProcedure
+    .input(z.object({ id: z.number(), isSpam: z.boolean() }))
+    .mutation(async ({ input }) => {
+      const db = getDb();
+      await db.update(contactMessages).set({ isSpam: input.isSpam }).where(eq(contactMessages.id, input.id));
+      return { success: true };
+    }),
+  listBlockedIps: adminProcedure.query(async () => {
+    const db = getDb();
+    return db.select().from(blockedContactIps).orderBy(desc(blockedContactIps.blockedAt));
+  }),
+  blockIp: adminProcedure
+    .input(z.object({ ipAddress: z.string().min(1).max(128), note: z.string().max(255).optional() }))
+    .mutation(async ({ input }) => {
+      const db = getDb();
+      await db.insert(blockedContactIps).values({ ipAddress: input.ipAddress, note: input.note || null }).onConflictDoNothing();
+      return { success: true };
+    }),
+  unblockIp: adminProcedure
+    .input(z.object({ ipAddress: z.string().min(1).max(128) }))
+    .mutation(async ({ input }) => {
+      const db = getDb();
+      await db.delete(blockedContactIps).where(eq(blockedContactIps.ipAddress, input.ipAddress));
+      return { success: true };
+    }),
   delete: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
