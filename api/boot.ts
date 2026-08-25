@@ -33,7 +33,10 @@ app.use("/api/trpc/*", async (c) => {
     createContext,
   });
 });
-app.get("/api/files/:id", serveUploadedFile);
+app.get("/api/files/:id", async (c) => {
+  c.header("X-Frame-Options", "SAMEORIGIN");
+  return serveUploadedFile(c);
+});
 app.all("/api/*", (c) => c.json({ error: "Not Found" }, 404));
 
 export default app;
