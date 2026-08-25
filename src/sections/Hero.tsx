@@ -300,7 +300,7 @@ export default function Hero() {
             </Magnetic>
           </div>
 
-          <div data-hero className="mt-6 flex items-center justify-center gap-3 sm:mt-7">
+          <div data-hero className="mt-4 flex items-center justify-center gap-3 sm:mt-7">
             {socialLinks.map(({ label, href, icon: Icon }) => href ? (
               <a
                 key={label}
@@ -321,7 +321,7 @@ export default function Hero() {
           data-hero
           aria-label="Scroll to About section"
           onClick={() => scrollToId(scrollTarget)}
-                    className="group relative z-20 mt-5 flex min-h-12 min-w-[96px] shrink-0 flex-col items-center gap-2 rounded-2xl px-4 py-2 text-gray-500 transition-all duration-300 hover:-translate-y-1 hover:bg-white/5 hover:text-[#e8b923] sm:mt-5 sm:-translate-y-1 sm:hover:-translate-y-2"
+                    className="group absolute bottom-[calc(0.5rem+env(safe-area-inset-bottom))] left-1/2 z-20 flex min-h-12 min-w-[96px] -translate-x-1/2 flex-col items-center gap-2 rounded-2xl px-4 py-2 text-gray-500 transition-all duration-300 hover:-translate-y-1 hover:bg-white/5 hover:text-[#e8b923] lg:relative lg:bottom-auto lg:left-auto lg:mt-5 lg:min-h-0 lg:translate-x-0 lg:shrink-0 lg:-translate-y-1 lg:hover:-translate-y-2"
 
         >
           <span className="font-mono text-[10px] uppercase tracking-[0.35em]">{get('heroScrollLabel')}</span>

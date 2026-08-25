@@ -114,7 +114,7 @@ export default function FloatingSkillLogos() {
       </div>
 
       {/* Mobile: keep every hardcoded logo visible in a compact dock below the Hero flow. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-[2] flex justify-center px-3 sm:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] lg:hidden">
+      <div className="pointer-events-none absolute inset-x-0 bottom-[calc(8.5rem+env(safe-area-inset-bottom))] z-[2] flex justify-center px-3 sm:bottom-[calc(9rem+env(safe-area-inset-bottom))] lg:hidden">
         <div className="grid w-full max-w-[23rem] grid-cols-7 gap-1 sm:max-w-[34rem] sm:grid-cols-8 sm:gap-1.5">
 
         {floatingCards.map((card, index) => (
