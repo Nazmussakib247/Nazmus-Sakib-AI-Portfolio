@@ -70,6 +70,7 @@ export function ProfileTab() {
           <Field label="Medium"><input value={form.mediumUrl} onChange={(e) => setForm({ ...form, mediumUrl: e.target.value })} className={inputCls} /></Field>
         </div>
         <ImageUploadField label="CV / Resume (PDF)" value={form.cvUrl} onChange={(url) => setForm({ ...form, cvUrl: url })} accept="application/pdf" />
+        <Field label="CV PDF URL (advanced)"><input value={form.cvUrl} onChange={(e) => setForm({ ...form, cvUrl: e.target.value })} className={inputCls} placeholder="/api/files/123" /></Field>
         <div className="pt-2">
           <button type="submit" disabled={update.isPending} className={btnPrimary}>
             <Save className="h-4 w-4" /> {update.isPending ? 'Saving…' : 'Save Profile'}
