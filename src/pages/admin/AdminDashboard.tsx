@@ -130,8 +130,8 @@ export default function AdminDashboard() {
       </MobileNav>
 
       {/* Main */}
-      <main ref={mainRef} className="min-w-0 flex-1 overflow-y-auto">
-        <div className="p-6 lg:p-8">
+      <main ref={mainRef} className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-[1600px] p-6 lg:p-8">
           {activeTab === 'overview' && <OverviewTab unreadCount={unreadCount} goTo={setActiveTab} />}
           {activeTab === 'messages' && <MessagesTab />}
           {activeTab === 'profile' && <ProfileTab />}
@@ -290,7 +290,7 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
           </ul>
         </div>
 
-        <div className="rounded-xl border border-white/5 bg-[#111527] p-6 lg:col-span-2">
+        <div className="min-w-0 overflow-hidden rounded-xl border border-white/5 bg-[#111527] p-6 lg:col-span-2">
           <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 className="text-sm font-medium text-white">Visitor analytics</h3>
@@ -344,7 +344,7 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
                 <h4 className="text-xs uppercase tracking-[0.16em] text-gray-500">All visitor events{analyticsCountry ? ` · ${analyticsCountry === 'ZZ' ? 'Unknown' : analyticsCountry}` : ''}</h4>
                 <span className="text-xs text-gray-600">{analyticsEvents?.total || 0} recorded</span>
               </div>
-              <div className="overflow-x-auto rounded-lg border border-white/5">
+              <div className="max-h-[30rem] overflow-auto rounded-lg border border-white/5">
                 <table className="min-w-[760px] w-full text-left text-xs">
                   <thead className="bg-white/[0.03] text-gray-500"><tr><th className="px-3 py-2 font-medium">Time</th><th className="px-3 py-2 font-medium">IP</th><th className="px-3 py-2 font-medium">Country</th><th className="px-3 py-2 font-medium">Path</th><th className="px-3 py-2 font-medium">Referrer</th><th className="px-3 py-2 font-medium">Device</th></tr></thead>
                   <tbody className="divide-y divide-white/5">
