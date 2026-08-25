@@ -4,6 +4,7 @@ import { createAdminRouter, adminProcedure } from "./admin-middleware";
 import { getDb } from "../queries/connection";
 import { projects } from "@db/schema";
 import { eq } from "drizzle-orm";
+import { recordEntityChange, snapshotProject } from "./change-log";
 
 const architectureNode = z.object({ id: z.string().min(1), label: z.string().min(1), detail: z.string().optional(), orderIndex: z.number().int().nonnegative() });
 const decision = z.object({ title: z.string().min(1), decision: z.string().min(1), tradeoff: z.string().min(1), orderIndex: z.number().int().nonnegative() });
@@ -64,17 +65,23 @@ export const projectAdminRouter = createAdminRouter({
   create: adminProcedure.input(z.object({ title: z.string().min(1), description: z.string().min(1), techStack: z.array(z.string()).optional(), thumbnailUrl: z.string().optional(), githubUrl: z.string().nullable().optional(), liveUrl: z.string().nullable().optional(), videoUrl: z.string().nullable().optional(), screenshots: z.array(z.string()).optional(), orderIndex: z.number().default(0), isFeatured: z.boolean().default(true), ...caseStudyFields })).mutation(async ({ input }) => {
     const db = getDb();
     const [result] = await db.insert(projects).values({ ...input, techStack: input.techStack || [], screenshots: input.screenshots || [], caseStudyArchitecture: input.caseStudyArchitecture || [], caseStudyDecisions: input.caseStudyDecisions || [], caseStudyMetrics: input.caseStudyMetrics || [], caseStudyMedia: input.caseStudyMedia || [], caseStudyLinks: input.caseStudyLinks || [], caseStudyStack: input.caseStudyStack || [] }).returning({ id: projects.id });
-    return { success: true, id: Number(result.id) };
+    const id = Number(result.id);
+    await recordEntityChange("project", id, "create", null, await snapshotProject(id), `Created project #${id}`);
+    return { success: true, id };
   }),
   update: adminProcedure.input(z.object({ id: z.number(), ...baseProjectFields, ...caseStudyFields })).mutation(async ({ input }) => {
     const { id, ...data } = input;
+    const before = await snapshotProject(id);
     const db = getDb();
     await db.update(projects).set({ ...data, updatedAt: new Date() }).where(eq(projects.id, id));
+    await recordEntityChange("project", id, "update", before, await snapshotProject(id), `Updated project #${id}`);
     return { success: true };
   }),
   delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+    const before = await snapshotProject(input.id);
     const db = getDb();
     await db.delete(projects).where(eq(projects.id, input.id));
+    await recordEntityChange("project", input.id, "delete", before, null, `Deleted project #${input.id}`);
     return { success: true };
   }),
 });

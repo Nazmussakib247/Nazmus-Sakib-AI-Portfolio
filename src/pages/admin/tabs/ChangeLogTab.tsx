@@ -27,7 +27,7 @@ export function ChangeLogTab() {
         <p className="text-xs uppercase tracking-[0.28em] text-[#e8b923]">Admin history</p>
         <h2 className="mt-2 text-2xl font-semibold text-white">Change Log</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-400">
-          Every saved Site Settings update is stored as a database snapshot. Restore an earlier version with one click; restoring also creates a new history entry.
+          Every saved Site Settings, Project, and Skill update is stored as a database snapshot. Restore an earlier version with one click; restoring also creates a new history entry.
         </p>
       </div>
       <div className="flex items-center gap-3 rounded-2xl border border-[#e8b923]/20 bg-[#e8b923]/5 p-4 text-sm text-gray-300">
@@ -45,15 +45,15 @@ export function ChangeLogTab() {
               <div key={entry.id} className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="truncate text-sm text-white">{entry.summary}</p>
-                  <p className="mt-1 text-xs text-gray-500">{formatDate(entry.createdAt)} · {entry.action}</p>
+                  <p className="mt-1 text-xs text-gray-500">{entry.entityType} · {formatDate(entry.createdAt)} · {entry.action}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => {
-                    if (entry.entityType !== 'siteSettings') return;
+                    if (!['siteSettings', 'project', 'skill'].includes(entry.entityType)) return;
                     if (window.confirm('Restore Site Settings to this saved version? Your current settings will also be saved as a new history entry.')) setSelectedId(entry.id);
                   }}
-                  disabled={entry.entityType !== 'siteSettings' || restore.isPending}
+                  disabled={!['siteSettings', 'project', 'skill'].includes(entry.entityType) || restore.isPending}
                   className="inline-flex flex-none items-center justify-center gap-2 rounded-lg border border-[#e8b923]/30 px-3 py-2 text-xs text-[#e8b923] transition hover:bg-[#e8b923]/10 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <RotateCcw className="h-3.5 w-3.5" /> Restore

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { desc, eq, sql } from "drizzle-orm";
 import { createAdminRouter, adminProcedure } from "./admin-middleware";
 import { getDb } from "../queries/connection";
-import { adminChangeLogs, siteSettings } from "@db/schema";
+import { adminChangeLogs, siteSettings, projects, skills } from "@db/schema";
 
 const settingStateSchema = z.record(z.string(), z.string());
 
@@ -36,6 +36,24 @@ export const changeLogAdminRouter = createAdminRouter({
       const db = getDb();
       const [entry] = await db.select().from(adminChangeLogs).where(eq(adminChangeLogs.id, input.id)).limit(1);
       if (!entry) throw new Error("Change history entry not found");
+      if (entry.entityType === "project" || entry.entityType === "skill") {
+        const before = entry.beforeState as Record<string, unknown> | Array<Record<string, unknown>> | null;
+        const after = entry.afterState as Record<string, unknown> | Array<Record<string, unknown>> | null;
+        const table = entry.entityType === "project" ? projects : skills;
+        const target = (after && !Array.isArray(after) ? after : before && !Array.isArray(before) ? before : null) as { id?: number } | null;
+        if (Array.isArray(before) || Array.isArray(after)) {
+          const rows = (before || []) as Array<{ id: number; orderIndex: number }>;
+          for (const row of rows) await db.update(table).set({ orderIndex: row.orderIndex, updatedAt: new Date() }).where(eq(table.id, row.id));
+        } else if (before) {
+          const row = before as Record<string, unknown>;
+          if (target?.id) await db.update(table).set({ ...row, id: undefined, updatedAt: new Date() } as never).where(eq(table.id, target.id));
+          else await db.insert(table).values(row as never);
+        } else if (target?.id) {
+          await db.delete(table).where(eq(table.id, target.id));
+        }
+        await db.insert(adminChangeLogs).values({ scope: entry.scope, entityType: entry.entityType, entityId: entry.entityId, action: "restore", summary: `Restored ${entry.entityType} from change #${entry.id}`, beforeState: entry.afterState, afterState: entry.beforeState });
+        return { success: true };
+      }
       if (entry.entityType !== "siteSettings" || !entry.beforeState) throw new Error("This change cannot be restored yet");
       const before = settingStateSchema.parse(entry.beforeState);
       const currentRows = await db.select({ key: siteSettings.key, value: siteSettings.value }).from(siteSettings);
@@ -62,6 +80,24 @@ export async function snapshotSiteSettings() {
   const db = getDb();
   const rows = await db.select({ key: siteSettings.key, value: siteSettings.value }).from(siteSettings);
   return Object.fromEntries(rows.filter((row) => !["aiProvider", "aiApiKey", "aiApiUrl", "aiModel"].includes(row.key)).map((row) => [row.key, row.value || ""]));
+}
+
+export async function recordEntityChange(entityType: "project" | "skill", entityId: number | null, action: string, beforeState: unknown, afterState: unknown, summary: string) {
+  await ensureChangeLogTable();
+  const db = getDb();
+  await db.insert(adminChangeLogs).values({ scope: entityType, entityType, entityId: entityId === null ? null : String(entityId), action, summary, beforeState, afterState });
+}
+
+export async function snapshotProject(id: number) {
+  const db = getDb();
+  const [row] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
+  return row || null;
+}
+
+export async function snapshotSkill(id: number) {
+  const db = getDb();
+  const [row] = await db.select().from(skills).where(eq(skills.id, id)).limit(1);
+  return row || null;
 }
 
 export async function recordSiteSettingsChange(beforeState: Record<string, string>, afterState: Record<string, string>, summary: string) {
