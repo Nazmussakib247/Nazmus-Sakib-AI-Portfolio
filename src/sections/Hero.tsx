@@ -222,7 +222,7 @@ export default function Hero() {
   ];
 
   return (
-    <section id="hero" className="relative h-screen w-full overflow-hidden" style={{ background: '#05060f' }}>
+    <section id="hero" className="relative h-[100svh] min-h-[100svh] w-full overflow-hidden lg:h-screen lg:min-h-0" style={{ background: '#05060f' }}>
       <canvas ref={canvasRef} className="absolute inset-0 z-0" />
       <div className="bg-grid absolute inset-0 z-0 opacity-60 [mask-image:radial-gradient(ellipse_60%_55%_at_50%_45%,#000_35%,transparent_80%)]" />
       <FloatingSkillLogos />
