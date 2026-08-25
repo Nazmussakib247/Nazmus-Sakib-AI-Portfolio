@@ -144,6 +144,41 @@ export const experiences = pgTable("experiences", {
 
 export type Experience = typeof experiences.$inferSelect;
 
+// Academic Foundation categories and completed coursework
+export const academicFoundationCategories = pgTable("academic_foundation_categories", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+  name: varchar("name", { length: 120 }).notNull().unique(),
+  description: text("description"),
+  orderIndex: integer("order_index").default(0).notNull(),
+  isVisible: boolean("is_visible").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type AcademicFoundationCategory = typeof academicFoundationCategories.$inferSelect;
+
+export const academicFoundationCourses = pgTable("academic_foundation_courses", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+  categoryId: integer("category_id").notNull().references(() => academicFoundationCategories.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  shortDescription: text("short_description"),
+  relatedProject: varchar("related_project", { length: 255 }),
+  relatedProjectId: integer("related_project_id"),
+  orderIndex: integer("order_index").default(0).notNull(),
+  isFeatured: boolean("is_featured").default(false).notNull(),
+  isVisible: boolean("is_visible").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type AcademicFoundationCourse = typeof academicFoundationCourses.$inferSelect;
+
 // Awards table
 export const awards = pgTable("awards", {
   id: integer("id").generatedByDefaultAsIdentity().primaryKey(),

@@ -3,16 +3,17 @@ import { useNavigate } from 'react-router';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { trpc } from '@/providers/trpc';
 import {
-  LayoutDashboard, FolderOpen, Award, BookOpen, Briefcase, FileBadge,
+  LayoutDashboard, FolderOpen, Award, BookOpen, Briefcase, FileBadge, GraduationCap,
   Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2, ShieldAlert, Search, Trash2, ChevronLeft, ChevronRight, History,
 } from 'lucide-react';
 import { ProjectsTab, SkillsTab, ExperiencesTab, CertificatesTab, AwardsTab, WritingsTab } from './tabs/ContentTabs';
 import { MessagesTab } from './tabs/MessagesTab';
 import { ProfileTab, SecurityTab, SiteTab } from './tabs/SettingsTabs';
 import { ChangeLogTab } from './tabs/ChangeLogTab';
+import { AcademicFoundationTab } from './tabs/AcademicFoundationTab';
 
 type TabType =
-  | 'overview' | 'profile' | 'projects' | 'skills' | 'experiences'
+  | 'overview' | 'profile' | 'projects' | 'skills' | 'experiences' | 'academicFoundation'
   | 'certificates' | 'awards' | 'writings' | 'messages' | 'security' | 'site' | 'changeLog';
 
 const countryDisplayNames = new Intl.DisplayNames(['en'], { type: 'region' });
@@ -30,6 +31,7 @@ const tabs: { id: TabType; label: string; icon: React.ElementType }[] = [
   { id: 'projects', label: 'Projects', icon: FolderOpen },
   { id: 'skills', label: 'Skills', icon: Sparkles },
   { id: 'experiences', label: 'Experience', icon: Briefcase },
+  { id: 'academicFoundation', label: 'Academic Foundation', icon: GraduationCap },
   { id: 'certificates', label: 'Certificates', icon: FileBadge },
   { id: 'awards', label: 'Awards', icon: Award },
   { id: 'writings', label: 'Writings', icon: BookOpen },
@@ -148,6 +150,7 @@ export default function AdminDashboard() {
           {activeTab === 'projects' && <ProjectsTab />}
           {activeTab === 'skills' && <SkillsTab />}
           {activeTab === 'experiences' && <ExperiencesTab />}
+          {activeTab === 'academicFoundation' && <AcademicFoundationTab />}
           {activeTab === 'certificates' && <CertificatesTab />}
           {activeTab === 'awards' && <AwardsTab />}
           {activeTab === 'writings' && <WritingsTab />}

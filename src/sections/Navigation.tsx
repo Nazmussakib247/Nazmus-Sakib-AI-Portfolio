@@ -43,10 +43,13 @@ export default function Navigation() {
   const [query, setQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { get, isVisible } = useSettings();
-  const allNavItems = parseJsonArray<NavItem>(get('navigationItems'));
+    const allNavItems = parseJsonArray<NavItem>(get('navigationItems'));
   const frequentSearches = parseJsonArray<SearchItem>(get('searchSuggestions'));
+  const navItemsWithAcademicFoundation = allNavItems.some((item) => item.id === 'academic-foundation')
+    ? allNavItems
+    : [...allNavItems, { label: 'Academic Foundation', id: 'academic-foundation', section: 'academicFoundation' as SectionKey }];
+  const navItems = navItemsWithAcademicFoundation.filter((i) => i.label && i.id && (!i.section || isVisible(i.section)));
 
-  const navItems = allNavItems.filter((i) => i.label && i.id && (!i.section || isVisible(i.section)));
   const filteredSearches = frequentSearches.filter((item) => item.label && item.id &&
     `${item.label} ${item.hint}`.toLowerCase().includes(query.trim().toLowerCase())
   );

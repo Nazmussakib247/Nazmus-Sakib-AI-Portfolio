@@ -5,6 +5,7 @@ import { profileRouter, profileAdminRouter } from "./routers/profile";
 import { projectRouter, projectAdminRouter } from "./routers/project";
 import { certificateRouter, certificateAdminRouter } from "./routers/certificate";
 import { experienceRouter, experienceAdminRouter } from "./routers/experience";
+import { academicFoundationRouter, academicFoundationAdminRouter } from "./routers/academic-foundation";
 import { awardRouter, awardAdminRouter } from "./routers/award";
 import { writingRouter, writingAdminRouter } from "./routers/writing";
 import { skillRouter, skillAdminRouter } from "./routers/skill";
@@ -24,6 +25,7 @@ export const appRouter = createRouter({
   project: projectRouter,
   certificate: certificateRouter,
   experience: experienceRouter,
+  academicFoundation: academicFoundationRouter,
   award: awardRouter,
   writing: writingRouter,
   skill: skillRouter,
@@ -37,6 +39,7 @@ export const appRouter = createRouter({
   projectAdmin: projectAdminRouter,
   certificateAdmin: certificateAdminRouter,
   experienceAdmin: experienceAdminRouter,
+  academicFoundationAdmin: academicFoundationAdminRouter,
   awardAdmin: awardAdminRouter,
   writingAdmin: writingAdminRouter,
   skillAdmin: skillAdminRouter,

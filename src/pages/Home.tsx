@@ -3,6 +3,7 @@ import Hero from '@/sections/Hero';
 import About from '@/sections/About';
 import Projects from '@/sections/Projects';
 import Experience from '@/sections/Experience';
+import AcademicFoundation from '@/sections/AcademicFoundation';
 import Skills from '@/sections/Skills';
 import Awards from '@/sections/Awards';
 import Certificates from '@/sections/Certificates';
@@ -50,6 +51,7 @@ export default function Home() {
         {isVisible('about') && <About />}
         {isVisible('projects') && <Projects />}
         {isVisible('experience') && <Experience />}
+        {isVisible('academicFoundation') && <AcademicFoundation />}
         {isVisible('skills') && <Skills />}
         {isVisible('awards') && <Awards />}
         {isVisible('certificates') && <Certificates />}
