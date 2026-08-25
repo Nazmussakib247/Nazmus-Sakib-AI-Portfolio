@@ -43,11 +43,23 @@ export default function Navigation() {
   const [query, setQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { get, isVisible } = useSettings();
-    const allNavItems = parseJsonArray<NavItem>(get('navigationItems'));
+  const allNavItems = parseJsonArray<NavItem>(get('navigationItems'));
   const frequentSearches = parseJsonArray<SearchItem>(get('searchSuggestions'));
-  const navItemsWithAcademicFoundation = allNavItems.some((item) => item.id === 'academic-foundation')
-    ? allNavItems
-    : [...allNavItems, { label: 'Academic Foundation', id: 'academic-foundation', section: 'academicFoundation' as SectionKey }];
+  const configuredFoundation = allNavItems.find((item) => item.id === 'academic-foundation');
+  const navItemsWithoutFoundation = allNavItems.filter((item) => item.id !== 'academic-foundation');
+  const foundationItem: NavItem = {
+    ...(configuredFoundation || {}),
+    label: 'Foundation',
+    id: 'academic-foundation',
+    section: 'academicFoundation',
+  };
+  const experienceIndex = navItemsWithoutFoundation.findIndex((item) => item.id === 'experience');
+  const foundationIndex = experienceIndex >= 0 ? experienceIndex + 1 : Math.min(3, navItemsWithoutFoundation.length);
+  const navItemsWithAcademicFoundation = [
+    ...navItemsWithoutFoundation.slice(0, foundationIndex),
+    foundationItem,
+    ...navItemsWithoutFoundation.slice(foundationIndex),
+  ];
   const navItems = navItemsWithAcademicFoundation.filter((i) => i.label && i.id && (!i.section || isVisible(i.section)));
 
   const filteredSearches = frequentSearches.filter((item) => item.label && item.id &&
