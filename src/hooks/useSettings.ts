@@ -2,11 +2,11 @@ import { trpc } from '@/providers/trpc';
 
 
 export const DEFAULT_SETTINGS: Record<string, string> = {
-  heroBadge: '<ml · web · automation />',
+  heroBadge: 'AI ENGINEER · RAG · AUTOMATION',
   heroHeadline: 'NAZMUS SAKIB',
-  heroTagline: 'ML Engineer,AI Engineer,AI Product Engineer',
+  heroTagline: 'RAG & LLM Systems,AI Product Engineering,Intelligent Automation',
   heroSubtext:
-    'ML Engineer building production-minded AI systems with Python, NLP, LLMs, retrieval, and automation—from bilingual analysis to intelligent business products.',
+    'AI Engineer building practical RAG, LLM, NLP, and automation systems—from retrieval pipelines to reliable products that solve real business problems.',
   heroPrimaryCta: 'View Projects',
   heroPrimaryTarget: 'projects',
   heroSecondaryCta: 'Get In Touch',
