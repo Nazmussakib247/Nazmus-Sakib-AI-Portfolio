@@ -305,6 +305,7 @@ export const visitEvents = pgTable("visit_events", {
   referrerHost: varchar("referrer_host", { length: 255 }),
   userAgent: varchar("user_agent", { length: 500 }),
   isSuspicious: boolean("is_suspicious").default(false).notNull(),
+  deletedAt: timestamp("deleted_at"),
   visitedAt: timestamp("visited_at").defaultNow().notNull(),
 });
 

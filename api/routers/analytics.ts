@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, gte, ilike, lt, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, isNotNull, isNull, lt, lte, or, sql } from "drizzle-orm";
 import { createRouter, publicQuery } from "../middleware";
 import { createAdminRouter, adminProcedure } from "./admin-middleware";
 import { getDb } from "../queries/connection";
@@ -39,6 +39,7 @@ function buildVisitorFilters(input: VisitorFilterInput) {
       )
     : undefined;
   return and(
+    isNull(visitEvents.deletedAt),
     gte(visitEvents.visitedAt, start),
     end ? lte(visitEvents.visitedAt, end) : undefined,
     input.country ? eq(visitEvents.country, input.country) : undefined,
@@ -77,11 +78,13 @@ export async function ensureVisitEventsTable() {
     await db.execute(sql`ALTER TABLE "visit_events" ADD COLUMN IF NOT EXISTS "ip_address" varchar(128)`);
     await db.execute(sql`ALTER TABLE "visit_events" ADD COLUMN IF NOT EXISTS "user_agent" varchar(500)`);
     await db.execute(sql`ALTER TABLE "visit_events" ADD COLUMN IF NOT EXISTS "is_suspicious" boolean NOT NULL DEFAULT false`);
+    await db.execute(sql`ALTER TABLE "visit_events" ADD COLUMN IF NOT EXISTS "deleted_at" timestamp`);
     await db.execute(sql`UPDATE "visit_events" SET "ip_address" = 'unknown' WHERE "ip_address" IS NULL`);
     await db.execute(sql`ALTER TABLE "visit_events" ALTER COLUMN "ip_address" SET NOT NULL`);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS "visit_events_visited_at_idx" ON "visit_events" ("visited_at")`);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS "visit_events_ip_address_idx" ON "visit_events" ("ip_address")`);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS "visit_events_country_idx" ON "visit_events" ("country")`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS "visit_events_deleted_at_idx" ON "visit_events" ("deleted_at")`);
   } catch (error) {
     console.error('[analytics] schema guard failed', error);
   }
@@ -166,6 +169,10 @@ export const analyticsAdminRouter = createAdminRouter({
         suspicious: visitEvents.isSuspicious,
         visitedAt: visitEvents.visitedAt,
       }).from(visitEvents).where(filters).orderBy(desc(visitEvents.visitedAt)).limit(input.pageSize).offset(offset);
+      const daily = await db.select({
+        day: sql<string>`to_char(date_trunc('day', ${visitEvents.visitedAt}), 'YYYY-MM-DD')`,
+        visits: sql<number>`count(*)`,
+      }).from(visitEvents).where(filters).groupBy(sql`date_trunc('day', ${visitEvents.visitedAt})`).orderBy(sql`date_trunc('day', ${visitEvents.visitedAt})`);
       const total = Number(countRow?.total || 0);
       return {
         page: input.page,
@@ -173,6 +180,7 @@ export const analyticsAdminRouter = createAdminRouter({
         total,
         totalPages: Math.max(1, Math.ceil(total / input.pageSize)),
         events: rows,
+        daily: daily.map((row) => ({ day: row.day, visits: Number(row.visits) })),
       };
     }),
 
@@ -181,7 +189,32 @@ export const analyticsAdminRouter = createAdminRouter({
     .mutation(async ({ input }) => {
       const db = getDb();
       const filters = buildVisitorFilters(input);
-      const deleted = await db.delete(visitEvents).where(filters).returning({ id: visitEvents.id });
+      const now = new Date();
+      const deleted = await db.update(visitEvents).set({ deletedAt: now }).where(filters).returning({ id: visitEvents.id });
       return { deletedCount: deleted.length };
     }),
+
+  recycleBin: adminProcedure.query(async () => {
+    const db = getDb();
+    return db.select({
+      id: visitEvents.id,
+      ipAddress: visitEvents.ipAddress,
+      country: visitEvents.country,
+      path: visitEvents.path,
+      visitedAt: visitEvents.visitedAt,
+      deletedAt: visitEvents.deletedAt,
+    }).from(visitEvents).where(isNotNull(visitEvents.deletedAt)).orderBy(desc(visitEvents.deletedAt)).limit(100);
+  }),
+
+  restore: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
+    const db = getDb();
+    await db.update(visitEvents).set({ deletedAt: null }).where(and(eq(visitEvents.id, input.id), isNotNull(visitEvents.deletedAt)));
+    return { success: true };
+  }),
+
+  permanentlyDelete: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input }) => {
+    const db = getDb();
+    const deleted = await db.delete(visitEvents).where(and(eq(visitEvents.id, input.id), isNotNull(visitEvents.deletedAt))).returning({ id: visitEvents.id });
+    return { success: deleted.length > 0 };
+  }),
 });

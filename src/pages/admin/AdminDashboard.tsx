@@ -242,13 +242,29 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
     pageSize: 25,
   });
   const deleteFiltered = trpc.analyticsAdmin.deleteFiltered.useMutation();
+  const { data: recycleBin, refetch: refetchRecycleBin } = trpc.analyticsAdmin.recycleBin.useQuery();
+  const restoreEvent = trpc.analyticsAdmin.restore.useMutation();
+  const permanentlyDeleteEvent = trpc.analyticsAdmin.permanentlyDelete.useMutation();
+  const chartDaily = analyticsEvents?.daily || [];
+  const maxChartVisits = Math.max(1, ...chartDaily.map((day) => day.visits));
   const handleDeleteFiltered = async () => {
     const total = analyticsEvents?.total || 0;
     if (!total || !window.confirm(`Delete ${total} visitor event${total === 1 ? '' : 's'} matching the current filters? This cannot be undone.`)) return;
     const result = await deleteFiltered.mutateAsync(analyticsFilter);
     setAnalyticsPage(1);
     await refetchAnalyticsEvents();
-    window.alert(`${result.deletedCount} visitor event${result.deletedCount === 1 ? '' : 's'} deleted.`);
+    await refetchRecycleBin();
+    window.alert(`${result.deletedCount} visitor event${result.deletedCount === 1 ? '' : 's'} moved to the recycle bin.`);
+  };
+  const handleRestoreEvent = async (id: number) => {
+    await restoreEvent.mutateAsync({ id });
+    await refetchRecycleBin();
+    await refetchAnalyticsEvents();
+  };
+  const handlePermanentDelete = async (id: number) => {
+    if (!window.confirm('Permanently delete this visitor event? This cannot be undone.')) return;
+    await permanentlyDeleteEvent.mutateAsync({ id });
+    await refetchRecycleBin();
   };
 
   const stats: { label: string; value: number; icon: React.ElementType; tab: TabType; highlight?: boolean }[] = [
@@ -379,6 +395,19 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
             <div className="min-w-0"><h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">All IPs · {analytics?.uniqueIps || 0}</h4><div className="max-h-52 space-y-1.5 overflow-y-auto pr-1">{analytics?.topIps.map((ip) => <div key={ip.ipAddress} className="rounded-md bg-white/[0.02] px-2 py-1.5 text-xs"><div className="flex items-center justify-between gap-3"><span className={`truncate font-mono ${ip.ipAddress === 'unknown' ? 'text-gray-500' : 'text-gray-300'}`}>{ip.ipAddress}</span><span className={`shrink-0 ${ip.suspicious > 0 ? 'text-orange-300' : 'text-gray-500'}`}>{ip.visits} visits{ip.suspicious > 0 ? ' · alert' : ''}</span></div><div className="mt-0.5 flex justify-between gap-3 text-[10px] text-gray-600"><span>{ip.country === 'ZZ' ? 'Unknown country' : ip.country}</span><span>{ip.lastSeen ? new Date(ip.lastSeen).toLocaleString() : 'No time data'}</span></div></div>) || <p className="text-xs text-gray-600">No IP data yet</p>}</div></div>
             <div className="min-w-0"><h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">Daily activity</h4><div className="max-h-32 space-y-1.5 overflow-y-auto pr-1">{analytics?.daily.slice(-8).map((day) => <div key={day.day} className="flex justify-between gap-3 text-xs"><span className="text-gray-300">{day.day}</span><span className="text-gray-500">{day.visits}</span></div>) || <p className="text-xs text-gray-600">No daily data yet</p>}</div></div>
           </div>
+          <div className="mt-6 rounded-lg border border-white/5 bg-white/[0.02] p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h4 className="text-xs uppercase tracking-[0.16em] text-gray-500">Activity chart · active filters</h4>
+              <span className="text-[10px] text-gray-600">{chartDaily.length ? `${chartDaily.length} day${chartDaily.length === 1 ? '' : 's'} · ${analyticsEvents?.total || 0} matching events` : 'No matching activity'}</span>
+            </div>
+            {chartDaily.length ? <div className="flex h-40 items-end gap-1 overflow-x-auto pb-5">
+              {chartDaily.map((day) => <div key={day.day} className="group flex h-full min-w-7 flex-1 flex-col items-center justify-end gap-1" title={`${day.day}: ${day.visits} visits`}>
+                <span className="text-[9px] text-gray-500 opacity-0 transition-opacity group-hover:opacity-100">{day.visits}</span>
+                <div className="w-full rounded-t bg-[#e8b923]/70 transition-all group-hover:bg-[#e8b923]" style={{ height: `${Math.max(6, (day.visits / maxChartVisits) * 100)}%` }} />
+                <span className="whitespace-nowrap text-[9px] text-gray-600">{day.day.slice(5)}</span>
+              </div>)}
+            </div> : <p className="py-10 text-center text-xs text-gray-600">No activity matches the current filters.</p>}
+          </div>
           <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
             <div className="min-w-0">
               <h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">All countries</h4>
@@ -424,6 +453,21 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
                 </div>
               </div>
             </div>
+          </div>
+          <div className="mt-6 rounded-lg border border-white/5 bg-[#0d1120] p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h4 className="text-xs uppercase tracking-[0.16em] text-gray-500">Recycle bin</h4>
+                <p className="mt-1 text-xs text-gray-600">Soft-deleted visitor events remain recoverable until permanently removed.</p>
+              </div>
+              <span className="text-xs text-gray-500">{recycleBin?.length || 0} recent items</span>
+            </div>
+            {recycleBin?.length ? <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
+              {recycleBin.map((event) => <div key={event.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-white/[0.03] px-3 py-2 text-xs">
+                <div className="min-w-0"><div className="flex flex-wrap gap-x-3 gap-y-1"><span className="font-mono text-gray-300">{event.ipAddress}</span><span className="text-gray-500">{event.country === 'ZZ' ? 'Unknown' : event.country}</span><span className="text-gray-500">{event.path}</span></div><div className="mt-1 text-[10px] text-gray-600">Deleted {event.deletedAt ? new Date(event.deletedAt).toLocaleString() : 'recently'} · visited {new Date(event.visitedAt).toLocaleString()}</div></div>
+                <div className="flex items-center gap-2"><button type="button" onClick={() => handleRestoreEvent(event.id)} className="rounded border border-[#e8b923]/25 px-2 py-1 text-[#e8b923] hover:bg-[#e8b923]/10">Restore</button><button type="button" onClick={() => handlePermanentDelete(event.id)} className="rounded border border-red-400/20 px-2 py-1 text-red-300 hover:bg-red-400/10">Delete permanently</button></div>
+              </div>)}
+            </div> : <p className="text-xs text-gray-600">Recycle bin is empty.</p>}
           </div>
         </div>
       </div>
