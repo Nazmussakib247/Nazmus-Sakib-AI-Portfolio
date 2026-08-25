@@ -61,8 +61,8 @@ export default function StatusBar() {
       className="fixed inset-x-0 bottom-0 z-[70] border-t border-white/10 bg-[#060812]/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_35px_rgba(0,0,0,0.28)] backdrop-blur-xl"
       aria-label="Portfolio status ticker"
     >
-      <div className="relative mx-auto grid h-16 max-w-[1600px] grid-cols-[1fr_auto] grid-rows-[2rem_2rem] items-center gap-x-3 px-3 sm:flex sm:h-14 sm:gap-5 sm:px-6 sm:pr-28 lg:px-8 lg:pr-28">
-        <div className="inline-flex min-w-0 items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-emerald-300/95 sm:shrink-0 sm:text-[11px] sm:tracking-[0.16em]">
+      <div className="relative mx-auto grid h-16 max-w-[1600px] grid-cols-[1fr_auto] grid-rows-[2rem_2rem] items-center gap-x-3 px-3 md:flex md:h-14 md:gap-5 md:px-6 md:pr-28 lg:px-8 lg:pr-28">
+        <div className="inline-flex min-w-0 items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-emerald-300/95 md:shrink-0 md:text-[11px] md:tracking-[0.16em]">
 
           <span className="relative flex h-2 w-2 items-center justify-center">
             <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400/35 motion-reduce:hidden" />
@@ -70,10 +70,10 @@ export default function StatusBar() {
           </span>
           <span className="whitespace-nowrap">{statusText}</span>
         </div>
-        <span className="hidden h-4 w-px shrink-0 bg-white/15 sm:block" aria-hidden="true" />
+        <span className="hidden h-4 w-px shrink-0 bg-white/15 md:block" aria-hidden="true" />
 
-        <div className="col-span-2 row-start-2 min-w-0 overflow-hidden sm:row-auto sm:flex-1" aria-live="polite">
-          <div className="status-bar-ticker flex w-max min-w-full items-center font-mono text-[8px] uppercase tracking-[0.09em] sm:text-[11px] sm:tracking-[0.16em]">
+        <div className="col-span-2 row-start-2 min-w-0 overflow-hidden md:row-auto md:flex-1" aria-live="polite">
+          <div className="status-bar-ticker flex w-max min-w-full items-center font-mono text-[8px] uppercase tracking-[0.09em] md:text-[11px] md:tracking-[0.16em]">
 
             {tickerMessage}
             <span aria-hidden="true">{tickerMessage}</span>
@@ -83,7 +83,7 @@ export default function StatusBar() {
         <button
           type="button"
           onClick={() => scrollToId(hireTarget)}
-          className="group row-start-1 inline-flex items-center justify-self-end gap-1.5 rounded-full bg-[#e8b923] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-[#05060f] shadow-[0_0_18px_rgba(232,185,35,0.16)] transition-all active:scale-[0.97] hover:-translate-y-0.5 hover:bg-[#f5cd45] hover:shadow-[0_0_24px_rgba(232,185,35,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923] sm:row-auto sm:px-4 sm:text-[10px] sm:tracking-[0.16em]"
+          className="group row-start-1 inline-flex items-center justify-self-end gap-1.5 rounded-full bg-[#e8b923] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-[#05060f] shadow-[0_0_18px_rgba(232,185,35,0.16)] transition-all active:scale-[0.97] hover:-translate-y-0.5 hover:bg-[#f5cd45] hover:shadow-[0_0_24px_rgba(232,185,35,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923] md:row-auto md:px-4 md:text-[10px] md:tracking-[0.16em]"
 
           aria-label={`${hireLabel} — scroll to ${hireTarget}`}
         >
