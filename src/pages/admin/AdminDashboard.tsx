@@ -15,6 +15,14 @@ type TabType =
   | 'overview' | 'profile' | 'projects' | 'skills' | 'experiences'
   | 'certificates' | 'awards' | 'writings' | 'messages' | 'security' | 'site' | 'changeLog';
 
+const countryDisplayNames = new Intl.DisplayNames(['en'], { type: 'region' });
+
+function formatCountry(value: string | null | undefined) {
+  const code = value?.trim().toUpperCase() || 'ZZ';
+  if (code === 'ZZ') return 'Unknown';
+  return countryDisplayNames.of(code) || code;
+}
+
 const tabs: { id: TabType; label: string; icon: React.ElementType }[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'messages', label: 'Messages', icon: Inbox },
@@ -375,7 +383,7 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
               <label htmlFor="analytics-country" className="sr-only">Filter visitor events by country</label>
               <select id="analytics-country" value={analyticsCountry} onChange={(event) => { setAnalyticsCountry(event.target.value); setAnalyticsPage(1); }} className="max-w-36 rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]">
                 <option value="">All countries</option>
-                {(analytics?.countries || []).map((country) => <option key={country.country} value={country.country}>{country.country === 'ZZ' ? 'Unknown' : country.country} ({country.visits})</option>)}
+                {(analytics?.countries || []).map((country) => <option key={country.country} value={country.country}>{formatCountry(country.country)} ({country.visits})</option>)}
               </select>
               <label htmlFor="analytics-search" className="sr-only">Search visitor events</label>
               <div className="relative w-full sm:w-56">
@@ -391,11 +399,12 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
             <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-2xl text-white">{analytics?.totalVisits || 0}</div><div className="text-xs text-gray-500">Visits · {analyticsDays}d</div></div>
             <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-2xl text-white">{analytics?.uniqueIps || 0}</div><div className="text-xs text-gray-500">Distinct IPs</div></div>
             <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-2xl text-white">{analytics?.suspiciousEvents || 0}</div><div className="flex items-center gap-1 text-xs text-gray-500"><ShieldAlert className="h-3 w-3 text-orange-300" /> Traffic alerts</div></div>
-            <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-sm text-gray-300">{analytics?.countries.slice(0, 4).map((country) => `${country.country === 'ZZ' ? 'Unknown' : country.country} (${country.visits})`).join(', ') || 'No country data yet'}</div><div className="mt-1 text-xs text-gray-500">Top countries</div></div>
+            <div className="rounded-lg bg-white/[0.03] p-3"><div className="text-sm text-gray-300">{analytics?.countries.slice(0, 4).map((country) => `${formatCountry(country.country)} (${country.visits})`).join(', ') || 'No country data yet'}</div><div className="mt-1 text-xs text-gray-500">Top countries</div></div>
           </div>
           <div className="mt-5 grid gap-5 lg:grid-cols-3">
             <div className="min-w-0"><h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">Top paths</h4><div className="space-y-1.5">{analytics?.topPaths.slice(0, 8).map((path) => <div key={path.path} className="flex justify-between gap-3 text-xs"><span className="truncate text-gray-300">{path.path}</span><span className="shrink-0 text-gray-500">{path.visits}</span></div>) || <p className="text-xs text-gray-600">No path data yet</p>}</div></div>
-            <div className="min-w-0"><h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">All IPs · {analytics?.uniqueIps || 0}</h4><div className="max-h-52 space-y-1.5 overflow-y-auto pr-1">{analytics?.topIps.map((ip) => <div key={ip.ipAddress} className="rounded-md bg-white/[0.02] px-2 py-1.5 text-xs"><div className="flex items-center justify-between gap-3"><span className={`truncate font-mono ${ip.ipAddress === 'unknown' ? 'text-gray-500' : 'text-gray-300'}`}>{ip.ipAddress}</span><span className={`shrink-0 ${ip.suspicious > 0 ? 'text-orange-300' : 'text-gray-500'}`}>{ip.visits} visits{ip.suspicious > 0 ? ' · alert' : ''}</span></div><div className="mt-0.5 flex justify-between gap-3 text-[10px] text-gray-600"><span>{ip.country === 'ZZ' ? 'Unknown country' : ip.country}</span><span>{ip.lastSeen ? new Date(ip.lastSeen).toLocaleString() : 'No time data'}</span></div></div>) || <p className="text-xs text-gray-600">No IP data yet</p>}</div></div>
+            <div className="min-w-0"><h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">All IPs · {analytics?.uniqueIps || 0}</h4><div className="max-h-52 space-y-1.5 overflow-y-auto pr-1">{analytics?.topIps.map((ip) => <div key={ip.ipAddress} className="rounded-md bg-white/[0.02] px-2 py-1.5 text-xs"><div className="flex items-center justify-between gap-3"><span className={`truncate font-mono ${ip.ipAddress === 'unknown' ? 'text-gray-500' : 'text-gray-300'}`}>{ip.ipAddress}</span><span className={`shrink-0 ${ip.suspicious > 0 ? 'text-orange-300' : 'text-gray-500'}`}>{ip.visits} visits{ip.suspicious > 0 ? ' · alert' : ''}</span></div><div className="mt-0.5 flex justify-between gap-3 text-[10px] text-gray-600"><span>{ip.country === 'ZZ' ? 'Unknown country' : formatCountry(ip.country)}</span>
+<span>{ip.lastSeen ? new Date(ip.lastSeen).toLocaleString() : 'No time data'}</span></div></div>) || <p className="text-xs text-gray-600">No IP data yet</p>}</div></div>
             <div className="min-w-0"><h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">Daily activity</h4><div className="max-h-32 space-y-1.5 overflow-y-auto pr-1">{analytics?.daily.slice(-8).map((day) => <div key={day.day} className="flex justify-between gap-3 text-xs"><span className="text-gray-300">{day.day}</span><span className="text-gray-500">{day.visits}</span></div>) || <p className="text-xs text-gray-600">No daily data yet</p>}</div></div>
           </div>
           <div className="mt-6 rounded-lg border border-white/5 bg-white/[0.02] p-4">
@@ -413,11 +422,11 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
           </div>
           <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
             <div className="min-w-0">
-              <h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">All countries</h4>
+              <h4 className="mb-2 text-xs uppercase tracking-[0.16em] text-gray-500">All countries · {analytics?.countries.length || 0}</h4>
               <div className="max-h-52 space-y-1.5 overflow-y-auto pr-1">
                 {(analytics?.countries || []).map((country) => (
                   <button key={country.country} type="button" onClick={() => { setAnalyticsCountry(country.country); setAnalyticsPage(1); }} className={`flex w-full items-center justify-between gap-3 rounded-md px-2 py-1.5 text-left text-xs transition-colors hover:bg-white/[0.05] ${analyticsCountry === country.country ? 'bg-[#e8b923]/10 text-[#e8b923]' : 'text-gray-300'}`}>
-                    <span>{country.country === 'ZZ' ? 'Unknown' : country.country}</span>
+                    <span>{formatCountry(country.country)}</span>
                     <span className="text-gray-500">{country.visits}</span>
                   </button>
                 ))}
@@ -427,7 +436,7 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
             </div>
             <div className="min-w-0">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <h4 className="text-xs uppercase tracking-[0.16em] text-gray-500">All visitor events{analyticsCountry ? ` · ${analyticsCountry === 'ZZ' ? 'Unknown' : analyticsCountry}` : ''}{analyticsSearch.trim() ? ` · Search: ${analyticsSearch.trim()}` : ''}</h4>
+                <h4 className="text-xs uppercase tracking-[0.16em] text-gray-500">All visitor events{analyticsCountry ? ` · ${formatCountry(analyticsCountry)}` : ''}{analyticsSearch.trim() ? ` · Search: ${analyticsSearch.trim()}` : ''}</h4>
                 <span className="text-xs text-gray-600">{analyticsEvents?.total || 0} recorded</span>
               </div>
               <div className="max-h-[30rem] overflow-auto rounded-lg border border-white/5">
@@ -438,7 +447,7 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
                       <tr key={event.id} className={event.suspicious ? 'bg-orange-400/[0.06]' : ''}>
                         <td className="whitespace-nowrap px-3 py-2 text-gray-400">{new Date(event.visitedAt).toLocaleString()}</td>
                         <td className={`whitespace-nowrap px-3 py-2 font-mono ${event.ipAddress === 'unknown' ? 'text-gray-500' : 'text-gray-200'}`}>{event.ipAddress || 'unknown'}{event.suspicious ? <span className="ml-1 text-orange-300">!</span> : null}</td>
-                        <td className="px-3 py-2 text-gray-300">{event.country === 'ZZ' ? 'Unknown' : event.country}</td>
+                        <td className="px-3 py-2 text-gray-300">{formatCountry(event.country)}</td>
                         <td className="max-w-40 truncate px-3 py-2 text-gray-400" title={event.path}>{event.path}</td>
                         <td className="max-w-32 truncate px-3 py-2 text-gray-500" title={event.referrerHost || undefined}>{event.referrerHost || 'Direct'}</td>
                         <td className="max-w-52 truncate px-3 py-2 text-gray-500" title={event.userAgent || undefined}>{event.userAgent || 'Unknown'}</td>
@@ -467,7 +476,7 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
             </div>
             {recycleBin?.length ? <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
               {recycleBin.map((event) => <div key={event.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-white/[0.03] px-3 py-2 text-xs">
-                <div className="min-w-0"><div className="flex flex-wrap gap-x-3 gap-y-1"><span className="font-mono text-gray-300">{event.ipAddress}</span><span className="text-gray-500">{event.country === 'ZZ' ? 'Unknown' : event.country}</span><span className="text-gray-500">{event.path}</span></div><div className="mt-1 text-[10px] text-gray-600">Deleted {event.deletedAt ? new Date(event.deletedAt).toLocaleString() : 'recently'} · visited {new Date(event.visitedAt).toLocaleString()}</div></div>
+                <div className="min-w-0"><div className="flex flex-wrap gap-x-3 gap-y-1"><span className="font-mono text-gray-300">{event.ipAddress}</span><span className="text-gray-500">{formatCountry(event.country)}</span><span className="text-gray-500">{event.path}</span></div><div className="mt-1 text-[10px] text-gray-600">Deleted {event.deletedAt ? new Date(event.deletedAt).toLocaleString() : 'recently'} · visited {new Date(event.visitedAt).toLocaleString()}</div></div>
                 <div className="flex items-center gap-2"><button type="button" onClick={() => handleRestoreEvent(event.id)} className="rounded border border-[#e8b923]/25 px-2 py-1 text-[#e8b923] hover:bg-[#e8b923]/10">Restore</button><button type="button" onClick={() => handlePermanentDelete(event.id)} className="rounded border border-red-400/20 px-2 py-1 text-red-300 hover:bg-red-400/10">Delete permanently</button></div>
               </div>)}
             </div> : <p className="text-xs text-gray-600">Recycle bin is empty.</p>}
