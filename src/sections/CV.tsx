@@ -149,7 +149,7 @@ export default function CV() {
             </div>
 
             <div className="min-h-0 flex-1 bg-white">
-              {cvUrl ? <iframe src={cvUrl} title={`${profile?.name || cvCopy.profileFallback || ''} ${cvCopy.previewTitleSuffix || ''}`} className="h-full w-full" /> : <div className="flex h-full items-center justify-center px-6 text-center text-sm text-gray-500">{cvCopy.noPreview || ''}</div>}
+              {cvUrl ? <iframe src={`${cvUrl}${cvUrl.includes('?') ? '&' : '?'}preview=1`} title={`${profile?.name || cvCopy.profileFallback || ''} ${cvCopy.previewTitleSuffix || ''}`} className="h-full w-full" /> : <div className="flex h-full items-center justify-center px-6 text-center text-sm text-gray-500">{cvCopy.noPreview || ''}</div>}
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-5 py-3 sm:px-6">
