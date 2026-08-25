@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { trpc } from '@/providers/trpc';
-import { ArrowUpRight, FileText, BookOpen, Newspaper, Globe2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowUpRight, FileText, BookOpen, Newspaper, Globe2, ChevronDown } from 'lucide-react';
 import { useReveal } from '@/components/fx/useReveal';
 import TiltCard from '@/components/fx/TiltCard';
 import SectionHeading from '@/components/fx/SectionHeading';
@@ -21,7 +21,7 @@ export default function Blog() {
   const writings = dbWritings ?? [];
   const allLabel = blogCopy.all || 'All';
   const [activeCategory, setActiveCategory] = useState(allLabel);
-  const [showMore, setShowMore] = useState(false);
+  const [visibleAdditionalCount, setVisibleAdditionalCount] = useState(0);
   const categories = useMemo(
     () => [allLabel, ...Array.from(new Set(writings.map((post) => post.category).filter((category): category is string => Boolean(category))))],
     [writings, allLabel]
@@ -29,13 +29,14 @@ export default function Blog() {
   const categoryWritings = activeCategory === allLabel ? writings : writings.filter((post) => post.category === activeCategory);
   const featuredWritings = categoryWritings.filter((post) => post.isFeatured);
   const moreWritings = categoryWritings.filter((post) => !post.isFeatured);
-  const displayedWritings = showMore ? categoryWritings : featuredWritings;
+  const displayedWritings = [...featuredWritings, ...moreWritings.slice(0, visibleAdditionalCount)];
+  const remainingWritings = Math.max(0, moreWritings.length - visibleAdditionalCount);
 
   useEffect(() => {
-    setShowMore(false);
+    setVisibleAdditionalCount(0);
   }, [activeCategory]);
 
-  useReveal(sectionRef, [dbWritings, activeCategory, showMore]);
+  useReveal(sectionRef, [dbWritings, activeCategory, visibleAdditionalCount]);
 
   return (
     <section
@@ -79,7 +80,7 @@ export default function Blog() {
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-10 text-center text-sm text-gray-500">{blogCopy.empty || ''}</div>
         ) : (
           <>
-            {displayedWritings.length === 0 && !showMore ? (
+            {displayedWritings.length === 0 ? (
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-10 text-center text-sm text-gray-500">
                 {blogCopy.featuredEmpty || 'No featured articles in this category yet.'}
               </div>
@@ -131,16 +132,16 @@ export default function Blog() {
                 })}
               </div>
             )}
-            {moreWritings.length > 0 && (
+            {remainingWritings > 0 && (
               <div className="mt-10 flex justify-center">
                 <button
                   type="button"
-                  aria-expanded={showMore}
-                  onClick={() => setShowMore((current) => !current)}
+                  aria-label={`Load 6 more articles; ${remainingWritings} remaining`}
+                  onClick={() => setVisibleAdditionalCount((current) => Math.min(current + 6, moreWritings.length))}
                   className="glass inline-flex items-center gap-2 rounded-full border border-[#e8b923]/25 px-5 py-2.5 text-sm text-[#e8b923] transition-all duration-300 hover:border-[#e8b923]/60 hover:bg-[#e8b923]/10"
                 >
-                  {showMore ? (blogCopy.readLess || 'Show Less') : `${blogCopy.readMore || 'Read More'}${moreWritings.length ? ` · ${moreWritings.length}` : ''}`}
-                  {showMore ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  {blogCopy.readMore || 'Read More'} · {Math.min(6, remainingWritings)} more
+                  <ChevronDown className="h-4 w-4" />
                 </button>
               </div>
             )}
