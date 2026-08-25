@@ -136,8 +136,11 @@ function injectSeo(html: string, data: SeoData) {
   updated = replaceMeta(updated, "property", "og:title", data.title);
   updated = replaceMeta(updated, "property", "og:description", data.description);
   updated = replaceMeta(updated, "property", "og:image", data.socialImageUrl);
+  updated = replaceMeta(updated, "property", "og:image:url", data.socialImageUrl);
   updated = replaceMeta(updated, "property", "og:image:secure_url", data.socialImageUrl);
   updated = replaceMeta(updated, "property", "og:image:type", "image/jpeg");
+  updated = replaceMeta(updated, "property", "og:image:width", "1200");
+  updated = replaceMeta(updated, "property", "og:image:height", "627");
   updated = replaceMeta(updated, "property", "og:image:alt", data.socialImageAlt);
   updated = replaceMeta(updated, "name", "twitter:title", data.title);
   updated = replaceMeta(updated, "name", "twitter:description", data.description);
