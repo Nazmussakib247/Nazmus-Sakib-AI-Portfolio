@@ -91,7 +91,13 @@ export const analyticsAdminRouter = createAdminRouter({
     const [alerts] = await db.select({ total: sql<number>`count(*)` }).from(visitEvents).where(and(range, eq(visitEvents.isSuspicious, true)));
     const countries = await db.select({ country: visitEvents.country, visits: sql<number>`count(*)` }).from(visitEvents).where(range).groupBy(visitEvents.country).orderBy(desc(sql`count(*)`));
     const paths = await db.select({ path: visitEvents.path, visits: sql<number>`count(*)` }).from(visitEvents).where(range).groupBy(visitEvents.path).orderBy(desc(sql`count(*)`)).limit(20);
-    const ips = await db.select({ ipAddress: visitEvents.ipAddress, country: visitEvents.country, visits: sql<number>`count(*)`, suspicious: sql<number>`sum(case when ${visitEvents.isSuspicious} then 1 else 0 end)` }).from(visitEvents).where(range).groupBy(visitEvents.ipAddress, visitEvents.country).orderBy(desc(sql`count(*)`)).limit(50);
+    const ips = await db.select({
+      ipAddress: visitEvents.ipAddress,
+      country: sql<string>`(array_agg(${visitEvents.country} order by ${visitEvents.visitedAt} desc))[1]`,
+      visits: sql<number>`count(*)`,
+      suspicious: sql<number>`sum(case when ${visitEvents.isSuspicious} then 1 else 0 end)`,
+      lastSeen: sql<Date>`max(${visitEvents.visitedAt})`,
+    }).from(visitEvents).where(range).groupBy(visitEvents.ipAddress).orderBy(desc(sql`count(*)`));
     const daily = await db.select({ day: sql<string>`to_char(date_trunc('day', ${visitEvents.visitedAt}), 'YYYY-MM-DD')`, visits: sql<number>`count(*)` }).from(visitEvents).where(range).groupBy(sql`date_trunc('day', ${visitEvents.visitedAt})`).orderBy(sql`date_trunc('day', ${visitEvents.visitedAt})`);
     return {
       periodDays: days,
@@ -100,7 +106,7 @@ export const analyticsAdminRouter = createAdminRouter({
       suspiciousEvents: Number(alerts?.total || 0),
       countries: countries.map((row) => ({ country: row.country, visits: Number(row.visits) })),
       topPaths: paths.map((row) => ({ path: row.path, visits: Number(row.visits) })),
-      topIps: ips.map((row) => ({ ipAddress: row.ipAddress, country: row.country, visits: Number(row.visits), suspicious: Number(row.suspicious || 0) })),
+      topIps: ips.map((row) => ({ ipAddress: row.ipAddress, country: row.country, visits: Number(row.visits), suspicious: Number(row.suspicious || 0), lastSeen: row.lastSeen })),
       daily: daily.map((row) => ({ day: row.day, visits: Number(row.visits) })),
     };
   }),
