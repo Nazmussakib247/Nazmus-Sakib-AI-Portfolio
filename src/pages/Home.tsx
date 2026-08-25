@@ -19,11 +19,23 @@ import ScrollProgress from '@/components/fx/ScrollProgress';
 import Preloader from '@/components/fx/Preloader';
 import { useLocation } from 'react-router';
 import { useSettings } from '@/hooks/useSettings';
+import { trpc } from '@/providers/trpc';
 
 export default function Home() {
   const location = useLocation();
   const { get, isVisible } = useSettings();
+  const trackVisit = trpc.analytics.track.useMutation();
   const isCaseStudyReturn = (location.state as { returnTo?: string } | null)?.returnTo === 'projects';
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem('portfolio:visit-tracked') === '1') return;
+      sessionStorage.setItem('portfolio:visit-tracked', '1');
+      trackVisit.mutate({ path: location.pathname || '/' });
+    } catch {
+      // Private browsing/sessionStorage restrictions should never affect the site.
+    }
+  }, [location.pathname, trackVisit]);
 
   // Admin-editable SEO meta
   useEffect(() => {
@@ -42,7 +54,7 @@ export default function Home() {
       <Preloader name="NAZMUS SAKIB" skip={isCaseStudyReturn} />
       <CustomCursor />
       <ScrollProgress />
-              <main className="relative pb-[calc(3rem+env(safe-area-inset-bottom))] sm:pb-14">
+      <main className="relative pb-[calc(4.5rem+env(safe-area-inset-bottom))] sm:pb-14">
 
         <Hero />
         <Navigation />
