@@ -121,7 +121,7 @@ function replaceMeta(html: string, attribute: "name" | "property", key: string, 
 function injectSeo(html: string, data: SeoData) {
   let updated = html;
   updated = updated.replace(/<title>[^<]*<\/title>/i, `<title>${escapeHtmlAttribute(data.title)}</title>`);
-  updated = updated.replace(/(<link\\s+rel="canonical"\\s+href=")[^"]*(")/i, `$1${escapeHtmlAttribute(data.canonicalUrl)}$2`);
+  updated = updated.replace(/(<link\s+rel="canonical"\s+href=")[^"]*(")/i, `$1${escapeHtmlAttribute(data.canonicalUrl)}$2`);
   updated = replaceMeta(updated, "name", "description", data.description);
   updated = replaceMeta(updated, "property", "og:url", data.canonicalUrl);
   updated = replaceMeta(updated, "property", "og:title", data.title);
@@ -132,7 +132,7 @@ function injectSeo(html: string, data: SeoData) {
   updated = replaceMeta(updated, "name", "twitter:description", data.description);
   updated = replaceMeta(updated, "name", "twitter:image", data.socialImageUrl);
   updated = replaceMeta(updated, "name", "twitter:image:alt", data.socialImageAlt);
-  updated = updated.replace(/(<link\\s+rel="icon"[^>]*href=")[^"]*(")/i, `$1${escapeHtmlAttribute(data.faviconUrl)}$2`);
+  updated = updated.replace(/(<link\s+rel="icon"[^>]*href=")[^"]*(")/i, `$1${escapeHtmlAttribute(data.faviconUrl)}$2`);
 
   const structuredData = {
     "@context": "https://schema.org",
