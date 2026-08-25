@@ -35,6 +35,63 @@ function normalizeStringArray(value: unknown): string[] {
   }
 }
 
+function ProjectScreenshotCarousel({ images, title }: { images: string[]; title: string }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const updatePreference = () => setReducedMotion(mediaQuery.matches);
+    updatePreference();
+    mediaQuery.addEventListener('change', updatePreference);
+    return () => mediaQuery.removeEventListener('change', updatePreference);
+  }, []);
+
+  useEffect(() => {
+    if (images.length < 2 || paused || reducedMotion) return;
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % images.length);
+    }, 4200);
+    return () => window.clearInterval(timer);
+  }, [images.length, paused, reducedMotion]);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [images.join('|')]);
+
+  return (
+    <div
+      className="relative h-full w-full"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+      aria-label={images.length > 1 ? `${title} screenshots rotating automatically` : `${title} screenshot`}
+    >
+      {images.length > 0 ? images.map((image, index) => (
+        <img
+          key={`${image}-${index}`}
+          src={image}
+          alt={index === activeIndex ? `${title} screenshot ${index + 1}` : ''}
+          aria-hidden={index === activeIndex ? undefined : true}
+          loading={index === 0 ? 'lazy' : 'eager'}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${index === activeIndex ? 'opacity-100' : 'opacity-0'}`}
+        />
+      )) : (
+        <div className="flex h-full items-center justify-center bg-white/[0.03] px-6 text-center font-mono text-xs uppercase tracking-[0.2em] text-gray-600">
+          Preview unavailable
+        </div>
+      )}
+      {images.length > 1 && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center gap-1.5" aria-hidden="true">
+          {images.map((image, index) => <span key={`${image}-dot`} className={`h-1 rounded-full transition-all duration-500 ${index === activeIndex ? 'w-5 bg-[#e8b923]' : 'w-1 bg-white/50'}`} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Projects() {
   const sectionRef = useRef<HTMLElement>(null);
   const { data: dbProjects } = trpc.project.list.useQuery();
@@ -168,19 +225,8 @@ export default function Projects() {
                     aria-label={`View details for ${project.title}`}
                   >
                     <div className="relative aspect-video overflow-hidden rounded-t-3xl">
-                      <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#05060f] via-transparent to-transparent" />
-                      {getThumb(project) ? (
-                        <img
-                          src={getThumb(project)}
-                          alt={project.title}
-                          loading="lazy"
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center bg-white/[0.03] px-6 text-center font-mono text-xs uppercase tracking-[0.2em] text-gray-600">
-                          Preview unavailable
-                        </div>
-                      )}
+                      <ProjectScreenshotCarousel images={getImages(project)} title={project.title} />
+                      <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-[#05060f] via-transparent to-transparent" />
                     </div>
                     <div className="p-6 sm:p-7">
                       <h3 className="mb-2 text-xl font-medium text-white transition-colors group-hover:text-[#e8b923]">
