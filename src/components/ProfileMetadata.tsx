@@ -3,7 +3,6 @@ import { trpc } from '@/providers/trpc';
 import { useSettings } from '@/hooks/useSettings';
 
 const fallbackProfileImage = '/images/profile-avatar.jpg';
-const stableSocialImage = '/og-image.png';
 
 type StructuredData = {
   '@graph'?: Array<Record<string, unknown>>;
@@ -75,8 +74,6 @@ export default function ProfileMetadata() {
     const description = get('seoDescription').trim() || 'Production-minded AI systems, bilingual NLP, LLM workflows, retrieval, full-stack engineering, and intelligent automation.';
     const siteUrl = toAbsoluteUrl(get('canonicalSiteUrl') || '/', window.location.origin).replace(/\/$/, '') + '/';
     const profileImageUrl = toAbsoluteUrl(profile?.avatarUrl || fallbackProfileImage, fallbackProfileImage);
-    const socialImageUrl = toAbsoluteUrl(stableSocialImage, stableSocialImage);
-    const socialImageAlt = get('socialPreviewImageAlt').trim() || 'Nazmus Sakib — ML Engineer and AI product builder';
     const faviconUrl = toAbsoluteUrl(get('faviconUrl') || fallbackProfileImage, fallbackProfileImage);
 
     document.title = title;
@@ -84,17 +81,8 @@ export default function ProfileMetadata() {
     ensureMeta('property', 'og:url').content = siteUrl;
     ensureMeta('property', 'og:title').content = title;
     ensureMeta('property', 'og:description').content = description;
-    ensureMeta('property', 'og:image').content = socialImageUrl;
-    ensureMeta('property', 'og:image:url').content = socialImageUrl;
-    ensureMeta('property', 'og:image:secure_url').content = socialImageUrl;
-    ensureMeta('property', 'og:image:type').content = 'image/png';
-    ensureMeta('property', 'og:image:width').content = '1200';
-    ensureMeta('property', 'og:image:height').content = '630';
-    ensureMeta('property', 'og:image:alt').content = socialImageAlt;
     ensureMeta('name', 'twitter:title').content = title;
     ensureMeta('name', 'twitter:description').content = description;
-    ensureMeta('name', 'twitter:image').content = socialImageUrl;
-    ensureMeta('name', 'twitter:image:alt').content = socialImageAlt;
     ensureLink('canonical').href = siteUrl;
     ensureLink('icon').href = faviconUrl;
     ensureLink('icon').dataset.adminManaged = 'true';

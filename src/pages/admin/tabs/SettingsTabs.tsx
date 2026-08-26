@@ -298,7 +298,7 @@ export function SiteTab() {
           <Field label="SEO / LinkedIn preview title"><input value={form.seoTitle} onChange={(e) => set('seoTitle', e.target.value)} className={inputCls} placeholder="Nazmus Sakib — ML Engineer · AI Engineer · AI Product Engineer" /></Field>
           <Field label="SEO / LinkedIn preview description"><textarea value={form.seoDescription} onChange={(e) => set('seoDescription', e.target.value)} className={`${inputCls} h-16`} placeholder="Production-minded AI systems, bilingual NLP, LLM workflows, retrieval, full-stack engineering, and intelligent automation." /></Field>
           <Field label="Canonical site URL"><input type="url" value={form.canonicalSiteUrl} onChange={(e) => set('canonicalSiteUrl', e.target.value)} className={inputCls} placeholder="https://nazmussakib.tech/" /></Field>
-          <ImageUploadField label="Social preview image (Open Graph / Twitter)" value={form.socialPreviewImageUrl} onChange={(url) => set('socialPreviewImageUrl', url)} accept="image/*" />
+          <ImageUploadField label="Social preview image (Open Graph / Twitter)" value={form.socialPreviewImageUrl} onChange={(url) => set('socialPreviewImageUrl', url)} accept="image/*" socialPreview />
           <Field label="Social preview image alt text"><input value={form.socialPreviewImageAlt} onChange={(e) => set('socialPreviewImageAlt', e.target.value)} className={inputCls} /></Field>
           <ImageUploadField label="Browser tab icon / favicon" value={form.faviconUrl} onChange={(url) => set('faviconUrl', url)} accept="image/*" />
           <Field label="Footer text"><input value={form.footerText} onChange={(e) => set('footerText', e.target.value)} className={inputCls} /></Field>

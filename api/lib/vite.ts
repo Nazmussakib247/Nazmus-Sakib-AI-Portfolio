@@ -104,7 +104,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
       title: normalizeSeoSetting("seoTitle", settings.seoTitle) || defaults.seoTitle,
       description: normalizeSeoSetting("seoDescription", settings.seoDescription) || defaults.seoDescription,
       canonicalUrl,
-      socialImageUrl: getAbsoluteUrl(c, resolveSocialImage(settings.socialPreviewImageUrl), fallbackSocialImage),
+      socialImageUrl: addAssetVersion(getAbsoluteUrl(c, resolveSocialImage(settings.socialPreviewImageUrl), fallbackSocialImage), settingUpdatedAt("socialPreviewImageUrl")),
       socialImageAlt: settings.socialPreviewImageAlt?.trim() || defaults.socialPreviewImageAlt,
       socialImageMeta: getSocialImageMeta(settings.socialPreviewImageUrl),
       faviconUrl: addAssetVersion(getAbsoluteUrl(c, settings.faviconUrl, fallbackProfileImage), settingUpdatedAt("faviconUrl")),

@@ -7,7 +7,7 @@ import { createContext } from "./context";
 import { env } from "./lib/env";
 import { createOAuthCallbackHandler } from "./kimi/auth";
 import { Paths } from "@contracts/constants";
-import { serveUploadedFile } from "./lib/files";
+import { serveSocialPreviewImage, serveUploadedFile } from "./lib/files";
 import { syncMediumWritings } from "./routers/writing";
 import { ensureVisitEventsTable } from "./routers/analytics";
 
@@ -33,6 +33,7 @@ app.use("/api/trpc/*", async (c) => {
     createContext,
   });
 });
+app.get("/og-image.png", serveSocialPreviewImage);
 app.get("/api/files/:id", async (c) => {
   c.header("X-Frame-Options", "SAMEORIGIN");
   return serveUploadedFile(c);

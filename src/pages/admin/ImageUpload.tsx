@@ -45,6 +45,42 @@ async function compressImage(file: File, maxDim = 1600, quality = 0.85): Promise
   }
 }
 
+async function compressSocialPreviewImage(file: File): Promise<{ dataBase64: string; mimeType: string }> {
+  if (file.type === 'image/gif' || file.type === 'image/svg+xml') {
+    throw new Error('Social preview image must be PNG, JPG, or WebP');
+  }
+
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = url;
+    });
+
+    const targetWidth = 1200;
+    const targetHeight = 630;
+    const scale = Math.max(targetWidth / img.width, targetHeight / img.height);
+    const sourceWidth = targetWidth / scale;
+    const sourceHeight = targetHeight / scale;
+    const sourceX = (img.width - sourceWidth) / 2;
+    const sourceY = (img.height - sourceHeight) / 2;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas not supported');
+    ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, targetWidth, targetHeight);
+
+    const dataUrl = canvas.toDataURL('image/png');
+    return { dataBase64: dataUrl.split(',')[1], mimeType: 'image/png' };
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 function toBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -59,13 +95,15 @@ const MAX_UPLOAD_MB = 9;
 function useUploader() {
   const upload = trpc.uploadAdmin.upload.useMutation();
 
-  const uploadFile = async (file: File): Promise<string | null> => {
+  const uploadFile = async (file: File, options?: { socialPreview?: boolean }): Promise<string | null> => {
     try {
       let dataBase64: string;
       let mimeType: string;
 
       if (file.type.startsWith('image/')) {
-        ({ dataBase64, mimeType } = await compressImage(file));
+        ({ dataBase64, mimeType } = options?.socialPreview
+          ? await compressSocialPreviewImage(file)
+          : await compressImage(file));
       } else if (file.type === 'application/pdf') {
         dataBase64 = await toBase64(file);
         mimeType = file.type;
@@ -97,11 +135,13 @@ export function ImageUploadField({
   value,
   onChange,
   accept = 'image/*',
+  socialPreview = false,
 }: {
   label: string;
   value: string;
   onChange: (url: string) => void;
   accept?: string;
+  socialPreview?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -110,7 +150,7 @@ export function ImageUploadField({
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return;
-    const url = await uploadFile(file);
+    const url = await uploadFile(file, { socialPreview });
     if (url) {
       onChange(url);
       toast.success('Uploaded');
@@ -120,6 +160,7 @@ export function ImageUploadField({
   return (
     <div>
       <label className={labelCls}>{label}</label>
+      {socialPreview && <p className="mt-1 text-xs leading-relaxed text-gray-500">Images are automatically center-cropped to 1200 × 630 for social sharing.</p>}
       {value ? (
         <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-[#05060f] p-2">
           {isPdf || !value.match(/^(\/api\/files\/|http|\/)/) ? (
