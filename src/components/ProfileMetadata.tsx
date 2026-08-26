@@ -3,7 +3,13 @@ import { trpc } from '@/providers/trpc';
 import { useSettings } from '@/hooks/useSettings';
 
 const fallbackProfileImage = '/images/profile-avatar.jpg';
-const fallbackSocialImage = '/images/hero-portrait.jpg';
+const fallbackSocialImage = 'https://raw.githubusercontent.com/Nazmussakib247/Nazmussakib247/main/assets/facebook-preview.png';
+const legacySocialImageMarkers = ['/images/hero-portrait.jpg', '/api/files/14'];
+
+function resolveSocialImage(value: string) {
+  const trimmed = value.trim();
+  return !trimmed || legacySocialImageMarkers.some((marker) => trimmed.includes(marker)) ? fallbackSocialImage : trimmed;
+}
 
 type StructuredData = {
   '@graph'?: Array<Record<string, unknown>>;
@@ -75,7 +81,7 @@ export default function ProfileMetadata() {
     const description = get('seoDescription').trim() || 'Production-minded AI systems, bilingual NLP, LLM workflows, retrieval, full-stack engineering, and intelligent automation.';
     const siteUrl = toAbsoluteUrl(get('canonicalSiteUrl') || '/', window.location.origin).replace(/\/$/, '') + '/';
     const profileImageUrl = toAbsoluteUrl(profile?.avatarUrl || fallbackProfileImage, fallbackProfileImage);
-    const socialImageUrl = toAbsoluteUrl(get('socialPreviewImageUrl') || fallbackSocialImage, fallbackSocialImage);
+    const socialImageUrl = toAbsoluteUrl(resolveSocialImage(get('socialPreviewImageUrl')), fallbackSocialImage);
     const socialImageAlt = get('socialPreviewImageAlt').trim() || 'Nazmus Sakib — ML Engineer and AI product builder';
     const faviconUrl = toAbsoluteUrl(get('faviconUrl') || fallbackProfileImage, fallbackProfileImage);
 
@@ -85,6 +91,11 @@ export default function ProfileMetadata() {
     ensureMeta('property', 'og:title').content = title;
     ensureMeta('property', 'og:description').content = description;
     ensureMeta('property', 'og:image').content = socialImageUrl;
+    ensureMeta('property', 'og:image:url').content = socialImageUrl;
+    ensureMeta('property', 'og:image:secure_url').content = socialImageUrl;
+    ensureMeta('property', 'og:image:type').content = 'image/png';
+    ensureMeta('property', 'og:image:width').content = '1200';
+    ensureMeta('property', 'og:image:height').content = '630';
     ensureMeta('property', 'og:image:alt').content = socialImageAlt;
     ensureMeta('name', 'twitter:title').content = title;
     ensureMeta('name', 'twitter:description').content = description;

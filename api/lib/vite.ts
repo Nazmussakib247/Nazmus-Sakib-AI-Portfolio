@@ -16,6 +16,7 @@ type SeoData = {
   canonicalUrl: string;
   socialImageUrl: string;
   socialImageAlt: string;
+  socialImageMeta: { type: string; width: string; height: string };
   faviconUrl: string;
   profileImageUrl: string;
   profile: {
@@ -29,7 +30,20 @@ type SeoData = {
 };
 
 const fallbackProfileImage = "/images/profile-avatar.jpg";
-const fallbackSocialImage = "/images/hero-portrait.jpg";
+const fallbackSocialImage = "https://raw.githubusercontent.com/Nazmussakib247/Nazmussakib247/main/assets/facebook-preview.png";
+const legacySocialImageMarkers = ["/images/hero-portrait.jpg", "/api/files/14"];
+
+function resolveSocialImage(value: string | null | undefined) {
+  const trimmed = value?.trim() || "";
+  return !trimmed || legacySocialImageMarkers.some((marker) => trimmed.includes(marker)) ? fallbackSocialImage : trimmed;
+}
+
+function getSocialImageMeta(value: string | null | undefined) {
+  const imageUrl = resolveSocialImage(value);
+  return imageUrl.includes('/api/files/26')
+    ? { type: 'image/png', width: '1600', height: '900' }
+    : { type: 'image/png', width: '1200', height: '630' };
+}
 const fallbackTitle = DEFAULT_SEO_TITLE;
 const fallbackDescription = DEFAULT_SEO_DESCRIPTION;
 
@@ -93,8 +107,9 @@ async function getSeoData(c: Context): Promise<SeoData> {
       title: normalizeSeoSetting("seoTitle", settings.seoTitle) || defaults.seoTitle,
       description: normalizeSeoSetting("seoDescription", settings.seoDescription) || defaults.seoDescription,
       canonicalUrl,
-      socialImageUrl: addAssetVersion(getAbsoluteUrl(c, settings.socialPreviewImageUrl, fallbackSocialImage), settingUpdatedAt("socialPreviewImageUrl")),
+      socialImageUrl: addAssetVersion(getAbsoluteUrl(c, resolveSocialImage(settings.socialPreviewImageUrl), fallbackSocialImage), settingUpdatedAt("socialPreviewImageUrl")),
       socialImageAlt: settings.socialPreviewImageAlt?.trim() || defaults.socialPreviewImageAlt,
+      socialImageMeta: getSocialImageMeta(settings.socialPreviewImageUrl),
       faviconUrl: addAssetVersion(getAbsoluteUrl(c, settings.faviconUrl, fallbackProfileImage), settingUpdatedAt("faviconUrl")),
       profileImageUrl,
       profile: {
@@ -112,8 +127,9 @@ async function getSeoData(c: Context): Promise<SeoData> {
       title: defaults.seoTitle,
       description: defaults.seoDescription,
       canonicalUrl: defaults.canonicalSiteUrl,
-      socialImageUrl: getAbsoluteUrl(c, defaults.socialPreviewImageUrl, fallbackSocialImage),
+      socialImageUrl: getAbsoluteUrl(c, resolveSocialImage(defaults.socialPreviewImageUrl), fallbackSocialImage),
       socialImageAlt: defaults.socialPreviewImageAlt,
+      socialImageMeta: getSocialImageMeta(defaults.socialPreviewImageUrl),
       faviconUrl: getAbsoluteUrl(c, defaults.faviconUrl, fallbackProfileImage),
       profileImageUrl: getAbsoluteUrl(c, fallbackProfileImage, fallbackProfileImage),
       profile: { name: "Nazmus Sakib", title: "AI Engineer", bio: fallbackDescription, githubUrl: null, linkedinUrl: null, mediumUrl: null },
@@ -138,9 +154,9 @@ function injectSeo(html: string, data: SeoData) {
   updated = replaceMeta(updated, "property", "og:image", data.socialImageUrl);
   updated = replaceMeta(updated, "property", "og:image:url", data.socialImageUrl);
   updated = replaceMeta(updated, "property", "og:image:secure_url", data.socialImageUrl);
-  updated = replaceMeta(updated, "property", "og:image:type", "image/jpeg");
-  updated = replaceMeta(updated, "property", "og:image:width", "1200");
-  updated = replaceMeta(updated, "property", "og:image:height", "627");
+  updated = replaceMeta(updated, "property", "og:image:type", data.socialImageMeta.type);
+  updated = replaceMeta(updated, "property", "og:image:width", data.socialImageMeta.width);
+  updated = replaceMeta(updated, "property", "og:image:height", data.socialImageMeta.height);
   updated = replaceMeta(updated, "property", "og:image:alt", data.socialImageAlt);
   updated = replaceMeta(updated, "name", "twitter:title", data.title);
   updated = replaceMeta(updated, "name", "twitter:description", data.description);
