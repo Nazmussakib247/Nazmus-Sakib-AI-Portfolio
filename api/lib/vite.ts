@@ -32,8 +32,10 @@ type SeoData = {
 const fallbackProfileImage = "/images/profile-avatar.jpg";
 const fallbackSocialImage = "/og-image.png";
 const legacySocialImageMarkers = ["/api/files/"];
+const legacyProfileImageMarkers = ["/api/files/29"];
 function resolveProfileImage(value: string | null | undefined) {
-  return value?.trim() || fallbackProfileImage;
+  const trimmed = value?.trim() || "";
+  return !trimmed || legacyProfileImageMarkers.some((marker) => trimmed.includes(marker)) ? fallbackProfileImage : trimmed;
 }
 
 function resolveSocialImage(value: string | null | undefined) {
