@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
-import { LogOut, Save, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, LogOut, Save, ShieldCheck } from 'lucide-react';
 import { trpc } from '@/providers/trpc';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { DEFAULT_SETTINGS, type SectionKey } from '@/hooks/useSettings';
@@ -138,6 +138,10 @@ export function SiteTab() {
     onSuccess: () => { utils.settings.getAll.invalidate(); toast.success('Site settings saved'); },
     onError: (e) => toast.error(e.message),
   });
+  const setPublished = trpc.settingsAdmin.set.useMutation({
+    onSuccess: () => { utils.settings.getAll.invalidate(); toast.success('Site visibility updated'); },
+    onError: (e) => toast.error(e.message),
+  });
 
   const [form, setForm] = useState<Record<string, string>>(DEFAULT_SETTINGS);
   const [aiForm, setAiForm] = useState({ provider: 'gemini' as 'openai' | 'gemini' | 'groq' | 'xai', apiUrl: 'https://generativelanguage.googleapis.com', model: 'gemini-3.5-flash-lite', apiKey: '' });
@@ -166,6 +170,12 @@ export function SiteTab() {
   }, [saved]);
 
   const set = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
+  const isPublished = form.sitePublished !== 'false';
+  const togglePublished = () => {
+    const value = isPublished ? 'false' : 'true';
+    set('sitePublished', value);
+    setPublished.mutate({ key: 'sitePublished', value });
+  };
 
   const handleAiSave = () => {
     saveAi.mutate({ provider: aiForm.provider, apiUrl: aiForm.apiUrl, model: aiForm.model, apiKey: aiForm.apiKey || undefined });
@@ -183,6 +193,25 @@ export function SiteTab() {
   return (
     <div className="pt-12 lg:pt-0">
       <h2 className="mb-6 text-xl text-white">Site Settings</h2>
+      <section className="mb-8 max-w-2xl rounded-xl border border-[#e8b923]/20 bg-[#111527] p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-sm font-medium text-[#e8b923]">Public site visibility</h3>
+            <p className="mt-1 text-xs leading-relaxed text-gray-500">
+              {isPublished ? 'Your portfolio is currently visible to visitors.' : 'Your portfolio is currently hidden from visitors. Admin access remains available.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={togglePublished}
+            disabled={setPublished.isPending}
+            className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${isPublished ? 'bg-red-400/10 text-red-300 hover:bg-red-400/20' : 'bg-emerald-400/10 text-emerald-300 hover:bg-emerald-400/20'}`}
+          >
+            {isPublished ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {setPublished.isPending ? 'Updating…' : isPublished ? 'Unpublish site' : 'Publish site'}
+          </button>
+        </div>
+      </section>
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-8">
         <section className="space-y-4 rounded-xl border border-white/5 bg-[#111527] p-6">
           <h3 className="text-sm font-medium text-[#e8b923]">Hero Section</h3>

@@ -19,6 +19,7 @@ type SeoData = {
   socialImageMeta: { type: string; width: string; height: string };
   faviconUrl: string;
   profileImageUrl: string;
+  sitePublished: boolean;
   profile: {
     name: string;
     title: string;
@@ -91,6 +92,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
     socialPreviewImageUrl: fallbackSocialImage,
     socialPreviewImageAlt: "Nazmus Sakib — ML Engineer and AI product builder",
     faviconUrl: fallbackProfileImage,
+    sitePublished: true,
   };
 
   try {
@@ -114,6 +116,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
       socialImageMeta: getSocialImageMeta(),
       faviconUrl: addAssetVersion(getAbsoluteUrl(c, resolveProfileImage(settings.faviconUrl), fallbackProfileImage), settingUpdatedAt("faviconUrl")),
       profileImageUrl,
+      sitePublished: settings.sitePublished !== "false",
       profile: {
         name: profile?.name || "Nazmus Sakib",
         title: profile?.title || "AI Engineer",
@@ -134,6 +137,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
       socialImageMeta: getSocialImageMeta(),
       faviconUrl: getAbsoluteUrl(c, defaults.faviconUrl, fallbackProfileImage),
       profileImageUrl: getAbsoluteUrl(c, fallbackProfileImage, fallbackProfileImage),
+      sitePublished: true,
       profile: { name: "Nazmus Sakib", title: "AI Engineer", bio: fallbackDescription, githubUrl: null, linkedinUrl: null, mediumUrl: null },
     };
   }
@@ -190,9 +194,15 @@ function injectSeo(html: string, data: SeoData) {
   return updated;
 }
 
+function unpublishedPage() {
+  return `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Portfolio temporarily unavailable</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#05060f;color:#e5e7eb;font-family:system-ui,sans-serif;text-align:center}main{max-width:560px;padding:32px}h1{color:#e8b923;font-size:clamp(2rem,6vw,3.5rem);margin:0 0 16px}p{color:#9ca3af;line-height:1.7}</style></head><body><main><h1>Portfolio temporarily unavailable</h1><p>This portfolio is currently unpublished. Please check back soon.</p></main></body></html>`;
+}
+
 async function renderIndex(c: Context, indexPath: string) {
   const content = fs.readFileSync(indexPath, "utf-8");
   const data = await getSeoData(c);
+  const pathname = new URL(c.req.url).pathname;
+  if (!pathname.startsWith("/admin") && !data.sitePublished) return c.html(unpublishedPage(), 503);
   return c.html(injectSeo(content, data));
 }
 

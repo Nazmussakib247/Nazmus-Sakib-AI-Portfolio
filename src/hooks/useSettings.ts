@@ -14,6 +14,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   heroCvCta: 'View CV',
   heroScrollLabel: 'Scroll',
   heroScrollTarget: 'about',
+  sitePublished: 'true',
   availableForWork: 'true',
   availabilityText: 'Open to opportunities',
   footerText: 'Building practical AI systems, retrieval workflows, and intelligent automation.',
