@@ -144,7 +144,7 @@ export default function Projects() {
     const restoreScroll = () => {
       if (cancelled) return;
       const lenis = (window as unknown as {
-        __lenis?: { scrollTo: (value: number, options?: { immediate?: boolean }) => void };
+        __lenis?: { scroll?: number; scrollTo: (value: number, options?: { immediate?: boolean }) => void };
       }).__lenis;
       if (lenis) {
         lenis.scrollTo(scrollTop, { immediate: true });
@@ -153,17 +153,20 @@ export default function Projects() {
       }
 
       const height = document.documentElement.scrollHeight;
+      const currentScroll = Number(lenis?.scroll ?? window.scrollY);
+      const delta = Math.abs(currentScroll - scrollTop);
       settledFrames = height === lastHeight ? settledFrames + 1 : 0;
       lastHeight = height;
       attempts += 1;
-      if (attempts < 24 && settledFrames < 2) {
+      if (attempts < 36 && (delta > 2 || settledFrames < 2)) {
         requestAnimationFrame(restoreScroll);
         return;
       }
 
       if (context) clearCaseStudyReturnContext();
-      if (returnState?.returnTo === 'projects') {
-        window.history.replaceState(null, document.title, window.location.href);
+      if (returnState?.returnTo === 'projects' || window.location.hash) {
+        const cleanUrl = `${window.location.pathname}${window.location.search}`;
+        window.history.replaceState(null, document.title, cleanUrl);
       }
     };
 
