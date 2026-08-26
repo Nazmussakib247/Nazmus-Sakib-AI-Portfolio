@@ -110,6 +110,9 @@ export default function Projects() {
   const copy = getJson<{ projects?: Record<string, string> }>('sectionCopy', {});
   const projectCopy = copy.projects ?? {};
   const allLabel = projectCopy.all || 'All';
+  const loadMoreLabel = projectCopy.more || 'See more';
+  const initialProjectCount = 10;
+  const projectBatchSize = 6;
   const currentPath = getCaseStudyOriginPath(location);
   const projects = (dbProjects || []).filter((project) => project.isFeatured !== false) as ProjectLike[];
   const [filter, setFilter] = useState<string>(() => {
@@ -118,6 +121,7 @@ export default function Projects() {
   });
   const [selected, setSelected] = useState<ProjectLike | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(initialProjectCount);
 
   useEffect(() => {
     setSelectedImageIndex(0);
@@ -185,13 +189,19 @@ export default function Projects() {
   }, [projects, projectCopy.all]);
 
   const visible = filter === allLabel ? projects : projects.filter((p) => normalizeStringArray(p.techStack).includes(filter));
+  const displayedProjects = visible.slice(0, visibleCount);
+  const remainingProjectCount = Math.max(0, visible.length - displayedProjects.length);
+
+  useEffect(() => {
+    setVisibleCount(initialProjectCount);
+  }, [filter]);
 
   const getImages = (p: ProjectLike) => {
     const sources = [p.thumbnailUrl, ...normalizeStringArray(p.screenshots)].filter(Boolean) as string[];
     return Array.from(new Set(sources));
   };
 
-  useReveal(sectionRef, [dbProjects, filter]);
+  useReveal(sectionRef, [dbProjects, filter, visibleCount]);
 
   const getThumb = (p: ProjectLike) => p.thumbnailUrl || undefined;
   const getOwnershipLabel = (p: ProjectLike) => p.title.toLowerCase().includes('enterprise nexus')
@@ -231,7 +241,7 @@ export default function Projects() {
 
         <div className="grid gap-8 md:grid-cols-2">
                       {visible.length === 0 && <p className="col-span-full py-12 text-center text-sm text-gray-500">{projectCopy.empty || ''}</p>}
-            {visible.map((project, i) => (
+            {displayedProjects.map((project, i) => (
 
             <div
               key={project.id || i}
@@ -318,8 +328,19 @@ export default function Projects() {
               </TiltCard>
             </div>
           ))}
+          </div>
+          {remainingProjectCount > 0 && (
+            <div className="mt-12 flex justify-center" data-reveal="up">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((current) => Math.min(visible.length, current + projectBatchSize))}
+                className="inline-flex items-center gap-2 rounded-full border border-[#e8b923]/35 bg-[#e8b923]/[0.06] px-5 py-2.5 font-mono text-xs uppercase tracking-[0.14em] text-[#f5cd45] transition-all hover:border-[#e8b923]/70 hover:bg-[#e8b923]/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923]"
+              >
+                {loadMoreLabel} <span className="text-gray-500">({remainingProjectCount})</span>
+              </button>
+            </div>
+          )}
         </div>
-      </div>
 
       {/* Project detail modal */}
       {selected && (

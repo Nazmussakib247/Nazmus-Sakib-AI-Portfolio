@@ -3,7 +3,7 @@ import { createRouter, publicQuery } from "../middleware";
 import { createAdminRouter, adminProcedure } from "./admin-middleware";
 import { getDb } from "../queries/connection";
 import { projects } from "@db/schema";
-import { eq } from "drizzle-orm";
+import { and, asc, eq, isNull, or } from "drizzle-orm";
 import { recordEntityChange, snapshotProject } from "./change-log";
 
 const architectureNode = z.object({ id: z.string().min(1), label: z.string().min(1), detail: z.string().optional(), orderIndex: z.number().int().nonnegative() });
@@ -46,22 +46,26 @@ const baseProjectFields = {
 export const projectRouter = createRouter({
   list: publicQuery.query(async () => {
     const db = getDb();
-    return db.select().from(projects).orderBy(projects.orderIndex);
+    return db.select().from(projects).where(or(eq(projects.isFeatured, true), isNull(projects.isFeatured))).orderBy(asc(projects.orderIndex), asc(projects.id));
   }),
   getById: publicQuery.input(z.object({ id: z.number() })).query(async ({ input }) => {
     const db = getDb();
-    const rows = await db.select().from(projects).where(eq(projects.id, input.id)).limit(1);
+    const rows = await db.select().from(projects).where(and(eq(projects.id, input.id), or(eq(projects.isFeatured, true), isNull(projects.isFeatured)))).limit(1);
     return rows[0] || null;
   }),
   getCaseStudyBySlug: publicQuery.input(z.object({ slug: z.string().min(1) })).query(async ({ input }) => {
     const db = getDb();
-    const rows = await db.select().from(projects).where(eq(projects.slug, input.slug)).limit(1);
+    const rows = await db.select().from(projects).where(and(eq(projects.slug, input.slug), or(eq(projects.isFeatured, true), isNull(projects.isFeatured)))).limit(1);
     const project = rows[0] || null;
     return project?.caseStudyEnabled ? project : null;
   }),
 });
 
 export const projectAdminRouter = createAdminRouter({
+  list: adminProcedure.query(async () => {
+    const db = getDb();
+    return db.select().from(projects).orderBy(asc(projects.orderIndex), asc(projects.id));
+  }),
   create: adminProcedure.input(z.object({ title: z.string().min(1), description: z.string().min(1), techStack: z.array(z.string()).optional(), thumbnailUrl: z.string().optional(), githubUrl: z.string().nullable().optional(), liveUrl: z.string().nullable().optional(), videoUrl: z.string().nullable().optional(), screenshots: z.array(z.string()).optional(), orderIndex: z.number().default(0), isFeatured: z.boolean().default(true), ...caseStudyFields })).mutation(async ({ input }) => {
     const db = getDb();
     const [result] = await db.insert(projects).values({ ...input, techStack: input.techStack || [], screenshots: input.screenshots || [], caseStudyArchitecture: input.caseStudyArchitecture || [], caseStudyDecisions: input.caseStudyDecisions || [], caseStudyMetrics: input.caseStudyMetrics || [], caseStudyMedia: input.caseStudyMedia || [], caseStudyLinks: input.caseStudyLinks || [], caseStudyStack: input.caseStudyStack || [] }).returning({ id: projects.id });
@@ -75,6 +79,20 @@ export const projectAdminRouter = createAdminRouter({
     const db = getDb();
     await db.update(projects).set({ ...data, updatedAt: new Date() }).where(eq(projects.id, id));
     await recordEntityChange("project", id, "update", before, await snapshotProject(id), `Updated project #${id}`);
+    return { success: true };
+  }),
+  reorder: adminProcedure.input(z.object({
+    items: z.array(z.object({ id: z.number().int().positive(), orderIndex: z.number().int().nonnegative() })).min(1).max(500),
+  })).mutation(async ({ input }) => {
+    const db = getDb();
+    const before = await db.select({ id: projects.id, orderIndex: projects.orderIndex }).from(projects);
+    await db.transaction(async (tx) => {
+      for (const item of input.items) {
+        await tx.update(projects).set({ orderIndex: item.orderIndex, updatedAt: new Date() }).where(eq(projects.id, item.id));
+      }
+    });
+    const after = await db.select({ id: projects.id, orderIndex: projects.orderIndex }).from(projects);
+    await recordEntityChange("project", null, "reorder", before, after, "Reordered projects");
     return { success: true };
   }),
   delete: adminProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Eye, EyeOff, GripVertical, Plus, RefreshCw } from 'lucide-react';
 import { trpc } from '@/providers/trpc';
 import { Field, Modal, RowActions, EmptyState, inputCls, btnPrimary, btnGhost, cardCls, stripEmpty } from '../adminUi';
 import { ImageUploadField, MultiImageUploadField } from '../ImageUpload';
@@ -116,20 +116,35 @@ function TabHeader({ title, onAdd, addLabel, extraAction }: { title: string; onA
 export function ProjectsTab() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const { data: projects, refetch } = trpc.project.list.useQuery();
+  const { data: projects, refetch } = trpc.projectAdmin.list.useQuery();
   const del = trpc.projectAdmin.delete.useMutation({ onSuccess: () => { refetch(); toast.success('Project deleted'); } });
   const create = trpc.projectAdmin.create.useMutation({ onSuccess: () => { refetch(); setShowForm(false); toast.success('Project created'); } });
   const update = trpc.projectAdmin.update.useMutation({ onSuccess: () => { refetch(); toast.success('Project updated'); } });
+  const reorder = trpc.projectAdmin.reorder.useMutation({ onSuccess: () => { refetch(); toast.success('Project order saved'); }, onError: () => { refetch(); toast.error('Project order could not be saved'); } });
   const swap = useSwapOrder((args) => update.mutateAsync(args), refetch);
 
   const empty = { title: '', description: '', techStack: '', thumbnailUrl: '', githubUrl: '', liveUrl: '', videoUrl: '', screenshots: [] as string[], isFeatured: true, slug: '', caseStudyEnabled: false, caseStudySummary: '', problemStatement: '', roleDescription: '', architectureSummary: '', outcomeSummary: '', lessonsLearned: '', caseStudyOrder: 0, caseStudyArchitecture: '[]', caseStudyDecisions: '[]', caseStudyMetrics: '[]', caseStudyMedia: '[]', caseStudyLinks: '[]', caseStudyStack: '' };
   const [form, setForm] = useState(empty);
   const [simpleText, setSimpleText] = useState<CaseStudyTextState>(emptyCaseStudyText);
   const [simpleTextMode, setSimpleTextMode] = useState(true);
+  const [draggingId, setDraggingId] = useState<number | null>(null);
+  const [dragOverId, setDragOverId] = useState<number | null>(null);
 
   const sorted = [...(projects || [])].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
 
   const openCreate = () => { setForm(empty); setSimpleText(emptyCaseStudyText); setSimpleTextMode(true); setEditingId(null); setShowForm(true); };
+  const handleDrop = (targetId: number) => {
+    if (draggingId === null || draggingId === targetId || reorder.isPending) return;
+    const next = [...sorted];
+    const fromIndex = next.findIndex((project) => project.id === draggingId);
+    const targetIndex = next.findIndex((project) => project.id === targetId);
+    if (fromIndex < 0 || targetIndex < 0) return;
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(targetIndex, 0, moved);
+    reorder.mutate({ items: next.map((project, index) => ({ id: project.id, orderIndex: index })) });
+    setDraggingId(null);
+    setDragOverId(null);
+  };
   const openEdit = (p: (typeof sorted)[number]) => {
     setForm({
       title: p.title,
@@ -231,15 +246,42 @@ export function ProjectsTab() {
 
   return (
     <div className="pt-12 lg:pt-0">
-      <TabHeader title="Projects" onAdd={openCreate} addLabel="Add Project" />
+                <TabHeader
+            title="Projects"
+            onAdd={openCreate}
+            addLabel="Add Project"
+            extraAction={<span className="hidden text-xs text-gray-500 lg:inline">Drag the handle to reorder</span>}
+          />
+
       {sorted.length === 0 ? (
         <EmptyState text="No projects yet. Add your first project." />
       ) : (
         <div className="space-y-3">
           {sorted.map((p, i) => (
-            <div key={p.id} className={`${cardCls} flex items-center justify-between`}>
-              <div className="mr-4 min-w-0 flex-1">
-                <h4 className="truncate text-sm text-white">{p.title}</h4>
+            <div
+              key={p.id}
+              onDragOver={(event) => { event.preventDefault(); setDragOverId(p.id); }}
+              onDrop={(event) => { event.preventDefault(); handleDrop(p.id); }}
+              className={`${cardCls} flex items-center justify-between gap-3 transition-colors ${dragOverId === p.id && draggingId !== p.id ? 'border-[#e8b923]/70 bg-[#e8b923]/[0.06]' : ''} ${draggingId === p.id ? 'opacity-60' : ''}`}
+            >
+              <button
+                type="button"
+                draggable
+                onDragStart={(event) => { event.dataTransfer.effectAllowed = 'move'; setDraggingId(p.id); }}
+                onDragEnd={() => { setDraggingId(null); setDragOverId(null); }}
+                className="shrink-0 cursor-grab touch-none rounded-lg p-2 text-gray-500 transition-colors hover:bg-white/5 hover:text-[#e8b923] active:cursor-grabbing"
+                aria-label={`Drag to reorder ${p.title}`}
+                title="Drag to reorder"
+              >
+                <GripVertical className="h-5 w-5" />
+              </button>
+              <div className="mr-1 min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="truncate text-sm text-white">{p.title}</h4>
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] ${p.isFeatured !== false ? 'bg-emerald-400/10 text-emerald-300' : 'bg-white/10 text-gray-500'}`}>
+                    {p.isFeatured !== false ? <><Eye className="h-3 w-3" /> Published</> : <><EyeOff className="h-3 w-3" /> Unpublished</>}
+                  </span>
+                </div>
                 <p className="truncate text-xs text-gray-500">{p.description?.slice(0, 90)}</p>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {normalizeStringArray(p.techStack).slice(0, 5).map((t) => (
@@ -247,6 +289,14 @@ export function ProjectsTab() {
                   ))}
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={() => update.mutate({ id: p.id, isFeatured: p.isFeatured === false })}
+                disabled={update.isPending}
+                className={`hidden shrink-0 rounded-full border px-3 py-1.5 text-xs transition-colors sm:inline-flex ${p.isFeatured !== false ? 'border-emerald-400/25 text-emerald-300 hover:border-rose-300/40 hover:text-rose-200' : 'border-white/15 text-gray-400 hover:border-emerald-300/40 hover:text-emerald-200'}`}
+              >
+                {p.isFeatured !== false ? 'Unpublish' : 'Publish'}
+              </button>
               <RowActions
                 onEdit={() => openEdit(p)}
                 onDelete={() => { if (confirm(`Delete "${p.title}"?`)) del.mutate({ id: p.id }); }}
@@ -306,7 +356,7 @@ export function ProjectsTab() {
             </div>
             <label className="flex items-center gap-2 text-xs text-gray-400">
               <input type="checkbox" checked={form.isFeatured} onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })} className="rounded" />
-              Featured on homepage
+              Published on public portfolio
             </label>
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setShowForm(false)} className={btnGhost}>Cancel</button>
