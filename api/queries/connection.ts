@@ -1,4 +1,4 @@
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { env } from "../lib/env";
 import * as schema from "@db/schema";
@@ -47,7 +47,7 @@ export function getDb() {
     // Drizzle's node-postgres generics are narrower than the installed
     // @types/pg QueryResult union; the runtime Pool is compatible, so keep
     // the application schema inference at the Drizzle boundary.
-    instance = drizzle(pool as any, {
+    instance = drizzle(pool as unknown as NodePgClient, {
       schema: fullSchema,
     });
   }

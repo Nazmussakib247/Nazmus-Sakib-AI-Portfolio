@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { trpc } from '@/providers/trpc';
@@ -35,7 +35,7 @@ export default function Skills() {
   const { getJson } = useSettings();
   const copy = getJson<{ skills?: Record<string, string> }>('sectionCopy', {});
   const skillCopy = copy.skills ?? {};
-  const skills = (dbSkills || []) as SkillRow[];
+  const skills = useMemo(() => (dbSkills || []) as SkillRow[], [dbSkills]);
 
   useReveal(sectionRef, [dbSkills]);
 

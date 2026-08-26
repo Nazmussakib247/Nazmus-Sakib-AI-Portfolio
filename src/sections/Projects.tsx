@@ -66,9 +66,11 @@ function ProjectScreenshotCarousel({ images, title }: { images: string[]; title:
     return () => window.clearInterval(timer);
   }, [images.length, paused, reducedMotion]);
 
+  const imageKey = images.join('|');
+
   useEffect(() => {
     setActiveIndex(0);
-  }, [images.join('|')]);
+  }, [imageKey]);
 
   return (
     <div

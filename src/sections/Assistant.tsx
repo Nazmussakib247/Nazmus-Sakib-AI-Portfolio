@@ -165,7 +165,7 @@ export default function Assistant() {
       if (typingTimer !== undefined) window.clearInterval(typingTimer);
       window.clearTimeout(dismissTimer);
     };
-  }, []);
+  }, [introCopy]);
 
   useEffect(() => {
     const dismissGreetingOnScroll = () => {

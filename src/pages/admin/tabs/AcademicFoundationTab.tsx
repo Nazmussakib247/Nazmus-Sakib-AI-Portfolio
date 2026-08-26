@@ -44,10 +44,6 @@ export function AcademicFoundationTab() {
     () => [...(foundation || [])].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0)),
     [foundation],
   );
-  const courses = useMemo(
-    () => categories.flatMap((category) => category.courses || []),
-    [categories],
-  );
   const [categoryModal, setCategoryModal] = useState(false);
   const [courseModal, setCourseModal] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
@@ -113,7 +109,7 @@ export function AcademicFoundationTab() {
     setCourseModal(true);
   };
 
-  const openEditCourse = (course: (typeof courses)[number]) => {
+  const openEditCourse = (course: NonNullable<(typeof categories)[number]['courses']>[number]) => {
     setEditingCourseId(course.id);
     setCourseForm({
       categoryId: course.categoryId,

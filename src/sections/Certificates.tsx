@@ -23,7 +23,7 @@ export default function Certificates() {
   const { getJson } = useSettings();
   const copy = getJson<{ certificates?: Record<string, string> }>('sectionCopy', {});
   const certificateCopy = copy.certificates ?? {};
-  const certs = dbCerts || [];
+  const certs = useMemo(() => dbCerts || [], [dbCerts]);
   const [activeCategory, setActiveCategory] = useState('All');
   const [lightbox, setLightbox] = useState<string | null>(null);
   const categories = useMemo(

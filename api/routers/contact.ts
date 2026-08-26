@@ -10,7 +10,7 @@ const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_WINDOW = 5;
 
 function escapeHtml(value: string) {
-  return value.replace(/[&<>\"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[char] || char));
+  return value.replace(new RegExp('[&<>" ]'.replace(' ', ''), 'g'), (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char] || char));
 }
 
 async function checkRate(db: ReturnType<typeof getDb>, ipAddress: string) {

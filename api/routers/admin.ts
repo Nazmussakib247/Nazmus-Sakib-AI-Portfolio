@@ -124,7 +124,7 @@ async function clearFailedLogins(db: ReturnType<typeof getDb>, identifier: strin
 }
 
 function escapeHtml(value: string): string {
-  return value.replace(/[&<>\"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[char] || char));
+  return value.replace(new RegExp('[&<>"]', 'g'), (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char] || char));
 }
 
 async function sendPasswordResetEmail(email: string, code: string): Promise<boolean> {

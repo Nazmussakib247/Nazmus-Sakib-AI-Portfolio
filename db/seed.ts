@@ -806,7 +806,8 @@ async function seed() {
         (post.title.startsWith("Week 2 Deep Dive") && row.title === "Strategic Model Selection")
     );
     if (existing) {
-      const { isPublished: _seedIsPublished, ...managedPost } = post;
+      const { isPublished, ...managedPost } = post;
+      void isPublished;
       await db.update(writings).set({ ...managedPost, orderIndex: existing.orderIndex ?? index, updatedAt: new Date() }).where(eq(writings.id, existing.id));
     } else {
       await db.insert(writings).values({ ...post, orderIndex: index });

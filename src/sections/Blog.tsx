@@ -18,7 +18,7 @@ export default function Blog() {
   const copy = getJson<{ blog?: Record<string, string> }>('sectionCopy', {});
   const blogCopy = copy.blog ?? {};
   const { data: dbWritings, isLoading } = trpc.writing.list.useQuery();
-  const writings = dbWritings ?? [];
+  const writings = useMemo(() => dbWritings ?? [], [dbWritings]);
   const allLabel = blogCopy.all || 'All';
   const [activeCategory, setActiveCategory] = useState(allLabel);
   const [visibleAdditionalCount, setVisibleAdditionalCount] = useState(0);

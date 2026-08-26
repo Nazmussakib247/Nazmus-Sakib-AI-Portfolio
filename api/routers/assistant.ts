@@ -72,7 +72,12 @@ async function retrievePortfolioContext(plan: RetrievalPlan) {
     return (relevant.length > 0 ? relevant : ranked.slice(0, 8).map((item) => item.row));
   };
   const context = {
-    profile: profileRows.map(({ email, cvUrl, ...publicProfile }) => publicProfile),
+    profile: profileRows.map((publicProfile) => {
+      const { email: privateEmail, cvUrl: privateCvUrl, ...safeProfile } = publicProfile;
+      void privateEmail;
+      void privateCvUrl;
+      return safeProfile;
+    }),
     projects: limitRows(projectRows),
     experiences: limitRows(experienceRows),
     awards: limitRows(awardRows),

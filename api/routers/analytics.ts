@@ -58,7 +58,7 @@ function getCountry(req: Request) {
 
 function getClientIp(req: Request) {
   const raw = req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
-  return raw.trim().replace(/[^a-zA-Z0-9:.%_\-]/g, "").slice(0, 128) || "unknown";
+  return raw.trim().replace(/[^-a-zA-Z0-9:._%]/g, "").slice(0, 128) || "unknown";
 }
 
 function getReferrerHost(req: Request) {

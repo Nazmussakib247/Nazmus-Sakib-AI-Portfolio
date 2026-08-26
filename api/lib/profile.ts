@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { sql, type SQLWrapper } from "drizzle-orm";
 import { z } from "zod";
 
 /**
@@ -6,7 +6,9 @@ import { z } from "zod";
  * Keep the first request after deployment safe while the idempotent migration
  * is applied by creating the nullable JSON column if it is missing.
  */
-export async function ensureProfilePlatformLinksColumn(db: any) {
+type SqlExecutor = { execute: (query: string | SQLWrapper) => unknown };
+
+export async function ensureProfilePlatformLinksColumn(db: SqlExecutor) {
   await db.execute(sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS platform_links jsonb`);
 }
 

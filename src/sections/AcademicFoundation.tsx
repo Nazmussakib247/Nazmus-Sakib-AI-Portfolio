@@ -12,7 +12,7 @@ export default function AcademicFoundation() {
   const { getJson } = useSettings();
   const copy = getJson<{ academicFoundation?: Record<string, string> }>('sectionCopy', {});
   const academicCopy = copy.academicFoundation || {};
-  const categories = foundation || [];
+  const categories = useMemo(() => foundation || [], [foundation]);
   const visibleCourses = useMemo(
     () => categories.flatMap((category) => category.courses || []),
     [categories],

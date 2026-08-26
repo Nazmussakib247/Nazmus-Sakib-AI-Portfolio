@@ -38,7 +38,7 @@ function resolveSocialImage(value: string | null | undefined) {
   return !trimmed || legacySocialImageMarkers.some((marker) => trimmed.includes(marker)) ? fallbackSocialImage : trimmed;
 }
 
-function getSocialImageMeta(_value: string | null | undefined) {
+function getSocialImageMeta() {
   return { type: 'image/png', width: '1200', height: '630' };
 }
 const fallbackTitle = DEFAULT_SEO_TITLE;
@@ -106,7 +106,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
       canonicalUrl,
       socialImageUrl: addAssetVersion(getAbsoluteUrl(c, resolveSocialImage(settings.socialPreviewImageUrl), fallbackSocialImage), settingUpdatedAt("socialPreviewImageUrl")),
       socialImageAlt: settings.socialPreviewImageAlt?.trim() || defaults.socialPreviewImageAlt,
-      socialImageMeta: getSocialImageMeta(settings.socialPreviewImageUrl),
+      socialImageMeta: getSocialImageMeta(),
       faviconUrl: addAssetVersion(getAbsoluteUrl(c, settings.faviconUrl, fallbackProfileImage), settingUpdatedAt("faviconUrl")),
       profileImageUrl,
       profile: {
@@ -126,7 +126,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
       canonicalUrl: defaults.canonicalSiteUrl,
       socialImageUrl: getAbsoluteUrl(c, resolveSocialImage(defaults.socialPreviewImageUrl), fallbackSocialImage),
       socialImageAlt: defaults.socialPreviewImageAlt,
-      socialImageMeta: getSocialImageMeta(defaults.socialPreviewImageUrl),
+      socialImageMeta: getSocialImageMeta(),
       faviconUrl: getAbsoluteUrl(c, defaults.faviconUrl, fallbackProfileImage),
       profileImageUrl: getAbsoluteUrl(c, fallbackProfileImage, fallbackProfileImage),
       profile: { name: "Nazmus Sakib", title: "AI Engineer", bio: fallbackDescription, githubUrl: null, linkedinUrl: null, mediumUrl: null },
