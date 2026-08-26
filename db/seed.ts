@@ -117,6 +117,40 @@ async function seed() {
     console.log("Projects seeded");
   }
 
+  // Preserve repository-backed projects for fresh or restored databases without overwriting Admin-edited records.
+  const repositoryProjects = [
+    {
+      title: "Car Parts Inventory Ledger",
+      description: "Operations workspace for auto-parts shops spanning POS, inventory, purchasing, ledgers, daily closing, reporting, and print-ready invoices.",
+      techStack: ["React 19", "TypeScript", "Vite", "Tailwind CSS 4", "shadcn/ui", "Recharts", "Express 4", "tRPC 11", "Drizzle ORM", "MySQL/TiDB", "Vitest", "Docker"],
+      githubUrl: "https://github.com/Nazmussakib247/car-parts-inventory-ledger",
+      orderIndex: 8,
+      isFeatured: true,
+    },
+    {
+      title: "StudioCraft Architecture",
+      description: "Full-stack architecture and interior design portfolio platform with image-led public pages, editable PostgreSQL content, protected admin CRUD, and inquiry management.",
+      techStack: ["React 18", "TypeScript", "Vite", "Tailwind CSS", "Radix UI", "Lucide React", "React Router", "Express", "PostgreSQL", "pg", "Node.js crypto", "Docker Compose", "Vitest"],
+      githubUrl: "https://github.com/Nazmussakib247/studiocraft-architecture",
+      orderIndex: 9,
+      isFeatured: true,
+    },
+    {
+      title: "Nexus Ecommerce",
+      description: "Full-stack ecommerce storefront with product discovery, cart and wishlist flows, checkout, orders, reviews, coupons, and protected admin operations.",
+      techStack: ["React 18", "TypeScript", "Vite", "Tailwind CSS", "Radix UI", "Express", "PostgreSQL", "pg", "React Query", "React Router", "bcryptjs", "JWT", "Docker Compose", "Vitest"],
+      githubUrl: "https://github.com/Nazmussakib247/nexus-ecommerce",
+      orderIndex: 10,
+      isFeatured: true,
+    },
+  ] as const;
+  for (const project of repositoryProjects) {
+    const existing = await db.select({ id: projects.id }).from(projects).where(eq(projects.title, project.title)).limit(1);
+    if (existing.length === 0) {
+      await db.insert(projects).values({ ...project, techStack: [...project.techStack] });
+    }
+  }
+
   // Seed flagship case studies only when the project has not been configured yet.
   // Values are limited to facts supported by the existing project records and brief; no metrics are invented.
   const hirelayCaseStudy = {

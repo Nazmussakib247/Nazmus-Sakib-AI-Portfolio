@@ -172,7 +172,7 @@ export default function Projects() {
   useReveal(sectionRef, [dbProjects, filter]);
 
   const getThumb = (p: ProjectLike) => p.thumbnailUrl || undefined;
-  const getOwnershipLabel = (p: ProjectLike) => p.title.toLowerCase().includes('nexus')
+  const getOwnershipLabel = (p: ProjectLike) => p.title.toLowerCase().includes('enterprise nexus')
     ? 'Team Lead · RAG & AI Integration · Documentation · Deployment · Security'
     : 'End-to-end ownership · Designed, built & deployed by Nazmus Sakib';
 
