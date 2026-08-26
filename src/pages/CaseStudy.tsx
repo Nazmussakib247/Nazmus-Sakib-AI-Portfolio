@@ -1,4 +1,5 @@
-import { useNavigate, useParams } from "react-router";
+import { useLayoutEffect } from "react";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { ArrowLeft, ArrowUpRight, ExternalLink, GitBranch, Layers3, ShieldCheck } from "lucide-react";
 import { trpc } from "@/providers/trpc";
 
@@ -20,9 +21,22 @@ function sortByOrder<T extends { orderIndex: number }>(value: unknown) {
 
 export default function CaseStudy() {
   const { slug = "" } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { data: project, isLoading, isError } = trpc.project.getCaseStudyBySlug.useQuery({ slug });
-  const returnToProjects = () => navigate("/", { state: { returnTo: "projects" } });
+
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [slug]);
+
+  const returnToProjects = () => {
+    const state = location.state as { caseStudyOrigin?: boolean } | null;
+    if (state?.caseStudyOrigin) {
+      navigate(-1);
+      return;
+    }
+    navigate("/", { state: { returnTo: "projects" } });
+  };
 
   if (isLoading) return <main className="min-h-screen bg-[#05060f] px-6 py-32 text-center text-gray-400">Loading case study…</main>;
   if (isError || !project) return <main className="min-h-screen bg-[#05060f] px-6 py-32 text-center text-gray-400"><p className="mb-6">This case study is unavailable.</p><button type="button" onClick={returnToProjects} className="text-[#e8b923]">Return to projects</button></main>;

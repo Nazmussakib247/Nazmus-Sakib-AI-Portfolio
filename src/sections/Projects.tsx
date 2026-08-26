@@ -6,6 +6,12 @@ import { useReveal } from '@/components/fx/useReveal';
 import TiltCard from '@/components/fx/TiltCard';
 import SectionHeading from '@/components/fx/SectionHeading';
 import { useSettings } from '@/hooks/useSettings';
+import {
+  clearCaseStudyReturnContext,
+  getCaseStudyOriginPath,
+  readCaseStudyReturnContext,
+  saveCaseStudyReturnContext,
+} from '@/lib/caseStudyNavigation';
 
 type ProjectLike = {
   id: number;
@@ -104,8 +110,12 @@ export default function Projects() {
   const copy = getJson<{ projects?: Record<string, string> }>('sectionCopy', {});
   const projectCopy = copy.projects ?? {};
   const allLabel = projectCopy.all || 'All';
+  const currentPath = getCaseStudyOriginPath(location);
   const projects = (dbProjects || []).filter((project) => project.isFeatured !== false) as ProjectLike[];
-  const [filter, setFilter] = useState<string>(allLabel);
+  const [filter, setFilter] = useState<string>(() => {
+    const context = readCaseStudyReturnContext();
+    return context?.originPath === currentPath && context.filter ? context.filter : allLabel;
+  });
   const [selected, setSelected] = useState<ProjectLike | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
@@ -115,45 +125,54 @@ export default function Projects() {
 
   useEffect(() => {
     if (!dbProjects?.length) return;
-    const savedScroll = sessionStorage.getItem('portfolio-return-scroll');
+
+    const context = readCaseStudyReturnContext();
     const returnState = location.state as { returnTo?: string } | null;
-    const shouldReturnToProjects = returnState?.returnTo === 'projects';
+    const shouldReturnToProjects = returnState?.returnTo === 'projects'
+      || Boolean(context && (context.originKey === location.key || context.originPath === currentPath));
 
-    // A saved scroll marker is only valid for the one intentional return from a case study.
-    // Clear stale markers during ordinary reloads so Home never jumps to Projects unexpectedly.
-    if (!shouldReturnToProjects) {
-      sessionStorage.removeItem('portfolio-return-scroll');
-      sessionStorage.removeItem('portfolio-return-hash');
-      return;
-    }
+    // Do not let ordinary Home loads consume a context created for another route.
+    if (!shouldReturnToProjects) return;
 
-    sessionStorage.removeItem('portfolio-return-scroll');
-    sessionStorage.removeItem('portfolio-return-hash');
-    // React Router location.state survives a browser reload. Replace the transient state
-    // in the native history entry without changing React state, so the preloader stays skipped
-    // for this return but a subsequent refresh starts normally at the current position.
-    window.history.replaceState(null, document.title, window.location.href);
-    const savedTop = savedScroll ? Number(savedScroll) : NaN;
-    const fallbackTop = sectionRef.current ? sectionRef.current.offsetTop - 24 : 0;
-    const scrollTop = Number.isFinite(savedTop) ? savedTop : fallbackTop;
-
+    const fallbackTop = sectionRef.current ? Math.max(0, sectionRef.current.offsetTop - 24) : 0;
+    const scrollTop = context?.scrollY ?? fallbackTop;
     let attempts = 0;
+    let lastHeight = 0;
+    let settledFrames = 0;
+    let cancelled = false;
+
     const restoreScroll = () => {
+      if (cancelled) return;
       const lenis = (window as unknown as {
         __lenis?: { scrollTo: (value: number, options?: { immediate?: boolean }) => void };
       }).__lenis;
       if (lenis) {
         lenis.scrollTo(scrollTop, { immediate: true });
+      } else {
+        window.scrollTo({ top: scrollTop, left: 0, behavior: 'auto' });
+      }
+
+      const height = document.documentElement.scrollHeight;
+      settledFrames = height === lastHeight ? settledFrames + 1 : 0;
+      lastHeight = height;
+      attempts += 1;
+      if (attempts < 24 && settledFrames < 2) {
+        requestAnimationFrame(restoreScroll);
         return;
       }
-      window.scrollTo({ top: scrollTop, left: 0, behavior: 'auto' });
-      if (attempts < 12) {
-        attempts += 1;
-        requestAnimationFrame(restoreScroll);
+
+      if (context) clearCaseStudyReturnContext();
+      if (returnState?.returnTo === 'projects') {
+        window.history.replaceState(null, document.title, window.location.href);
       }
     };
-    requestAnimationFrame(restoreScroll);
-  }, [dbProjects, location.state]);
+
+    const frame = requestAnimationFrame(restoreScroll);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frame);
+    };
+  }, [dbProjects, currentPath, location.key, location.state]);
 
   // Distinct tech tags for filtering
   const tags = useMemo(() => {
@@ -275,9 +294,16 @@ export default function Projects() {
                     {project.caseStudyEnabled && project.slug && (
                       <Link
                         to={`/projects/${project.slug}/case-study`}
+                        state={{ caseStudyOrigin: true }}
                         onClick={() => {
-                          sessionStorage.setItem('portfolio-return-scroll', String(window.scrollY));
-                          sessionStorage.setItem('portfolio-return-hash', '#projects');
+                          const lenis = (window as unknown as { __lenis?: { scroll?: number } }).__lenis;
+                          saveCaseStudyReturnContext({
+                            originPath: currentPath,
+                            originKey: location.key,
+                            scrollY: Number.isFinite(lenis?.scroll) ? Number(lenis?.scroll) : window.scrollY,
+                            filter,
+                            projectSlug: project.slug || '',
+                          });
                         }}
                         className="inline-flex items-center gap-1.5 rounded-full border border-[#e8b923]/30 bg-[#e8b923]/[0.06] px-3 py-1.5 text-xs font-medium text-[#f5cd45] transition-all hover:border-[#e8b923]/65 hover:bg-[#e8b923]/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8b923]"
                       >

@@ -6,6 +6,10 @@ import './index.css'
 import { TRPCProvider } from "@/providers/trpc"
 import App from './App.tsx'
 
+if ('scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual'
+}
+
 class AppErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state: { error: Error | null } = { error: null }
 

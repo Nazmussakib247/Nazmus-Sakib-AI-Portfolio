@@ -20,13 +20,21 @@ import ScrollProgress from '@/components/fx/ScrollProgress';
 import Preloader from '@/components/fx/Preloader';
 import { useLocation } from 'react-router';
 import { useSettings } from '@/hooks/useSettings';
+import { getCaseStudyOriginPath, isCaseStudyReturn as matchesCaseStudyReturn, readCaseStudyReturnContext } from '@/lib/caseStudyNavigation';
 import { trpc } from '@/providers/trpc';
 
 export default function Home() {
   const location = useLocation();
   const { isVisible } = useSettings();
   const trackVisit = trpc.analytics.track.useMutation();
-  const isCaseStudyReturn = (location.state as { returnTo?: string } | null)?.returnTo === 'projects';
+  const returnContext = readCaseStudyReturnContext();
+  const currentPath = getCaseStudyOriginPath(location);
+  const isCaseStudyReturn = matchesCaseStudyReturn(
+    returnContext,
+    location.key,
+    currentPath,
+    location.state as { returnTo?: string } | null,
+  );
 
   useEffect(() => {
     try {

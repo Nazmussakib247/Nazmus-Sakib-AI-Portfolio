@@ -3,7 +3,7 @@ import gsap from 'gsap';
 
 /** Brief branded preloader with a counting percentage, then curtain lift. */
 export default function Preloader({ name = 'NS', skip = false }: { name?: string; skip?: boolean }) {
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(skip);
 
   useEffect(() => {
     if (skip) {
