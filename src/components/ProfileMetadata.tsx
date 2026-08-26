@@ -3,13 +3,7 @@ import { trpc } from '@/providers/trpc';
 import { useSettings } from '@/hooks/useSettings';
 
 const fallbackProfileImage = '/images/profile-avatar.jpg';
-const fallbackSocialImage = 'https://raw.githubusercontent.com/Nazmussakib247/Nazmussakib247/main/assets/facebook-preview.png';
-const legacySocialImageMarkers = ['/images/hero-portrait.jpg', '/api/files/14'];
-
-function resolveSocialImage(value: string) {
-  const trimmed = value.trim();
-  return !trimmed || legacySocialImageMarkers.some((marker) => trimmed.includes(marker)) ? fallbackSocialImage : trimmed;
-}
+const stableSocialImage = '/og-image.png';
 
 type StructuredData = {
   '@graph'?: Array<Record<string, unknown>>;
@@ -81,7 +75,7 @@ export default function ProfileMetadata() {
     const description = get('seoDescription').trim() || 'Production-minded AI systems, bilingual NLP, LLM workflows, retrieval, full-stack engineering, and intelligent automation.';
     const siteUrl = toAbsoluteUrl(get('canonicalSiteUrl') || '/', window.location.origin).replace(/\/$/, '') + '/';
     const profileImageUrl = toAbsoluteUrl(profile?.avatarUrl || fallbackProfileImage, fallbackProfileImage);
-    const socialImageUrl = toAbsoluteUrl(resolveSocialImage(get('socialPreviewImageUrl')), fallbackSocialImage);
+    const socialImageUrl = toAbsoluteUrl(stableSocialImage, stableSocialImage);
     const socialImageAlt = get('socialPreviewImageAlt').trim() || 'Nazmus Sakib — ML Engineer and AI product builder';
     const faviconUrl = toAbsoluteUrl(get('faviconUrl') || fallbackProfileImage, fallbackProfileImage);
 

@@ -30,19 +30,16 @@ type SeoData = {
 };
 
 const fallbackProfileImage = "/images/profile-avatar.jpg";
-const fallbackSocialImage = "https://raw.githubusercontent.com/Nazmussakib247/Nazmussakib247/main/assets/facebook-preview.png";
-const legacySocialImageMarkers = ["/images/hero-portrait.jpg", "/api/files/14"];
+const fallbackSocialImage = "/og-image.png";
+const legacySocialImageMarkers = ["/images/hero-portrait.jpg", "/api/files/"];
 
 function resolveSocialImage(value: string | null | undefined) {
   const trimmed = value?.trim() || "";
   return !trimmed || legacySocialImageMarkers.some((marker) => trimmed.includes(marker)) ? fallbackSocialImage : trimmed;
 }
 
-function getSocialImageMeta(value: string | null | undefined) {
-  const imageUrl = resolveSocialImage(value);
-  return imageUrl.includes('/api/files/26')
-    ? { type: 'image/png', width: '1600', height: '900' }
-    : { type: 'image/png', width: '1200', height: '630' };
+function getSocialImageMeta(_value: string | null | undefined) {
+  return { type: 'image/png', width: '1200', height: '630' };
 }
 const fallbackTitle = DEFAULT_SEO_TITLE;
 const fallbackDescription = DEFAULT_SEO_DESCRIPTION;
@@ -107,7 +104,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
       title: normalizeSeoSetting("seoTitle", settings.seoTitle) || defaults.seoTitle,
       description: normalizeSeoSetting("seoDescription", settings.seoDescription) || defaults.seoDescription,
       canonicalUrl,
-      socialImageUrl: addAssetVersion(getAbsoluteUrl(c, resolveSocialImage(settings.socialPreviewImageUrl), fallbackSocialImage), settingUpdatedAt("socialPreviewImageUrl")),
+      socialImageUrl: getAbsoluteUrl(c, resolveSocialImage(settings.socialPreviewImageUrl), fallbackSocialImage),
       socialImageAlt: settings.socialPreviewImageAlt?.trim() || defaults.socialPreviewImageAlt,
       socialImageMeta: getSocialImageMeta(settings.socialPreviewImageUrl),
       faviconUrl: addAssetVersion(getAbsoluteUrl(c, settings.faviconUrl, fallbackProfileImage), settingUpdatedAt("faviconUrl")),
