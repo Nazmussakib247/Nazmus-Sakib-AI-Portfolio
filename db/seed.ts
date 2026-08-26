@@ -178,7 +178,350 @@ async function seed() {
     caseStudyLinks: [{ label: "Repository", url: "https://github.com/nazmussakib/sentiment-analysis", kind: "repository", orderIndex: 0 }],
     caseStudyStack: ["React", "TypeScript", "Machine Learning", "LLM", "Browser Inference", "Visualization"],
   };
-  for (const [title, data] of [["Hirelay — AI Recruitment Platform", hirelayCaseStudy], ["SentimentScope — Bilingual AI Analysis", sentimentScopeCaseStudy]] as const) {
+  const swadeshiCaseStudy = {
+  "slug": "swadeshi-digital-craft-storefront",
+  "caseStudyEnabled": true,
+  "caseStudySummary": "An evidence-led digital craft storefront for Bangladeshi textiles that connects product discovery with provenance, cultural context, saved collections, and a secure order workflow.",
+  "problemStatement": "Generic storefronts often ask visitors to trust vague authenticity claims while hiding the material, technique, region, and cultural context behind a craft. Swadeshi addresses that gap by making evidence and provenance part of the discovery experience before purchase-oriented actions.",
+  "roleDescription": "I designed and implemented the full-stack product experience, connecting the editorial React interface to an Express REST API and SQLite data layer. My work covered catalog and provenance presentation, authentication, saved collections, cart and order flows, responsive UI, validation, error handling, and backend hardening including rate limits, CORS controls, body-size limits, and sanitized responses.",
+  "architectureSummary": "Editorial React/Vite frontend → Express REST API with authentication and validation middleware → SQLite persistence for crafts, users, collections, and orders → resilient catalog, account, cart, and order experiences. The client communicates with the backend over HTTP and never touches the database directly.",
+  "outcomeSummary": "Delivered a complete, evidence-led storefront concept with database-backed catalog records, source-linked craft context, accounts, saved collections, cart and order persistence, responsive interaction design, and a hardened API. The project demonstrates product thinking beyond a static catalog while remaining explicit that payments are not processed.",
+  "lessonsLearned": "For trust-sensitive products, context is part of the feature: provenance, source links, image credits, and clear record status can matter as much as the catalog itself. I also learned to keep the purchase workflow honest by separating a working order record from payment processing that the project does not claim to implement.",
+  "caseStudyOrder": 0,
+  "caseStudyArchitecture": [
+    {
+      "id": "craft-records-sources",
+      "label": "Craft records + sources",
+      "detail": "Provenance, region, material, technique, and labelled imagery",
+      "orderIndex": 0
+    },
+    {
+      "id": "react-storefront",
+      "label": "React storefront",
+      "detail": "Editorial discovery, filtering, detail pages, and responsive interaction",
+      "orderIndex": 1
+    },
+    {
+      "id": "express-rest-api",
+      "label": "Express REST API",
+      "detail": "Catalog, authentication, collections, and order endpoints",
+      "orderIndex": 2
+    },
+    {
+      "id": "sqlite-database",
+      "label": "SQLite database",
+      "detail": "Persistent craft records, accounts, saved collections, and orders",
+      "orderIndex": 3
+    },
+    {
+      "id": "order-workflow",
+      "label": "Order workflow",
+      "detail": "Server-recomputed totals with a clear no-payment boundary",
+      "orderIndex": 4
+    }
+  ],
+  "caseStudyDecisions": [],
+  "caseStudyMetrics": [],
+  "caseStudyMedia": [
+    {
+      "url": "/images/projects/github/swadeshi/home-hero.png",
+      "kind": "overview",
+      "altText": "Editorial homepage that introduces provenance before purchase-oriented actions",
+      "caption": "Evidence-led craft storefront entry point",
+      "orderIndex": 0
+    },
+    {
+      "url": "/images/projects/github/swadeshi/product-detail.png",
+      "kind": "analysis",
+      "altText": "Region, material, technique, source link, and image credit in one record view",
+      "caption": "Craft record detail",
+      "orderIndex": 1
+    },
+    {
+      "url": "/images/projects/github/swadeshi/cart-drawer.png",
+      "kind": "workflow",
+      "altText": "Persisted cart interaction supporting the order journey",
+      "caption": "Cart workflow",
+      "orderIndex": 2
+    },
+    {
+      "url": "/images/projects/github/swadeshi/artisan-profile.png",
+      "kind": "workflow",
+      "altText": "Artisan and craft-community context within the product experience",
+      "caption": "Maker context",
+      "orderIndex": 3
+    }
+  ],
+  "caseStudyLinks": [
+    {
+      "url": "https://github.com/Nazmussakib247/swadeshi",
+      "kind": "repository",
+      "label": "Repository",
+      "orderIndex": 0
+    }
+  ],
+  "caseStudyStack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "Tailwind CSS",
+    "Express",
+    "SQLite",
+    "REST API",
+    "JWT",
+    "bcrypt",
+    "Zod",
+    "Docker"
+  ]
+};
+  const enterpriseNexusCaseStudy = {
+  "slug": "enterprise-nexus-multi-agent-ai-os",
+  "caseStudyEnabled": true,
+  "caseStudySummary": "A multi-agent business automation OS that brings HR, finance, support, analytics, and executive decision support into one role-based workspace with retrieval, orchestration, and security intelligence.",
+  "problemStatement": "Growing organizations often manage HR, finance, support, and operational signals in disconnected tools. That fragmentation makes cross-domain decisions slow and makes it difficult to retrieve trusted internal context, surface anomalies, and give leaders a coherent view without exposing uncontrolled AI output.",
+  "roleDescription": "As Team Leader and AI Integration Lead, I owned system architecture, Gemini integration, LangChain and multi-agent coordination, n8n workflow automation, the HR and Finance agent work, and the Security Intelligence module. I also led documentation, deployment coordination, and the engineering decisions that connected specialist agents to a unified dashboard. Frontend, backend, and other agent surfaces were delivered collaboratively by the team, so this case study separates my ownership from shared project output.",
+  "architectureSummary": "Role-based dashboard → Express API and agent service boundary → Executive orchestrator delegates to HR, Finance, Support, and Analytics specialists → Gemini native JSON responses validated by schemas → Supabase pgvector retrieves domain context through match_documents → persisted results, realtime updates, and executive briefings. Security intelligence, RBAC, rate limiting, and graceful AI degradation sit across the workflow.",
+  "outcomeSummary": "Delivered a documented end-to-end AI platform concept that connects specialist agents, retrieval, workflow automation, realtime dashboard updates, and security intelligence. The implementation demonstrates how AI output can be structured, validated, persisted, and degraded safely when a model is unavailable rather than fabricating a response.",
+  "lessonsLearned": "Multi-agent systems are an orchestration problem as much as a prompting problem. Clear agent boundaries, schema-validated JSON, scoped retrieval, retries, timeouts, and explicit degraded states make a system easier to reason about and safer to present to users. Team leadership also means documenting ownership boundaries so collaboration is visible rather than overstated.",
+  "caseStudyOrder": 0,
+  "caseStudyArchitecture": [
+    {
+      "id": "business-inputs",
+      "label": "Business inputs",
+      "detail": "HR, finance, support, and operational records",
+      "orderIndex": 0
+    },
+    {
+      "id": "domain-agents",
+      "label": "Domain agents",
+      "detail": "HR, Finance, Support, and Analytics specialists",
+      "orderIndex": 1
+    },
+    {
+      "id": "executive-orchestrator",
+      "label": "Executive orchestrator",
+      "detail": "Delegates work and synthesizes cross-domain briefings",
+      "orderIndex": 2
+    },
+    {
+      "id": "rag-context",
+      "label": "RAG context",
+      "detail": "Gemini embeddings plus Supabase pgvector retrieval through match_documents",
+      "orderIndex": 3
+    },
+    {
+      "id": "validated-output",
+      "label": "Validated output",
+      "detail": "Native JSON schemas, backend persistence, realtime dashboard updates, and graceful degradation",
+      "orderIndex": 4
+    }
+  ],
+  "caseStudyDecisions": [
+    {
+      "title": "Scoped agent responsibilities",
+      "decision": "Keep HR, Finance, Support, and Analytics agents domain-focused, with Executive coordinating rather than duplicating them",
+      "tradeoff": "Requires orchestration design, but makes behavior easier to reason about",
+      "orderIndex": 0
+    },
+    {
+      "title": "Schema-first AI output",
+      "decision": "Use Gemini native JSON mode and validate results before persistence or display",
+      "tradeoff": "Adds validation work, but reduces malformed and ambiguous downstream states",
+      "orderIndex": 1
+    },
+    {
+      "title": "Grounded retrieval",
+      "decision": "Store embeddings in Supabase pgvector and retrieve relevant context through match_documents",
+      "tradeoff": "Requires an embedding and retrieval path, but improves domain grounding",
+      "orderIndex": 2
+    },
+    {
+      "title": "Graceful degradation",
+      "decision": "Use timeouts, retries, explicit ai_status values, and retryable failures when AI is unavailable",
+      "tradeoff": "Adds operational states, but avoids fabricating output and preserves user trust",
+      "orderIndex": 3
+    }
+  ],
+  "caseStudyMetrics": [],
+  "caseStudyMedia": [
+    {
+      "url": "/images/projects/github/enterprise-nexus/dashboard-overview.png",
+      "kind": "overview",
+      "altText": "Cross-domain workspace for business operations and agent activity",
+      "caption": "Unified role-based dashboard",
+      "orderIndex": 0
+    },
+    {
+      "url": "/images/projects/github/enterprise-nexus/hr-candidate-detail.png",
+      "kind": "workflow",
+      "altText": "Candidate detail and HR decision-support surface",
+      "caption": "HR agent workflow",
+      "orderIndex": 1
+    },
+    {
+      "url": "/images/projects/github/enterprise-nexus/finance-analytics.png",
+      "kind": "analysis",
+      "altText": "Finance-agent analytics and anomaly-oriented insight surface",
+      "caption": "Finance analytics",
+      "orderIndex": 2
+    },
+    {
+      "url": "/images/projects/github/enterprise-nexus/executive-briefing.png",
+      "kind": "architecture",
+      "altText": "Cross-domain synthesis for leadership review",
+      "caption": "Executive briefing",
+      "orderIndex": 3
+    }
+  ],
+  "caseStudyLinks": [
+    {
+      "url": "https://github.com/Nazmussakib247/CSE4204-8B-T04-Enterprise-Nexus-Multi-Agent-AI-Business-Automation-OS-with-Security-Intelligence",
+      "kind": "repository",
+      "label": "Repository",
+      "orderIndex": 0
+    }
+  ],
+  "caseStudyStack": [
+    "React",
+    "Next.js",
+    "Node.js",
+    "Express",
+    "Google Gemini",
+    "LangChain.js",
+    "CrewAI",
+    "Supabase",
+    "pgvector",
+    "n8n",
+    "PostgreSQL",
+    "Docker",
+    "JWT",
+    "bcrypt"
+  ]
+};
+  const neighbourCaseStudy = {
+  "slug": "neighbour-local-services-marketplace",
+  "caseStudyEnabled": true,
+  "caseStudySummary": "A full-stack local-services marketplace that helps clients discover trusted professionals, compare service information, book appointments, communicate, and manage the service lifecycle in one workflow.",
+  "problemStatement": "Finding a reliable local professional is often fragmented across informal recommendations, incomplete service information, and untracked conversations. The product needed a clearer trust and coordination layer from discovery through booking, messaging, reviews, and service management.",
+  "roleDescription": "I designed and implemented the full-stack marketplace flow, connecting the responsive TypeScript frontend to the backend APIs and persistence layer. My work covered service discovery, professional profiles, booking state, client and provider workflows, messaging, reviews, authentication boundaries, and the operational states needed to keep the experience understandable.",
+  "architectureSummary": "Client discovery UI → service and professional profiles → booking state machine → provider workflow for availability and status → authenticated messaging and reviews → persisted marketplace records and notifications. The design keeps client and provider responsibilities explicit while allowing the service lifecycle to be tracked end to end.",
+  "outcomeSummary": "Delivered a complete marketplace concept with distinct client and provider journeys, persisted booking states, professional profiles, messaging, reviews, and service-management workflows. The project demonstrates product-level thinking across trust, coordination, and lifecycle state rather than stopping at a listing page.",
+  "lessonsLearned": "Marketplace UX depends on explicit states and trust signals: who can act, what is pending, what has been accepted, and how both sides recover from ambiguity. Designing the client and provider journeys together also exposed edge cases that a single-user listing flow would hide.",
+  "caseStudyOrder": 0,
+  "caseStudyArchitecture": [
+    {
+      "id": "client-discovery",
+      "label": "Client discovery",
+      "detail": "Browse services and trusted professional profiles",
+      "orderIndex": 0
+    },
+    {
+      "id": "booking-workflow",
+      "label": "Booking workflow",
+      "detail": "Availability, request, acceptance, status, and double-booking-safe transaction state",
+      "orderIndex": 1
+    },
+    {
+      "id": "provider-workspace",
+      "label": "Provider workspace",
+      "detail": "Manage services, availability, client requests, and lifecycle status",
+      "orderIndex": 2
+    },
+    {
+      "id": "communication-layer",
+      "label": "Communication layer",
+      "detail": "Authenticated messaging, notifications, and reviews",
+      "orderIndex": 3
+    },
+    {
+      "id": "persistence-and-analytics",
+      "label": "Persistence and analytics",
+      "detail": "MySQL records, operational history, and CSV reporting",
+      "orderIndex": 4
+    }
+  ],
+  "caseStudyDecisions": [],
+  "caseStudyMetrics": [],
+  "caseStudyMedia": [],
+  "caseStudyLinks": [],
+  "caseStudyStack": [
+    "React 19",
+    "TypeScript",
+    "Vite",
+    "Tailwind CSS",
+    "PHP 8.2",
+    "REST API",
+    "MySQL 8",
+    "Docker",
+    "PDO",
+    "RBAC",
+    "Bookings",
+    "Notifications"
+  ]
+};
+  const spamGuardCaseStudy = {
+  "slug": "spamguard-ai-spam-detection-dashboard",
+  "caseStudyEnabled": true,
+  "caseStudySummary": "A browser-first spam-detection dashboard that makes text classification inspectable through transparent heuristics, suspicious-word highlighting, English and Bangla support, batch analysis, local history, trend views, and an optional FastAPI/scikit-learn backend.",
+  "problemStatement": "Many spam filters hide the reason behind a label, making borderline messages difficult to review and tune. The project needed a fast, browser-first workflow that surfaces suspicious terms, supports English and Bangla text, handles batches, and remains useful offline while being honest that heuristic detection is not a production-trained classifier.",
+  "roleDescription": "I designed and implemented the browser-first analysis workflow, including the transparent heuristic engine, suspicious-word highlighting, English and Bangla handling, batch input, local history, trends, CSV import/export, and the optional FastAPI/scikit-learn boundary. I kept the UI useful offline and documented the difference between an inspectable heuristic tool and a production-trained classifier.",
+  "architectureSummary": "Text input → transparent heuristic rules and suspicious-word highlighting → English/Bangla classification view → local history and trend summaries → CSV batch import/export. Optional FastAPI and scikit-learn backend extends the workflow for model-backed experiments, while the browser path remains usable offline.",
+  "outcomeSummary": "Delivered a practical, explainable classification dashboard with bilingual support, suspicious-term highlighting, batch analysis, local history, trends, and CSV workflow support. The project is intentionally transparent about its boundary: it is a browser-first heuristic tool and not evidence of a production-trained model accuracy claim.",
+  "lessonsLearned": "Explainability is a product feature when users must review borderline text. Highlighting the evidence behind a label makes heuristics easier to inspect, while the explicit limitation statement prevents a prototype from being mistaken for a validated production classifier. Future improvements should begin with a labelled evaluation set, authentication, and shared persistence.",
+  "caseStudyOrder": 0,
+  "caseStudyArchitecture": [],
+  "caseStudyDecisions": [],
+  "caseStudyMetrics": [],
+  "caseStudyMedia": [],
+  "caseStudyLinks": [],
+  "caseStudyStack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "Tailwind CSS",
+    "FastAPI",
+    "Python",
+    "scikit-learn",
+    "Pandas",
+    "CSV",
+    "Local Storage",
+    "Offline-first"
+  ]
+};
+  const arduinoRadarCaseStudy = {
+  "slug": "arduino-based-military-radar-system",
+  "caseStudyEnabled": true,
+  "caseStudySummary": "An embedded sensing and visualization project that turns an Arduino, ultrasonic sensor, and servo sweep into a radar-style monitoring interface. It demonstrates practical computer-architecture work across physical input, serial communication, angle-distance mapping, and a live Processing visualization.",
+  "problemStatement": "Raw ultrasonic readings alone are difficult to interpret when the sensor is moving through different angles. The project needed a low-cost way to coordinate servo position, distance measurement, serial output, and a visual sweep so detected objects could be understood in relation to both angle and distance.",
+  "roleDescription": "I assembled the sensing workflow around the Arduino, ultrasonic sensor, and servo motor, then connected the angle-distance readings to a serial visualization pipeline. My contribution covered the embedded C++ logic, sweep coordination, detection mapping, and Processing-side radar-style rendering used to make the physical behavior inspectable.",
+  "architectureSummary": "Ultrasonic sensor → Arduino distance sampling → servo-controlled 180-degree sweep → angle-distance serial stream → Processing visualization. The system maps measured distance to the current sweep angle, renders a green scan field, and marks detected objects for real-time inspection.",
+  "outcomeSummary": "Delivered a working radar-style prototype that connects physical sensing to an interpretable visual interface. The project demonstrates end-to-end embedded reasoning from sensor input and servo control through serial data handling and real-time object visualization, while remaining appropriately scoped as an academic hardware prototype.",
+  "lessonsLearned": "Embedded projects make timing and calibration first-class design concerns. A clear serial contract between the Arduino and visualization layer simplifies debugging, while separating sensor behavior from rendering makes the prototype easier to reason about and extend.",
+  "caseStudyOrder": 0,
+  "caseStudyArchitecture": [],
+  "caseStudyDecisions": [],
+  "caseStudyMetrics": [],
+  "caseStudyMedia": [],
+  "caseStudyLinks": [],
+  "caseStudyStack": [
+    "Arduino",
+    "C++",
+    "Ultrasonic Sensor",
+    "Servo Motor",
+    "Serial Communication",
+    "Processing",
+    "Computer Architecture"
+  ]
+};
+  for (const [title, data] of [
+    ["Hirelay — AI Recruitment Platform", hirelayCaseStudy],
+    ["SentimentScope — Bilingual AI Analysis", sentimentScopeCaseStudy],
+    ["Swadeshi — Digital Craft Storefront", swadeshiCaseStudy],
+    ["Enterprise Nexus — Multi-Agent AI OS", enterpriseNexusCaseStudy],
+    ["Neighbour — Local Services Marketplace", neighbourCaseStudy],
+    ["SpamGuard AI — Spam Detection Dashboard", spamGuardCaseStudy],
+    ["Arduino-Based Military Radar System", arduinoRadarCaseStudy],
+  ] as const) {
     await db.update(projects).set(data as unknown as typeof projects.$inferInsert).where(and(eq(projects.title, title), isNull(projects.slug)));
   }
 
