@@ -1,11 +1,23 @@
 import { useRef } from 'react';
 import { trpc } from '@/providers/trpc';
-import { Github, Linkedin, BookOpen, Link2, MapPin, GraduationCap, Hash } from 'lucide-react';
+import { Github, Linkedin, BookOpen, MapPin, GraduationCap, Hash } from 'lucide-react';
 import { useReveal } from '@/components/fx/useReveal';
 import { useSettings } from '@/hooks/useSettings';
 import Counter from '@/components/fx/Counter';
 import TiltCard from '@/components/fx/TiltCard';
 import SectionHeading from '@/components/fx/SectionHeading';
+
+function KaggleMark() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-none stroke-current stroke-[1.8]">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 4v16M6 12 16.5 4M6 12l10.5 8" />
+      <circle cx="6" cy="4" r="1.2" className="fill-current stroke-none" />
+      <circle cx="6" cy="20" r="1.2" className="fill-current stroke-none" />
+      <circle cx="16.5" cy="4" r="1.2" className="fill-current stroke-none" />
+      <circle cx="16.5" cy="20" r="1.2" className="fill-current stroke-none" />
+    </svg>
+  );
+}
 
 export default function About() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -153,8 +165,7 @@ export default function About() {
                     aria-label="Kaggle"
                     title="Kaggle"
                   >
-                    <Link2 className="h-3.5 w-3.5" />
-                    <span>K</span>
+                    <KaggleMark />
                   </a>
                 )}
               </div>
