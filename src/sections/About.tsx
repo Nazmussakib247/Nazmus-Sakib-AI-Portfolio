@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { trpc } from '@/providers/trpc';
-import { Github, Linkedin, BookOpen, MapPin, GraduationCap, Hash } from 'lucide-react';
+import { Github, Linkedin, BookOpen, Link2, MapPin, GraduationCap, Hash } from 'lucide-react';
 import { useReveal } from '@/components/fx/useReveal';
 import { useSettings } from '@/hooks/useSettings';
 import Counter from '@/components/fx/Counter';
@@ -36,6 +36,7 @@ export default function About() {
     github: profile?.githubUrl,
     linkedin: profile?.linkedinUrl,
     medium: profile?.mediumUrl,
+    kaggle: profile?.platformLinks?.kaggle,
   };
 
   return (
@@ -141,6 +142,19 @@ export default function About() {
                     aria-label="Medium"
                   >
                     <BookOpen className="h-4 w-4" />
+                  </a>
+                )}
+                {socialLinks.kaggle && (
+                  <a
+                    href={socialLinks.kaggle}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 rounded-xl bg-white/5 px-2.5 py-2.5 text-[10px] font-semibold text-gray-400 transition-all hover:bg-[#e8b923]/10 hover:text-[#e8b923]"
+                    aria-label="Kaggle"
+                    title="Kaggle"
+                  >
+                    <Link2 className="h-3.5 w-3.5" />
+                    <span>K</span>
                   </a>
                 )}
               </div>
