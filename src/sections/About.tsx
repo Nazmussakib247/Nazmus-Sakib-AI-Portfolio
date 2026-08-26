@@ -3,6 +3,7 @@ import { trpc } from '@/providers/trpc';
 import { Github, Linkedin, BookOpen, MapPin, GraduationCap, Hash } from 'lucide-react';
 import { useReveal } from '@/components/fx/useReveal';
 import { useSettings } from '@/hooks/useSettings';
+import { fallbackProfileImage, resolveProfileImageUrl } from '@/lib/profileImage';
 import Counter from '@/components/fx/Counter';
 import TiltCard from '@/components/fx/TiltCard';
 import SectionHeading from '@/components/fx/SectionHeading';
@@ -98,7 +99,7 @@ export default function About() {
             <TiltCard className="glass rounded-3xl border border-[#e8b923]/15 p-6 sm:p-8">
               <div className="mb-6 flex items-center gap-5">
                 <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl border-2 border-[#e8b923]/40 shadow-[0_0_24px_rgba(232,185,35,0.12)] sm:h-28 sm:w-28">
-                  {profile?.avatarUrl ? <img src={profile.avatarUrl} alt={profile.name || 'Profile'} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center bg-white/[0.04] text-xs text-gray-600">Profile</div>}
+                  <img src={resolveProfileImageUrl(profile?.avatarUrl) || fallbackProfileImage} alt={profile?.name || 'Profile'} className="h-full w-full object-cover" />
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-xl font-medium text-white">{profile?.name || ''}</h3>

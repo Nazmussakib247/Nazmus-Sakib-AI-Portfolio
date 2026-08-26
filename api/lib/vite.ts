@@ -31,7 +31,13 @@ type SeoData = {
 
 const fallbackProfileImage = "/images/profile-avatar.jpg";
 const fallbackSocialImage = "/og-image.png";
-const legacySocialImageMarkers = ["/images/hero-portrait.jpg", "/api/files/"];
+const legacySocialImageMarkers = ["/api/files/"];
+const legacyProfileImageMarkers = ["/api/files/29"];
+
+function resolveProfileImage(value: string | null | undefined) {
+  const trimmed = value?.trim() || "";
+  return !trimmed || legacyProfileImageMarkers.some((marker) => trimmed.includes(marker)) ? fallbackProfileImage : trimmed;
+}
 
 function resolveSocialImage(value: string | null | undefined) {
   const trimmed = value?.trim() || "";
@@ -98,7 +104,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
     const settingUpdatedAt = (key: string) => settingRows.find((row) => row.key === key)?.updatedAt;
     const profile = profileRows[0];
     const canonicalUrl = getAbsoluteUrl(c, settings.canonicalSiteUrl || defaults.canonicalSiteUrl, `${origin}/`).replace(/\/$/, "") + "/";
-    const profileImageUrl = getAbsoluteUrl(c, profile?.avatarUrl, fallbackProfileImage);
+    const profileImageUrl = getAbsoluteUrl(c, resolveProfileImage(profile?.avatarUrl), fallbackProfileImage);
 
     return {
       title: normalizeSeoSetting("seoTitle", settings.seoTitle) || defaults.seoTitle,
@@ -107,7 +113,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
       socialImageUrl: addAssetVersion(getAbsoluteUrl(c, resolveSocialImage(settings.socialPreviewImageUrl), fallbackSocialImage), settingUpdatedAt("socialPreviewImageUrl")),
       socialImageAlt: settings.socialPreviewImageAlt?.trim() || defaults.socialPreviewImageAlt,
       socialImageMeta: getSocialImageMeta(),
-      faviconUrl: addAssetVersion(getAbsoluteUrl(c, settings.faviconUrl, fallbackProfileImage), settingUpdatedAt("faviconUrl")),
+      faviconUrl: addAssetVersion(getAbsoluteUrl(c, resolveProfileImage(settings.faviconUrl), fallbackProfileImage), settingUpdatedAt("faviconUrl")),
       profileImageUrl,
       profile: {
         name: profile?.name || "Nazmus Sakib",

@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { trpc } from '@/providers/trpc';
 import { useSettings } from '@/hooks/useSettings';
-
-const fallbackProfileImage = '/images/profile-avatar.jpg';
+import { fallbackProfileImage, resolveProfileImageUrl } from '@/lib/profileImage';
 
 type StructuredData = {
   '@graph'?: Array<Record<string, unknown>>;
@@ -73,8 +72,8 @@ export default function ProfileMetadata() {
     const title = get('seoTitle').trim() || 'Nazmus Sakib — ML Engineer · AI Engineer · AI Product Engineer';
     const description = get('seoDescription').trim() || 'Production-minded AI systems, bilingual NLP, LLM workflows, retrieval, full-stack engineering, and intelligent automation.';
     const siteUrl = toAbsoluteUrl(get('canonicalSiteUrl') || '/', window.location.origin).replace(/\/$/, '') + '/';
-    const profileImageUrl = toAbsoluteUrl(profile?.avatarUrl || fallbackProfileImage, fallbackProfileImage);
-    const faviconUrl = toAbsoluteUrl(get('faviconUrl') || fallbackProfileImage, fallbackProfileImage);
+    const profileImageUrl = toAbsoluteUrl(resolveProfileImageUrl(profile?.avatarUrl), fallbackProfileImage);
+    const faviconUrl = toAbsoluteUrl(resolveProfileImageUrl(get('faviconUrl')) || fallbackProfileImage, fallbackProfileImage);
 
     document.title = title;
     ensureMeta('name', 'description').content = description;

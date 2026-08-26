@@ -23,7 +23,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   seoDescription:
     'Production-minded AI systems, bilingual NLP, LLM workflows, retrieval, full-stack engineering, and intelligent automation.',
   canonicalSiteUrl: 'https://nazmussakib.tech/',
-  socialPreviewImageUrl: '/images/hero-portrait.jpg',
+  socialPreviewImageUrl: '/og-image.png',
   socialPreviewImageAlt: 'Nazmus Sakib — ML Engineer and AI product builder',
   faviconUrl: '/images/profile-avatar.jpg',
   sectionVisibility:
