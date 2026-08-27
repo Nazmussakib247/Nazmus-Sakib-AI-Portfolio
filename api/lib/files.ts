@@ -4,6 +4,7 @@ import { siteSettings, uploads } from "@db/schema";
 import { eq } from "drizzle-orm";
 
 const SOCIAL_IMAGE_SETTING_KEY = "socialPreviewImageUrl";
+const FAVICON_SETTING_KEY = "faviconUrl";
 
 function getUploadId(value: string | null | undefined) {
   const match = value?.match(/\/api\/files\/(\d+)(?:[?#]|$)/);
@@ -45,6 +46,35 @@ export async function serveSocialPreviewImage(c: Context, next: Next) {
     });
   } catch (error) {
     console.error("[seo] stable social image lookup failed:", error instanceof Error ? error.message : "unknown error");
+    return next();
+  }
+}
+
+/** Serves the Admin-selected favicon at a stable public URL. */
+export async function serveFavicon(c: Context, next: Next) {
+  try {
+    const db = getDb();
+    const rows = await db
+      .select({ value: siteSettings.value })
+      .from(siteSettings)
+      .where(eq(siteSettings.key, FAVICON_SETTING_KEY))
+      .limit(1);
+    const id = getUploadId(rows[0]?.value);
+    if (!id) return next();
+
+    const files = await db.select().from(uploads).where(eq(uploads.id, id)).limit(1);
+    const file = files[0];
+    if (!file || !file.mimeType.startsWith("image/")) return next();
+
+    const bytes = Buffer.from(file.data, "base64");
+    return c.body(new Uint8Array(bytes), 200, {
+      "Content-Type": file.mimeType,
+      "Content-Length": String(bytes.length),
+      "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=60",
+      "Content-Disposition": "inline",
+    });
+  } catch (error) {
+    console.error("[seo] stable favicon lookup failed:", error instanceof Error ? error.message : "unknown error");
     return next();
   }
 }

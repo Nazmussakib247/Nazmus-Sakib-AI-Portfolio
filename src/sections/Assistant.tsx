@@ -134,23 +134,13 @@ export default function Assistant() {
   }, [voiceEnabled]);
 
   useEffect(() => {
-    const audio = greetingAudioRef.current;
-    if (audio) {
-      audio.defaultMuted = true;
-      audio.muted = true;
-      audio.volume = 0;
-      audio.loop = true;
-      void audio.play().catch(() => undefined);
-    }
-
     let index = 0;
     let typingTimer: number | undefined;
     setIntroText('');
 
     const greetingDelayTimer = window.setTimeout(() => {
-      // Start the greeting audio at the same moment the bubble begins typing.
-      // Browsers may still block audible autoplay; hover remains the fallback.
-      triggerVoiceGreeting();
+      // Keep the greeting text visual-only until the visitor explicitly
+      // interacts with the Xervis trigger or Talk to Xervis control.
       typingTimer = window.setInterval(() => {
         index += 1;
         const nextText = introCopy.slice(0, index);
@@ -423,8 +413,7 @@ export default function Assistant() {
       <video
         ref={greetingAudioRef}
         src={greetingAudioUrl}
-        preload="auto"
-        autoPlay
+        preload="none"
         muted
         loop
         playsInline
