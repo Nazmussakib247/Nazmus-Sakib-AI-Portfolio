@@ -133,11 +133,11 @@ export default function Skills() {
         </div>
       </div>
 
-      {/* Readable technology strip */}
+      {/* Infinite marquee */}
       <div className="mt-20">
         <div className="border-y border-white/5 bg-white/[0.02] py-4">
           <div className="marquee-track">
-            {marqueeItems.map((item, i) => (
+            {[...marqueeItems, ...marqueeItems].map((item, i) => (
               <span key={i} className="mx-6 flex items-center gap-6 whitespace-nowrap font-mono text-sm text-gray-500">
                 {skills.find((skill) => skill.name === item)?.iconUrl ? (
                   <img

@@ -246,13 +246,14 @@
     mix-blend-mode: overlay;
   }
 
-  /* Technology strip: keep every label readable at every viewport width. */
+  /* Marquee strip */
   .marquee-track {
     display: flex;
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.75rem 0;
+    width: max-content;
+    animation: marquee 28s linear infinite;
+  }
+  .marquee-track:hover {
+    animation-play-state: paused;
   }
 
   /* Typewriter caret */
@@ -826,21 +827,26 @@
   }
 }
 
-/* Public bottom activity message: remain readable instead of clipping mid-word. */
+/* Public bottom activity news ticker */
 .status-bar-ticker {
-  width: 100%;
+  animation: status-bar-ticker 24s linear infinite;
+  will-change: transform;
 }
 
-.status-bar-ticker > span {
-  min-width: 0;
-  flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+@keyframes status-bar-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
-
-
+@media (prefers-reduced-motion: reduce) {
+  .status-bar-ticker {
+    animation: none;
+  }
+}
 
 @media (max-width: 1023px) and (max-height: 700px) {
   .xervis-greeting {
