@@ -4,6 +4,7 @@ import { trpc } from '@/providers/trpc';
 import { useReveal } from '@/components/fx/useReveal';
 import SectionHeading from '@/components/fx/SectionHeading';
 import { useSettings } from '@/hooks/useSettings';
+import KaggleMark from '@/components/brands/KaggleMark';
 
 export const CV_PREVIEW_EVENT = 'portfolio:open-cv-preview';
 
@@ -210,7 +211,19 @@ export default function CV() {
                   {EXTRA_PLATFORM_OPTIONS.map((platform) => {
                     const url = profile?.platformLinks?.[platform.key];
                     if (!url) return null;
-                    return <a key={platform.key} href={url} target="_blank" rel="noopener noreferrer" aria-label={platform.label} title={platform.label} className="inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-full border border-white/10 px-2 font-mono text-[9px] font-semibold tracking-tight transition-colors hover:border-[#e8b923]/50 hover:text-[#e8b923]"><Link2 className="h-3 w-3" /><span>{platform.mark}</span></a>;
+                    return (
+                      <a
+                        key={platform.key}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={platform.label}
+                        title={platform.label}
+                        className={platform.key === 'kaggle' ? 'inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 transition-colors hover:border-[#e8b923]/50 hover:text-[#e8b923]' : 'inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-full border border-white/10 px-2 font-mono text-[9px] font-semibold tracking-tight transition-colors hover:border-[#e8b923]/50 hover:text-[#e8b923]'}
+                      >
+                        {platform.key === 'kaggle' ? <KaggleMark /> : <><Link2 className="h-3 w-3" /><span>{platform.mark}</span></>}
+                      </a>
+                    );
                   })}
                 </div>
               </div>
