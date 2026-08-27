@@ -30,6 +30,7 @@ export function useReveal(scope: RefObject<HTMLElement | null>, deps: unknown[] 
 
     const triggers: ScrollTrigger[] = [];
     const tweens: gsap.core.Tween[] = [];
+    const refreshTimer = window.setTimeout(() => ScrollTrigger.refresh(), 80);
 
     elements.forEach((el) => {
       const dir = el.dataset.reveal || 'up';
@@ -38,8 +39,8 @@ export function useReveal(scope: RefObject<HTMLElement | null>, deps: unknown[] 
       const from: gsap.TweenVars = { opacity: 0 };
       if (dir === 'up') from.y = 60;
       if (dir === 'down') from.y = -60;
-      if (dir === 'left') from.x = -70;
-      if (dir === 'right') from.x = 70;
+      if (dir === 'left') from.x = window.innerWidth < 640 ? -32 : -70;
+      if (dir === 'right') from.x = window.innerWidth < 640 ? 32 : 70;
       if (dir === 'scale') from.scale = 0.88;
 
       const tween = gsap.fromTo(el, from, {
@@ -61,6 +62,7 @@ export function useReveal(scope: RefObject<HTMLElement | null>, deps: unknown[] 
     });
 
     return () => {
+      window.clearTimeout(refreshTimer);
       triggers.forEach((t) => t.kill());
       tweens.forEach((t) => t.kill());
     };
