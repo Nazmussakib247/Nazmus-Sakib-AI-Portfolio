@@ -153,13 +153,14 @@ export const contactRouter = createRouter({
       const resendKey = process.env.RESEND_API_KEY?.trim();
       const contactTo = process.env.CONTACT_TO_EMAIL?.trim();
       const resendFrom = process.env.RESEND_FROM_EMAIL?.trim();
-      if (resendKey && contactTo && resendFrom) {
+      const contactFrom = process.env.CONTACT_FROM_EMAIL?.trim() || resendFrom;
+      if (resendKey && contactTo && contactFrom) {
         try {
           const emailResponse = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              from: resendFrom,
+              from: contactFrom,
               to: [contactTo],
               reply_to: input.email,
               subject: input.subject || `Portfolio message from ${input.name}`,
