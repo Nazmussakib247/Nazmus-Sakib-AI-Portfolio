@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { BookOpen, Download, Eye, FileText, Github, Linkedin, Link2, X } from 'lucide-react';
-import * as pdfjsLib from 'pdfjs-dist';
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { trpc } from '@/providers/trpc';
 import { useReveal } from '@/components/fx/useReveal';
 import SectionHeading from '@/components/fx/SectionHeading';
@@ -9,7 +7,26 @@ import { useSettings } from '@/hooks/useSettings';
 
 export const CV_PREVIEW_EVENT = 'portfolio:open-cv-preview';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+type PdfModule = typeof import('pdfjs-dist');
+type PdfDocument = import('pdfjs-dist').PDFDocumentProxy;
+let pdfModulePromise: Promise<PdfModule> | null = null;
+
+function loadPdfModule() {
+  if (!pdfModulePromise) {
+    pdfModulePromise = Promise.all([
+      import('pdfjs-dist'),
+      import('pdfjs-dist/build/pdf.worker.min.mjs?url'),
+    ]).then(([pdfjsLib, worker]) => {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = worker.default;
+      return pdfjsLib;
+    });
+  }
+  return pdfModulePromise;
+}
+
+export function prefetchPdfViewer() {
+  void loadPdfModule();
+}
 
 const EXTRA_PLATFORM_OPTIONS = [
   { key: 'hackerrank', label: 'HackerRank', mark: 'HR' },
@@ -27,7 +44,7 @@ const EXTRA_PLATFORM_OPTIONS = [
 function MobilePdfPreview({ url, title }: { url: string; title: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRefs = useRef<Array<HTMLCanvasElement | null>>([]);
-  const [pdf, setPdf] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
+  const [pdf, setPdf] = useState<PdfDocument | null>(null);
   const [pageCount, setPageCount] = useState(0);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
@@ -36,7 +53,7 @@ function MobilePdfPreview({ url, title }: { url: string; title: string }) {
     setStatus('loading');
     setPdf(null);
     setPageCount(0);
-    pdfjsLib.getDocument(url).promise.then((document) => {
+    loadPdfModule().then((pdfjsLib) => pdfjsLib.getDocument(url).promise).then((document) => {
       if (cancelled) {
         void document.destroy();
         return;
@@ -155,6 +172,8 @@ export default function CV() {
                     <button
                       type="button"
                       onClick={() => setIsPreviewOpen(true)}
+                      onPointerEnter={prefetchPdfViewer}
+                      onFocus={prefetchPdfViewer}
                       className="glow-gold group inline-flex items-center gap-2 rounded-full bg-[#e8b923] px-6 py-3 text-sm font-semibold text-[#05060f] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#f5cd45]"
                     >
                       <Eye className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />

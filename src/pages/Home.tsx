@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import Hero from '@/sections/Hero';
 import About from '@/sections/About';
 import Projects from '@/sections/Projects';
@@ -27,6 +27,7 @@ export default function Home() {
   const location = useLocation();
   const { isVisible } = useSettings();
   const trackVisit = trpc.analytics.track.useMutation();
+  const [assistantReady, setAssistantReady] = useState(false);
   const returnContext = readCaseStudyReturnContext();
   const currentPath = getCaseStudyOriginPath(location);
   const isCaseStudyReturn = matchesCaseStudyReturn(
@@ -35,6 +36,29 @@ export default function Home() {
     currentPath,
     location.state as { returnTo?: string } | null,
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    const enableAssistant = () => {
+      if (!cancelled) setAssistantReady(true);
+    };
+    const idleWindow = window as typeof window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    if (idleWindow.requestIdleCallback) {
+      const handle = idleWindow.requestIdleCallback(enableAssistant, { timeout: 2000 });
+      return () => {
+        cancelled = true;
+        idleWindow.cancelIdleCallback?.(handle);
+      };
+    }
+    const timer = window.setTimeout(enableAssistant, 1200);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -65,7 +89,7 @@ export default function Home() {
         {isVisible('certificates') && <Certificates />}
         {isVisible('blog') && <Blog />}
         <CV />
-        <Suspense fallback={null}><Assistant /></Suspense>
+        {assistantReady && <Suspense fallback={null}><Assistant /></Suspense>}
         <SocialActivity />
         {isVisible('contact') && <Contact />}
         <StatusBar />

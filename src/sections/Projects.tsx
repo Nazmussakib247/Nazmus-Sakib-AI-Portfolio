@@ -204,6 +204,9 @@ export default function Projects() {
     const sources = [p.thumbnailUrl, ...normalizeStringArray(p.screenshots)].filter(Boolean) as string[];
     return Array.from(new Set(sources));
   };
+  const prefetchCaseStudy = () => {
+    void import('@/pages/CaseStudy');
+  };
 
   useReveal(sectionRef, [dbProjects, filter, visibleCount]);
 
@@ -312,6 +315,8 @@ export default function Projects() {
                       <Link
                         to={`/projects/${project.slug}/case-study`}
                         state={{ caseStudyOrigin: true }}
+                        onMouseEnter={prefetchCaseStudy}
+                        onFocus={prefetchCaseStudy}
                         onClick={() => {
                           const lenis = (window as unknown as { __lenis?: { scroll?: number } }).__lenis;
                           saveCaseStudyReturnContext({
