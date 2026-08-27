@@ -25,12 +25,10 @@ export default function Assistant() {
   const [agentStatus, setAgentStatus] = useState<'online' | 'offline'>('online');
   const [introText, setIntroText] = useState('');
   const [showGreeting, setShowGreeting] = useState(false);
-  const [hasScrolled, setHasScrolled] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [speakingMessageIndex, setSpeakingMessageIndex] = useState<number | null>(null);
   const [isGreetingPlaying, setIsGreetingPlaying] = useState(false);
   const voiceHoverActiveRef = useRef(false);
-  const hasScrolledRef = useRef(false);
   const openRef = useRef(false);
   const voiceEnabledRef = useRef(true);
   const greetingAudioRef = useRef<HTMLVideoElement | null>(null);
@@ -154,7 +152,7 @@ export default function Assistant() {
         index += 1;
         const nextText = introCopy.slice(0, index);
         setIntroText(nextText);
-        if (nextText.length > 0 && !hasScrolledRef.current) setShowGreeting(true);
+        if (nextText.length > 0) setShowGreeting(true);
         if (index >= introCopy.length && typingTimer !== undefined) window.clearInterval(typingTimer);
       }, 26);
     }, 5200);
@@ -167,20 +165,6 @@ export default function Assistant() {
     };
   }, [introCopy]);
 
-  useEffect(() => {
-    const dismissGreetingOnScroll = () => {
-      if (window.scrollY <= 64) return;
-      hasScrolledRef.current = true;
-      setHasScrolled(true);
-      setShowGreeting(false);
-      const audio = greetingAudioRef.current;
-      if (audio && !audio.paused) audio.pause();
-      setIsGreetingPlaying(false);
-    };
-
-    window.addEventListener('scroll', dismissGreetingOnScroll, { passive: true });
-    return () => window.removeEventListener('scroll', dismissGreetingOnScroll);
-  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -447,7 +431,7 @@ export default function Assistant() {
         className="sr-only"
       />
 
-      {!open && !hasScrolled && showGreeting && introText && (
+      {!open && showGreeting && introText && (
         <div className="xervis-greeting absolute bottom-[calc(100%+0.9rem)] right-0 w-[min(300px,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] rounded-2xl rounded-br-md border border-[#e8b923]/25 bg-[#080b17]/95 px-4 py-3 text-xs leading-relaxed text-gray-300 shadow-[0_14px_35px_rgba(0,0,0,0.45)] backdrop-blur-xl lg:block lg:bottom-[calc(100%+0.9rem)]">
           <span className="mb-1 flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[#e8b923]">
             <Bot className="h-3 w-3" /> Xervis
