@@ -34,7 +34,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   bottomBarMessage: 'Bilingual AI engineering · Available for selected freelance and remote engagements · Open to thoughtful collaborations',
   bottomBarHireLabel: 'Hire Me',
   bottomBarHireTarget: 'contact',
-  assistantAvatarUrl: '/images/assistant/xervis-avatar.png',
+  assistantAvatarUrl: '/images/assistant/xervis-avatar.webp',
   assistantGreetingAudioUrl: '/audio/xervis-greeting.mp3',
   navigationItems: '[{"label":"About","id":"about","section":"about"},{"label":"Projects","id":"projects","section":"projects"},{"label":"Experience","id":"experience","section":"experience"},{"label":"Foundation","id":"academic-foundation","section":"academicFoundation"},{"label":"Skills","id":"skills","section":"skills"},{"label":"Awards","id":"awards","section":"awards"},{"label":"Blog","id":"blog","section":"blog"},{"label":"CV","id":"cv"},{"label":"Activity","id":"activity"},{"label":"Contact","id":"contact","section":"contact"}]',
   searchSuggestions: '[{"label":"Explore AI projects","hint":"ML products and systems","id":"projects","icon":"projects"},{"label":"Hirelay recruitment platform","hint":"AI matching and automation","id":"projects","icon":"experience"},{"label":"SentimentScope analysis","hint":"Bilingual sentiment intelligence","id":"projects","icon":"ai"},{"label":"Core AI & ML skills","hint":"Tools and capabilities","id":"skills","icon":"skills"},{"label":"Professional experience","hint":"Journey and current work","id":"experience","icon":"experience"},{"label":"Certifications","hint":"Verified learning milestones","id":"certificates","icon":"certificates"},{"label":"Start a conversation","hint":"Contact Nazmus","id":"contact","icon":"contact"}]',

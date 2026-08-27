@@ -870,7 +870,7 @@ async function seed() {
     bottomBarMessage: "Bilingual AI engineering · Available for selected freelance and remote engagements · Open to thoughtful collaborations",
     bottomBarHireLabel: "Hire Me",
     bottomBarHireTarget: "contact",
-    assistantAvatarUrl: "/images/assistant/xervis-avatar.png",
+    assistantAvatarUrl: "/images/assistant/xervis-avatar.webp",
     assistantGreetingAudioUrl: "/audio/xervis-greeting.mp3",
     heroPrimaryCta: "View Projects",
     heroPrimaryTarget: "projects",
