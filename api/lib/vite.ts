@@ -210,6 +210,20 @@ export function serveStaticFiles(app: App) {
   const distPath = path.resolve(import.meta.dirname, "../dist/public");
   const indexPath = path.resolve(distPath, "index.html");
 
+  // HTML must revalidate so deployments and Admin-managed metadata become visible.
+  // Hashed build assets can be cached for a year because their filenames change per build.
+  app.use("*", async (c, next) => {
+    const pathname = new URL(c.req.url).pathname;
+    if (pathname === "/" || pathname.endsWith(".html")) {
+      c.header("Cache-Control", "no-cache, must-revalidate");
+    } else if (pathname.startsWith("/assets/")) {
+      c.header("Cache-Control", "public, max-age=31536000, immutable");
+    } else if (pathname.startsWith("/images/") || pathname.startsWith("/fonts/")) {
+      c.header("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
+    }
+    await next();
+  });
+
   app.get("/", (c) => renderIndex(c, indexPath));
   app.use("*", serveStatic({ root: "./dist/public" }));
 
