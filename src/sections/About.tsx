@@ -10,12 +10,8 @@ import SectionHeading from '@/components/fx/SectionHeading';
 
 function KaggleMark() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-none stroke-current stroke-[1.8]">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 4v16M6 12 16.5 4M6 12l10.5 8" />
-      <circle cx="6" cy="4" r="1.2" className="fill-current stroke-none" />
-      <circle cx="6" cy="20" r="1.2" className="fill-current stroke-none" />
-      <circle cx="16.5" cy="4" r="1.2" className="fill-current stroke-none" />
-      <circle cx="16.5" cy="20" r="1.2" className="fill-current stroke-none" />
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-current">
+      <path d="M4 3h4v7.65L15.55 3h4.85l-8.3 9.05 8.7 8.95h-4.95L8 13.2V21H4V3Z" />
     </svg>
   );
 }
@@ -162,7 +158,7 @@ export default function About() {
                     href={socialLinks.kaggle}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-xl bg-white/5 px-2.5 py-2.5 text-[10px] font-semibold text-gray-400 transition-all hover:bg-[#e8b923]/10 hover:text-[#e8b923]"
+                    className="rounded-xl bg-white/5 p-2.5 text-gray-400 transition-all hover:bg-[#e8b923]/10 hover:text-[#e8b923]"
                     aria-label="Kaggle"
                     title="Kaggle"
                   >
