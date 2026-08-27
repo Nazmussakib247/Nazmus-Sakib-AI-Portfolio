@@ -676,6 +676,14 @@
   82% { transform: rotate(2deg) translateY(-1px); }
 }
 
+@keyframes xervis-periodic-wave {
+  0%, 82%, 100% { transform: rotate(0deg) translateY(0); }
+  86% { transform: rotate(-7deg) translateY(-1px); }
+  90% { transform: rotate(6deg) translateY(-2px); }
+  94% { transform: rotate(-5deg) translateY(-1px); }
+  97% { transform: rotate(2deg) translateY(0); }
+}
+
 @keyframes xervis-greeting-in {
   0% { opacity: 0; transform: translateY(8px) scale(0.96); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
@@ -684,6 +692,13 @@
 @keyframes xervis-panel-in {
   0% { opacity: 0; transform: translateY(10px) scale(0.97); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.xervis-periodic-wave {
+  display: inline-flex;
+  animation: xervis-periodic-wave 16s ease-in-out infinite;
+  transform-origin: 50% 78%;
+  will-change: transform;
 }
 
 .xervis-avatar-image {
@@ -695,6 +710,11 @@
 .xervis-trigger:hover .xervis-avatar-image,
 .xervis-trigger:focus-visible .xervis-avatar-image {
   animation: xervis-wave 680ms ease-in-out 1;
+}
+
+.xervis-trigger:hover .xervis-periodic-wave,
+.xervis-trigger:focus-visible .xervis-periodic-wave {
+  animation-play-state: paused;
 }
 
 .xervis-greeting {
@@ -789,6 +809,9 @@
 .xervis-speaking-card .xervis-wave-bar:nth-child(4) { animation-delay: 330ms; }
 
 @media (prefers-reduced-motion: reduce) {
+  .xervis-periodic-wave,
+  .xervis-trigger:hover .xervis-periodic-wave,
+  .xervis-trigger:focus-visible .xervis-periodic-wave,
   .xervis-avatar-image,
   .xervis-trigger:hover .xervis-avatar-image,
   .xervis-trigger:focus-visible .xervis-avatar-image,

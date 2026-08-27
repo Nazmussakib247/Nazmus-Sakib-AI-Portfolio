@@ -453,12 +453,14 @@ export default function Assistant() {
         <span className="absolute inset-1 rounded-full border border-[#e8b923]/15" />
         {chatMutation.isPending && <span className="assistant-ring absolute inset-0 rounded-full border border-[#e8b923]/70" />}
         <span className="absolute -inset-1 rounded-full border border-[#e8b923]/0 transition-all duration-500 group-hover:border-[#e8b923]/20 group-hover:scale-110" />
-        <img
-          src={avatarUrl}
-          alt=""
-          aria-hidden="true"
-          className={`xervis-avatar-image relative h-[74px] w-[74px] object-contain drop-shadow-[0_0_14px_rgba(70,155,255,0.35)] sm:h-[86px] sm:w-[86px] ${chatMutation.isPending ? 'assistant-breathe' : ''}`}
-        />
+        <span className="xervis-periodic-wave relative h-[74px] w-[74px] items-center justify-center sm:h-[86px] sm:w-[86px]">
+          <img
+            src={avatarUrl}
+            alt=""
+            aria-hidden="true"
+            className={`xervis-avatar-image relative h-full w-full object-contain drop-shadow-[0_0_14px_rgba(70,155,255,0.35)] ${chatMutation.isPending ? 'assistant-breathe' : ''}`}
+          />
+        </span>
         {!open && (
           <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full border border-[#080b17] bg-[#e8b923] text-[#05060f]">
             <MessageCircle className="h-3 w-3" />
