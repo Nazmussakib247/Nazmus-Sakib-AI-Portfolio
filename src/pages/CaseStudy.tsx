@@ -2,6 +2,7 @@ import { useLayoutEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { ArrowLeft, ArrowUpRight, ExternalLink, GitBranch, Layers3, ShieldCheck } from "lucide-react";
 import { trpc } from "@/providers/trpc";
+import { getResponsiveImageProps } from "@/lib/responsiveImages";
 
 function parseArray<T>(value: unknown): T[] {
   if (Array.isArray(value)) return value as T[];
@@ -77,7 +78,7 @@ export default function CaseStudy() {
           </aside>
         </div>
 
-        {media.length > 0 && <section className="border-t border-white/10 py-14"><h2 className="mb-7 text-2xl font-medium">Screenshots and workflow evidence</h2><div className="grid gap-6 md:grid-cols-2">{media.map((item) => <figure key={`${item.url}-${item.orderIndex}`} className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.025]"><img src={item.url} alt={item.altText} className="aspect-video w-full object-cover" loading="lazy" /><figcaption className="p-4 text-sm leading-relaxed text-gray-400"><span className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-[#e8b923]">{item.kind}</span>{item.caption}</figcaption></figure>)}</div></section>}
+        {media.length > 0 && <section className="border-t border-white/10 py-14"><h2 className="mb-7 text-2xl font-medium">Screenshots and workflow evidence</h2><div className="grid gap-6 md:grid-cols-2">{media.map((item) => <figure key={`${item.url}-${item.orderIndex}`} className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.025]"><img {...getResponsiveImageProps(item.url, '(max-width: 768px) 100vw, 50vw')} src={item.url} alt={item.altText} className="aspect-video w-full object-cover" loading="lazy" decoding="async" /><figcaption className="p-4 text-sm leading-relaxed text-gray-400"><span className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-[#e8b923]">{item.kind}</span>{item.caption}</figcaption></figure>)}</div></section>}
         <footer className="border-t border-white/10 pt-8 text-sm text-gray-500">Evidence-led documentation for {project.title}. Claims and metrics are shown only when supported by stored project records.</footer>
       </div>
     </main>

@@ -6,6 +6,7 @@ import { useReveal } from '@/components/fx/useReveal';
 import TiltCard from '@/components/fx/TiltCard';
 import SectionHeading from '@/components/fx/SectionHeading';
 import { useSettings } from '@/hooks/useSettings';
+import { getResponsiveImageProps } from '@/lib/responsiveImages';
 import {
   clearCaseStudyReturnContext,
   getCaseStudyOriginPath,
@@ -84,10 +85,11 @@ function ProjectScreenshotCarousel({ images, title }: { images: string[]; title:
       {images.length > 0 ? images.map((image, index) => (
         <img
           key={`${image}-${index}`}
-          src={image}
+          {...getResponsiveImageProps(image)}
           alt={index === activeIndex ? `${title} screenshot ${index + 1}` : ''}
           aria-hidden={index === activeIndex ? undefined : true}
-          loading={index === 0 ? 'lazy' : 'eager'}
+          loading="lazy"
+          decoding="async"
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out ${index === activeIndex ? 'opacity-100' : 'opacity-0'}`}
         />
       )) : (
@@ -370,7 +372,7 @@ export default function Projects() {
                 return (
                   <>
                     {activeImage ? (
-                      <img src={activeImage} alt={`${selected.title} preview ${activeIndex + 1}`} className="h-full w-full rounded-t-3xl object-cover transition-opacity duration-500" />
+                      <img {...getResponsiveImageProps(activeImage, '(max-width: 768px) 100vw, 672px')} alt={`${selected.title} preview ${activeIndex + 1}`} loading="eager" decoding="async" className="h-full w-full rounded-t-3xl object-cover transition-opacity duration-500" />
                     ) : (
                       <div className="flex h-full items-center justify-center rounded-t-3xl bg-white/[0.03] font-mono text-xs uppercase tracking-[0.2em] text-gray-600">
                         Preview unavailable
@@ -423,7 +425,7 @@ export default function Projects() {
                 <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
                   {getImages(selected).map((image, index) => (
                     <button key={image} type="button" onClick={() => setSelectedImageIndex(index)} className={`h-16 w-24 shrink-0 overflow-hidden rounded-lg border transition-all ${index === selectedImageIndex ? 'border-[#e8b923] ring-2 ring-[#e8b923]/30' : 'border-white/10 opacity-70 hover:opacity-100'}`} aria-label={`Select screenshot ${index + 1}`}>
-                      <img src={image} alt={`${selected.title} thumbnail ${index + 1}`} className="h-full w-full object-cover" />
+                      <img {...getResponsiveImageProps(image, '96px')} src={image} alt={`${selected.title} thumbnail ${index + 1}`} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                     </button>
                   ))}
                 </div>
