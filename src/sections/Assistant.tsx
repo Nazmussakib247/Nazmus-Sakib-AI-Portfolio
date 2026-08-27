@@ -13,7 +13,10 @@ const fallbackSuggestions: string[] = [];
 
 export default function Assistant() {
   const { get, getJson } = useSettings();
-  const avatarUrl = get('assistantAvatarUrl');
+  const configuredAvatarUrl = get('assistantAvatarUrl');
+  const avatarUrl = configuredAvatarUrl === '/images/assistant/xervis-avatar.png'
+    ? '/images/assistant/xervis-avatar.webp'
+    : configuredAvatarUrl;
   const greetingAudioUrl = get('assistantGreetingAudioUrl');
   const introCopy = get('xervisIntro') || fallbackIntroCopy;
   const starterMessage = { role: 'assistant' as const, content: get('xervisStarter') || fallbackStarterMessage };
