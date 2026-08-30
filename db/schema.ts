@@ -1,6 +1,7 @@
 import {
   pgTable,
   pgEnum,
+  index,
   varchar,
   text,
   timestamp,
@@ -361,6 +362,30 @@ export const visitEvents = pgTable("visit_events", {
 });
 
 export type VisitEvent = typeof visitEvents.$inferSelect;
+
+// CV analytics. Raw IP visibility is restricted to authenticated admins and retention is bounded.
+export const cvEvents = pgTable("cv_events", {
+  id: integer("id").generatedByDefaultAsIdentity().primaryKey(),
+  kind: varchar("kind", { length: 24 }).notNull(),
+  source: varchar("source", { length: 40 }).default("unknown").notNull(),
+  path: varchar("path", { length: 160 }).default("/#cv").notNull(),
+  referrerHost: varchar("referrer_host", { length: 255 }),
+  ipAddress: varchar("ip_address", { length: 128 }).notNull(),
+  country: varchar("country", { length: 2 }).default("ZZ").notNull(),
+  deviceType: varchar("device_type", { length: 32 }),
+  browser: varchar("browser", { length: 64 }),
+  operatingSystem: varchar("operating_system", { length: 64 }),
+  userAgent: varchar("user_agent", { length: 500 }),
+  visitorHash: varchar("visitor_hash", { length: 64 }),
+  deletedAt: timestamp("deleted_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  kindCreatedAtIdx: index("cv_events_kind_created_at_idx").on(table.kind, table.createdAt),
+  createdAtIdx: index("cv_events_created_at_idx").on(table.createdAt),
+  visitorHashIdx: index("cv_events_visitor_hash_idx").on(table.visitorHash),
+}));
+
+export type CvEvent = typeof cvEvents.$inferSelect;
 
 // Uploaded files (images/PDFs) stored in DB as base64
 export const uploads = pgTable("uploads", {
