@@ -7,10 +7,10 @@ import { createContext } from "./context";
 import { env } from "./lib/env";
 import { createOAuthCallbackHandler } from "./kimi/auth";
 import { Paths } from "@contracts/constants";
-import { serveFavicon, serveSocialPreviewImage, serveUploadedFile } from "./lib/files";
+import { serveCvDownload, serveFavicon, serveSocialPreviewImage, serveUploadedFile } from "./lib/files";
 import { serveSitemap } from "./lib/sitemap";
 import { syncMediumWritings } from "./routers/writing";
-import { ensureVisitEventsTable } from "./routers/analytics";
+import { ensureCvEventsTable, ensureVisitEventsTable } from "./routers/analytics";
 
 const app = new Hono<{ Bindings: HttpBindings }>();
 
@@ -37,6 +37,7 @@ app.use("/api/trpc/*", async (c) => {
 app.get("/og-image.png", serveSocialPreviewImage);
 app.get("/favicon.png", serveFavicon);
 app.get("/sitemap.xml", serveSitemap);
+app.get("/api/cv/download", serveCvDownload);
 app.get("/api/files/:id", async (c) => {
   c.header("X-Frame-Options", "SAMEORIGIN");
   return serveUploadedFile(c);
@@ -57,6 +58,7 @@ if (env.isProduction) {
 
   const runMediumSync = () => syncMediumWritings().then((result) => console.log(`[medium-sync] ${result.created} new, ${result.updated} updated`)).catch((error) => console.error('[medium-sync] failed', error));
   void ensureVisitEventsTable();
+  void ensureCvEventsTable();
   void runMediumSync();
   setInterval(runMediumSync, 1000 * 60 * 60 * 6);
 }

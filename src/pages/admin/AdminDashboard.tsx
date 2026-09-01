@@ -4,7 +4,7 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { trpc } from '@/providers/trpc';
 import {
   LayoutDashboard, FolderOpen, Award, BookOpen, Briefcase, FileBadge, GraduationCap,
-  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2, ShieldAlert, Search, Trash2, ChevronLeft, ChevronRight, History,
+  Settings, ShieldCheck, LogOut, X, Menu, Code2, Sparkles, Inbox, User, ExternalLink, Globe2, ShieldAlert, Search, Trash2, ChevronLeft, ChevronRight, History, Eye, Download, TrendingUp,
 } from 'lucide-react';
 import { ProjectsTab, SkillsTab, ExperiencesTab, CertificatesTab, AwardsTab, WritingsTab } from './tabs/ContentTabs';
 import { MessagesTab } from './tabs/MessagesTab';
@@ -213,6 +213,63 @@ function MobileNav({
   );
 }
 
+const cvSources = ['direct', 'google', 'linkedin', 'github', 'medium', 'referral', 'other'] as const;
+const cvDevices = ['Mobile', 'Tablet', 'Desktop', 'Other'] as const;
+
+type CvSource = typeof cvSources[number];
+type CvDevice = typeof cvDevices[number];
+
+function CVAnalyticsPanel() {
+  const [days, setDays] = useState(30);
+  const [kind, setKind] = useState<'preview' | 'download' | ''>('');
+  const [source, setSource] = useState<CvSource | ''>('');
+  const [deviceType, setDeviceType] = useState<CvDevice | ''>('');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const filter = {
+    days,
+    kind: kind || undefined,
+    source: source || undefined,
+    deviceType: deviceType || undefined,
+    search: search.trim() || undefined,
+  };
+  const { data: summary } = trpc.analyticsAdmin.cvSummary.useQuery(filter);
+  const { data: events } = trpc.analyticsAdmin.cvEvents.useQuery({ ...filter, page, pageSize: 20 });
+  const daily = summary?.daily || [];
+  const maxDaily = Math.max(1, ...daily.map((day) => day.previews + day.downloads));
+  const clearFilters = () => { setKind(''); setSource(''); setDeviceType(''); setSearch(''); setPage(1); };
+  const formatSource = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+
+  return (
+    <section className="mb-8 min-w-0 overflow-hidden rounded-xl border border-[#e8b923]/20 bg-[#111527] p-6">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="flex items-center gap-2 text-sm font-medium text-white"><FileBadge className="h-4 w-4 text-[#e8b923]" /> CV analytics</h3>
+          <p className="mt-1 text-xs text-gray-500">Privacy-first preview and download activity. Visitor identity is represented by an anonymized hash.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <select aria-label="CV analytics period" value={days} onChange={(event) => { setDays(Number(event.target.value)); setPage(1); }} className="rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]"><option value="1">Today</option><option value="7">7 days</option><option value="30">30 days</option><option value="90">3 months</option><option value="180">6 months</option><option value="365">1 year</option></select>
+          <select aria-label="CV event type" value={kind} onChange={(event) => { setKind(event.target.value as typeof kind); setPage(1); }} className="rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]"><option value="">All activity</option><option value="preview">Preview views</option><option value="download">Downloads</option></select>
+          <select aria-label="CV traffic source" value={source} onChange={(event) => { setSource(event.target.value as CvSource | ''); setPage(1); }} className="rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]"><option value="">All sources</option>{cvSources.map((item) => <option key={item} value={item}>{formatSource(item)}</option>)}</select>
+          <select aria-label="CV device type" value={deviceType} onChange={(event) => { setDeviceType(event.target.value as CvDevice | ''); setPage(1); }} className="rounded-lg border border-white/10 bg-[#0a0d19] px-2.5 py-1.5 text-xs text-gray-300 outline-none focus:border-[#e8b923]"><option value="">All devices</option>{cvDevices.map((item) => <option key={item} value={item}>{item}</option>)}</select>
+          <div className="relative w-full sm:w-52"><Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" /><input aria-label="Search CV analytics" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Search IP, source, path…" className="w-full rounded-lg border border-white/10 bg-[#0a0d19] py-1.5 pl-8 pr-8 text-xs text-gray-300 outline-none placeholder:text-gray-600 focus:border-[#e8b923]" />{search && <button type="button" aria-label="Clear CV search" onClick={() => { setSearch(''); setPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">×</button>}</div>
+          {(kind || source || deviceType || search) && <button type="button" onClick={clearFilters} className="text-xs text-[#e8b923] hover:underline">Clear filters</button>}
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-lg bg-white/[0.03] p-4"><Eye className="mb-2 h-4 w-4 text-[#e8b923]" /><div className="text-2xl text-white">{summary?.previewViews || 0}</div><div className="text-xs text-gray-500">Preview views · {days}d</div></div>
+        <div className="rounded-lg bg-white/[0.03] p-4"><Download className="mb-2 h-4 w-4 text-[#e8b923]" /><div className="text-2xl text-white">{summary?.downloads || 0}</div><div className="text-xs text-gray-500">Downloads · {days}d</div></div>
+        <div className="rounded-lg bg-white/[0.03] p-4"><User className="mb-2 h-4 w-4 text-[#e8b923]" /><div className="text-2xl text-white">{summary?.uniqueViewers || 0}</div><div className="text-xs text-gray-500">Unique viewers · {days}d</div></div>
+        <div className="rounded-lg bg-white/[0.03] p-4"><TrendingUp className="mb-2 h-4 w-4 text-[#e8b923]" /><div className="text-2xl text-white">{summary?.conversionRate || 0}%</div><div className="text-xs text-gray-500">View to download rate</div></div>
+      </div>
+      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="min-w-0 rounded-lg border border-white/5 bg-white/[0.02] p-4"><div className="mb-3 flex items-center justify-between"><h4 className="text-xs uppercase tracking-[0.16em] text-gray-500">Daily CV activity</h4><span className="text-[10px] text-gray-600">{daily.length} days</span></div>{daily.length ? <div className="flex h-44 items-end gap-1 overflow-x-auto pb-5">{daily.map((day) => { const total = day.previews + day.downloads; return <div key={day.day} className="group flex h-full min-w-7 flex-1 flex-col items-center justify-end gap-1" title={`${day.day}: ${day.previews} previews, ${day.downloads} downloads`}><span className="text-[9px] text-gray-500 opacity-0 transition-opacity group-hover:opacity-100">{total}</span><div className="flex w-full items-end gap-px" style={{ height: `${Math.max(6, (total / maxDaily) * 100)}%` }}><div className="w-1/2 rounded-t bg-[#e8b923]/75" style={{ height: `${total ? (day.previews / total) * 100 : 0}%` }} /><div className="w-1/2 rounded-t bg-cyan-300/70" style={{ height: `${total ? (day.downloads / total) * 100 : 0}%` }} /></div><span className="whitespace-nowrap text-[9px] text-gray-600">{day.day.slice(5)}</span></div>; })}</div> : <p className="py-12 text-center text-xs text-gray-600">No CV activity in this range.</p>}<div className="mt-2 flex gap-4 text-[10px] text-gray-500"><span><i className="mr-1 inline-block h-2 w-2 rounded-sm bg-[#e8b923]/75" />Previews</span><span><i className="mr-1 inline-block h-2 w-2 rounded-sm bg-cyan-300/70" />Downloads</span></div></div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1"><div className="rounded-lg border border-white/5 bg-white/[0.02] p-4"><h4 className="mb-3 text-xs uppercase tracking-[0.16em] text-gray-500">Sources</h4><div className="space-y-2">{(summary?.sources || []).slice(0, 6).map((item) => <div key={item.source} className="flex justify-between gap-3 text-xs"><span className="text-gray-300">{formatSource(item.source)}</span><span className="text-gray-500">{item.events}</span></div>)}{!summary?.sources.length && <p className="text-xs text-gray-600">No source data yet</p>}</div></div><div className="rounded-lg border border-white/5 bg-white/[0.02] p-4"><h4 className="mb-3 text-xs uppercase tracking-[0.16em] text-gray-500">Devices</h4><div className="space-y-2">{(summary?.devices || []).map((item) => <div key={item.deviceType} className="flex justify-between gap-3 text-xs"><span className="text-gray-300">{item.deviceType}</span><span className="text-gray-500">{item.events}</span></div>)}{!summary?.devices.length && <p className="text-xs text-gray-600">No device data yet</p>}</div></div></div>
+      </div>
+      <div className="mt-5 min-w-0"><div className="mb-2 flex flex-wrap items-center justify-between gap-2"><h4 className="text-xs uppercase tracking-[0.16em] text-gray-500">Recent CV events</h4><span className="text-xs text-gray-600">{events?.total || 0} recorded</span></div><div className="max-h-[22rem] overflow-auto rounded-lg border border-white/5"><table className="min-w-[850px] w-full text-left text-xs"><thead className="bg-white/[0.03] text-gray-500"><tr><th className="px-3 py-2 font-medium">Time</th><th className="px-3 py-2 font-medium">Event</th><th className="px-3 py-2 font-medium">Source</th><th className="px-3 py-2 font-medium">Country</th><th className="px-3 py-2 font-medium">Device</th><th className="px-3 py-2 font-medium">IP</th><th className="px-3 py-2 font-medium">Path</th></tr></thead><tbody className="divide-y divide-white/5">{(events?.events || []).map((event) => <tr key={event.id}><td className="whitespace-nowrap px-3 py-2 text-gray-400">{new Date(event.createdAt).toLocaleString()}</td><td className={`px-3 py-2 font-medium ${event.kind === 'download' ? 'text-cyan-200' : 'text-[#e8b923]'}`}>{event.kind === 'download' ? 'Download' : 'Preview'}</td><td className="px-3 py-2 text-gray-300">{formatSource(event.source)}</td><td className="px-3 py-2 text-gray-300">{formatCountry(event.country)}</td><td className="px-3 py-2 text-gray-500">{event.deviceType}</td><td className="px-3 py-2 font-mono text-gray-400">{event.ipAddress || 'unknown'}</td><td className="max-w-40 truncate px-3 py-2 text-gray-500" title={event.path}>{event.path}</td></tr>)}</tbody></table>{!events?.events.length && <p className="px-3 py-5 text-xs text-gray-600">No CV events in this range.</p>}</div><div className="mt-3 flex items-center justify-between gap-3"><span className="text-xs text-gray-500">Page {events?.page || page} of {events?.totalPages || 1}</span><div className="flex items-center gap-1"><button type="button" aria-label="Previous CV events page" disabled={page <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className="rounded-md border border-white/10 p-1.5 text-gray-400 transition-colors hover:border-[#e8b923]/50 hover:text-[#e8b923] disabled:cursor-not-allowed disabled:opacity-30"><ChevronLeft className="h-4 w-4" /></button><button type="button" aria-label="Next CV events page" disabled={page >= (events?.totalPages || 1)} onClick={() => setPage((value) => value + 1)} className="rounded-md border border-white/10 p-1.5 text-gray-400 transition-colors hover:border-[#e8b923]/50 hover:text-[#e8b923] disabled:cursor-not-allowed disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button></div></div></div></section>
+  );
+}
+
 /* Overview */
 function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: TabType) => void }) {
   const { data: projects } = trpc.project.list.useQuery();
@@ -316,6 +373,8 @@ function OverviewTab({ unreadCount, goTo }: { unreadCount: number; goTo: (t: Tab
           </button>
         ))}
       </div>
+
+      <CVAnalyticsPanel />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-white/5 bg-[#111527] p-6">

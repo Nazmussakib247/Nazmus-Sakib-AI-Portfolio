@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { BookOpen, Download, Eye, FileText, Github, Linkedin, Link2, X } from 'lucide-react';
 import { trpc } from '@/providers/trpc';
 import { useReveal } from '@/components/fx/useReveal';
@@ -41,6 +41,18 @@ const EXTRA_PLATFORM_OPTIONS = [
   { key: 'behance', label: 'Behance', mark: 'BE' },
   { key: 'dribbble', label: 'Dribbble', mark: 'DB' },
 ] as const;
+
+function getCvTrafficSource() {
+  if (typeof window === 'undefined') return 'direct' as const;
+  const referrer = document.referrer.toLowerCase();
+  if (!referrer) return 'direct' as const;
+  if (referrer.includes('google.')) return 'google' as const;
+  if (referrer.includes('linkedin.com')) return 'linkedin' as const;
+  if (referrer.includes('github.com')) return 'github' as const;
+  if (referrer.includes('medium.com')) return 'medium' as const;
+  if (referrer.startsWith(window.location.origin)) return 'direct' as const;
+  return 'referral' as const;
+}
 
 function MobilePdfPreview({ url, title }: { url: string; title: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -113,12 +125,24 @@ export default function CV() {
 
   const cvUrl = profile?.cvUrl || '';
   const selectedWork = (projects ?? []).slice(0, 6).map((project) => project.title).filter(Boolean).join(', ');
+  const trackCvEvent = trpc.analytics.trackCv.useMutation();
+  const downloadHref = cvUrl.startsWith('/api/files/') ? '/api/cv/download' : cvUrl;
+  const recordCvEvent = useCallback((kind: 'preview' | 'download') => {
+    trackCvEvent.mutate({
+      kind,
+      source: getCvTrafficSource(),
+      path: `${window.location.pathname}${window.location.hash}`.slice(0, 160),
+    });
+  }, [trackCvEvent]);
 
   useEffect(() => {
-    const openPreview = () => setIsPreviewOpen(true);
+    const openPreview = () => {
+      recordCvEvent('preview');
+      setIsPreviewOpen(true);
+    };
     window.addEventListener(CV_PREVIEW_EVENT, openPreview);
     return () => window.removeEventListener(CV_PREVIEW_EVENT, openPreview);
-  }, []);
+  }, [recordCvEvent]);
 
   useEffect(() => {
     if (!isPreviewOpen) return;
@@ -172,7 +196,10 @@ export default function CV() {
                   {cvUrl ? (
                     <button
                       type="button"
-                      onClick={() => setIsPreviewOpen(true)}
+                      onClick={() => {
+                        recordCvEvent('preview');
+                        setIsPreviewOpen(true);
+                      }}
                       onPointerEnter={prefetchPdfViewer}
                       onFocus={prefetchPdfViewer}
                       className="glow-gold group inline-flex items-center gap-2 rounded-full bg-[#e8b923] px-6 py-3 text-sm font-semibold text-[#05060f] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#f5cd45]"
@@ -274,8 +301,9 @@ export default function CV() {
               <p className="text-xs text-gray-500">{cvCopy.reviewNote || ''}</p>
               {cvUrl && (
                 <a
-                  href={cvUrl}
+                  href={downloadHref}
                   download={cvCopy.downloadFileName || ''}
+                  onClick={() => recordCvEvent('download')}
                   className="inline-flex items-center gap-2 rounded-full border border-[#e8b923]/40 bg-[#e8b923]/10 px-4 py-2 text-xs font-semibold text-[#e8b923] transition-colors hover:bg-[#e8b923] hover:text-[#05060f]"
                 >
                   <Download className="h-3.5 w-3.5" />

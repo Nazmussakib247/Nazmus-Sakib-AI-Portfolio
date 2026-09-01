@@ -1,6 +1,6 @@
 import type { Context, Next } from "hono";
 import { getDb } from "../queries/connection";
-import { siteSettings, uploads } from "@db/schema";
+import { profiles, siteSettings, uploads } from "@db/schema";
 import { eq } from "drizzle-orm";
 
 const SOCIAL_IMAGE_SETTING_KEY = "socialPreviewImageUrl";
@@ -76,6 +76,31 @@ export async function serveFavicon(c: Context, next: Next) {
   } catch (error) {
     console.error("[seo] stable favicon lookup failed:", error instanceof Error ? error.message : "unknown error");
     return next();
+  }
+}
+
+/** Serves the configured profile CV as a tracked attachment. */
+export async function serveCvDownload(c: Context) {
+  try {
+    const db = getDb();
+    const profileRows = await db.select({ cvUrl: profiles.cvUrl }).from(profiles).limit(1);
+    const id = getUploadId(profileRows[0]?.cvUrl);
+    if (!id) return c.json({ error: "CV file is not configured" }, 404);
+
+    const files = await db.select().from(uploads).where(eq(uploads.id, id)).limit(1);
+    const file = files[0];
+    if (!file || file.mimeType !== "application/pdf") return c.json({ error: "Configured CV file is unavailable" }, 404);
+
+    const bytes = Buffer.from(file.data, "base64");
+    return c.body(new Uint8Array(bytes), 200, {
+      "Content-Type": "application/pdf",
+      "Content-Length": String(bytes.length),
+      "Cache-Control": "public, max-age=3600, s-maxage=3600",
+      "Content-Disposition": `attachment; filename="${encodeURIComponent(file.filename)}"`,
+    });
+  } catch (error) {
+    console.error("[cv] controlled download failed:", error instanceof Error ? error.message : "unknown error");
+    return c.json({ error: "CV download unavailable" }, 503);
   }
 }
 
