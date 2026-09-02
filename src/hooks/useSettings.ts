@@ -26,7 +26,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   canonicalSiteUrl: 'https://nazmussakib.tech/',
   socialPreviewImageUrl: '/og-image.png',
   socialPreviewImageAlt: 'Nazmus Sakib — ML Engineer and AI product builder',
-  faviconUrl: '/favicon.png',
+  faviconUrl: '/favicon.png?v=2',
   sectionVisibility:
     '{"about":true,"projects":true,"experience":true,"academicFoundation":true,"skills":true,"awards":true,"certificates":true,"blog":true,"contact":true}',
   bottomBarEnabled: 'true',

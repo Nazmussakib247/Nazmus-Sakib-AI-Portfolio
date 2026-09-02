@@ -174,7 +174,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
       socialImageUrl: addAssetVersion(getAbsoluteUrl(c, resolveSocialImage(settings.socialPreviewImageUrl), fallbackSocialImage), settingUpdatedAt("socialPreviewImageUrl")),
       socialImageAlt: settings.socialPreviewImageAlt?.trim() || defaults.socialPreviewImageAlt,
       socialImageMeta: getSocialImageMeta(),
-      faviconUrl: getAbsoluteUrl(c, "/favicon.png", "/favicon.png"),
+      faviconUrl: getAbsoluteUrl(c, "/favicon.png?v=2", "/favicon.png?v=2"),
       profileImageUrl,
       sitePublished: settings.sitePublished !== "false",
       profile: {
@@ -196,7 +196,7 @@ async function getSeoData(c: Context): Promise<SeoData> {
       socialImageUrl: getAbsoluteUrl(c, resolveSocialImage(defaults.socialPreviewImageUrl), fallbackSocialImage),
       socialImageAlt: defaults.socialPreviewImageAlt,
       socialImageMeta: getSocialImageMeta(),
-      faviconUrl: getAbsoluteUrl(c, "/favicon.png", "/favicon.png"),
+      faviconUrl: getAbsoluteUrl(c, "/favicon.png?v=2", "/favicon.png?v=2"),
       profileImageUrl: getAbsoluteUrl(c, fallbackProfileImage, fallbackProfileImage),
       sitePublished: true,
       profile: { name: "Nazmus Sakib", title: "AI Engineer", bio: fallbackDescription, githubUrl: null, linkedinUrl: null, mediumUrl: null },

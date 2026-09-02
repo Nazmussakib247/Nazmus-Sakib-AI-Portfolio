@@ -126,7 +126,7 @@ export default function ProfileMetadata() {
     const title = caseStudy?.title || baseTitle;
     const description = caseStudy?.description || baseDescription;
     const siteUrl = caseStudy?.canonicalUrl || baseSiteUrl;
-    const faviconUrl = toAbsoluteUrl('/favicon.png', '/favicon.png');
+    const faviconUrl = toAbsoluteUrl('/favicon.png?v=2', '/favicon.png?v=2');
 
     document.title = title;
     ensureMeta('name', 'description').content = description;

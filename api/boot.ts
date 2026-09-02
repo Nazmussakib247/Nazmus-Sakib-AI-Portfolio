@@ -36,6 +36,7 @@ app.use("/api/trpc/*", async (c) => {
 });
 app.get("/og-image.png", serveSocialPreviewImage);
 app.get("/favicon.png", serveFavicon);
+app.get("/favicon.ico", serveFavicon);
 app.get("/sitemap.xml", serveSitemap);
 app.get("/api/cv/download", serveCvDownload);
 app.get("/api/files/:id", async (c) => {
