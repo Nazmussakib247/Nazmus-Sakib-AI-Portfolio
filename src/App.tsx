@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import ProfileMetadata from './components/ProfileMetadata'
 
 const CaseStudy = lazy(() => import('./pages/CaseStudy'))
+const RuleBasedChatbot = lazy(() => import('./pages/RuleBasedChatbot'))
 const Login = lazy(() => import('./pages/Login'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'))
@@ -21,6 +22,7 @@ export default function App() {
       <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/projects/rule-based-ai-chatbot" element={<RuleBasedChatbot />} />
           <Route path="/projects/:slug/case-study" element={<CaseStudy />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<AdminDashboard />} />
